@@ -17,17 +17,35 @@ let AppController = class AppController {
     constructor(appService) {
         this.appService = appService;
     }
-    getAPI() {
-        return this.appService.getAPI();
+    getWebcams() {
+        return this.appService.getGoogleAPI();
+    }
+    getPlanes() {
+        return this.appService.getOpenskyAPI();
+    }
+    getTrains() {
+        return this.appService.getSncfAPI();
     }
 };
 exports.AppController = AppController;
 __decorate([
-    (0, common_1.Get)(),
+    (0, common_1.Get)('webcams'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
-], AppController.prototype, "getAPI", null);
+], AppController.prototype, "getWebcams", null);
+__decorate([
+    (0, common_1.Get)('planes'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "getPlanes", null);
+__decorate([
+    (0, common_1.Get)('train'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "getTrains", null);
 exports.AppController = AppController = __decorate([
     (0, common_1.Controller)(),
     __metadata("design:paramtypes", [app_service_1.AppService])
