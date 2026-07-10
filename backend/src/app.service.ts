@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
-export class AppService {
+export class ApiService {
   constructor(private configService: ConfigService) {}
   async getGoogleAPI()
   { 
@@ -85,6 +85,19 @@ export class AppService {
     {
       console.error("Error 'async getOpenskyAPI()' : ", e);
       return {error: "Impossible de joindre l'API de la SNCF"};
+    }
+  }
+
+  async getMeteofranceAPI()
+  {
+    try 
+    {
+      
+    }
+    catch (e)
+    {
+      console.error("Error 'async getMeteofranceAPI' : ", e);
+      return {error: "Impossible de joindr l'API de Meteo France"};
     }
   }
 }
