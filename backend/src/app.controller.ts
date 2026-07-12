@@ -3,24 +3,27 @@ import { ApiService } from './app.service';
 
 @Controller()
 export class AppController {
+
   constructor(private readonly appService: ApiService) {}
 
   @Get('webcams')
-  getWebcams()
-  {
-    return this.appService.getGoogleAPI();
+  async getWebcams() {
+    return await this.appService.getGoogleAPI();
   }
 
   @Get('planes')
-  getPlanes()
-  {
-    return this.appService.getOpenskyAPI();
+  async getPlanes() {
+    return await this.appService.getOpenskyCache();
   }
 
   @Get('train')
-  getTrains()
-  {
-    return this.appService.getSncfAPI();
+  async getTrains() {
+    return await this.appService.getSncfCache();
+  }
+
+  @Get('weather')
+  async getWeather() {
+    return await this.appService.getMeteofranceCache();
   }
 }
 

@@ -11,6 +11,9 @@ const common_1 = require("@nestjs/common");
 const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
 const config_1 = require("@nestjs/config");
+const openskyScript_1 = require("./script/openskyScript");
+const sncfScript_1 = require("./script/sncfScript");
+const meteofranceScript_1 = require("./script/meteofranceScript");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -18,7 +21,12 @@ exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [config_1.ConfigModule.forRoot()],
         controllers: [app_controller_1.AppController],
-        providers: [app_service_1.AppService],
+        providers: [
+            app_service_1.ApiService,
+            openskyScript_1.CallOpenskyAPI,
+            meteofranceScript_1.CallMeteofranceAPI,
+            sncfScript_1.CallSncfAPI,
+        ],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map

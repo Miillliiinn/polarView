@@ -17,14 +17,17 @@ let AppController = class AppController {
     constructor(appService) {
         this.appService = appService;
     }
-    getWebcams() {
-        return this.appService.getGoogleAPI();
+    async getWebcams() {
+        return await this.appService.getGoogleAPI();
     }
-    getPlanes() {
-        return this.appService.getOpenskyAPI();
+    async getPlanes() {
+        return await this.appService.getOpenskyCache();
     }
-    getTrains() {
-        return this.appService.getSncfAPI();
+    async getTrains() {
+        return await this.appService.getSncfCache();
+    }
+    async getWeather() {
+        return await this.appService.getMeteofranceCache();
     }
 };
 exports.AppController = AppController;
@@ -32,22 +35,28 @@ __decorate([
     (0, common_1.Get)('webcams'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], AppController.prototype, "getWebcams", null);
 __decorate([
     (0, common_1.Get)('planes'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], AppController.prototype, "getPlanes", null);
 __decorate([
     (0, common_1.Get)('train'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], AppController.prototype, "getTrains", null);
+__decorate([
+    (0, common_1.Get)('weather'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], AppController.prototype, "getWeather", null);
 exports.AppController = AppController = __decorate([
     (0, common_1.Controller)(),
-    __metadata("design:paramtypes", [app_service_1.AppService])
+    __metadata("design:paramtypes", [app_service_1.ApiService])
 ], AppController);
 //# sourceMappingURL=app.controller.js.map
