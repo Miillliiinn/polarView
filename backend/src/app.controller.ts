@@ -8,7 +8,7 @@ export class AppController {
 
   @Get('webcams')
   async getWebcams() {
-    return await this.appService.getGoogleAPI();
+    return await this.appService.getGoogleAPIFromDatabase();
   }
 
   @Get('planes')

@@ -1,0 +1,24 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Webcam {
+  id             String   @id @default(uuid())
+  youtubeVideoId String   @unique
+  title          String
+  latitude       Float?
+  longitude      Float?
+  isLive         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  lastCheckedAt  DateTime @default(now()) @updatedAt
+
+  @@map("webcams")
+}

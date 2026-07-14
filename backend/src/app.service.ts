@@ -1,30 +1,53 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { PrismaService } from 'prisma/prisma.service';
+
 
 @Injectable()
 export class ApiService {
 
-  constructor(private configService: ConfigService) {}
+  constructor(private configService: ConfigService, 
+    private prisma: PrismaService){}
+  
 
-  async getGoogleAPI()
+  async getGoogleAPIFromDatabase()
+  {
+    const count = await this.prisma.webcam.count();
+    console.log(count);
+    try
+    {
+      const webcams = await this.prisma.webcam.findMany();
+      return webcams; 
+    }
+    catch (e)
+    {
+      console.error("Error, 'async getGoogleAPIFromDatabase' : ", e);
+      return [];
+    }
+  }
+
+  async getGoogleAPI(city: string)
   { 
-    try 
+    try
     {
       const apiKey = this.configService.get('GOOGLE_API');
-      const apiResult = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&eventType=live&q=live+webcam+france&maxResults=10&key=${apiKey}`);
+      const query = encodeURIComponent(`webcam ${city} live`);
+      const apiResult = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&eventType=live&q=${query}&maxResults=50&key=${apiKey}`);
       const resJson = await apiResult.json();
       const videoLive = resJson.items || [];
+
       return videoLive.map((item) => ({
-        id: item.id.videoId,
+        youtubeVideoId: item.id.videoId,
         title: item.snippet.title,
         thumbnail: item.snippet.thumbnails.medium.url,
-        channel: item.snippet.channelTitle,   
+        channel: item.snippet.channelTitle,
+        city: city,
       }));
     }
     catch (e)
     {
-      console.error("Error 'async getGoogleAPI()' : ", e);
-      return {error: "Impossible de joindre l'API de google"};
+      console.error(`Error 'async getGoogleAPI(${city})' : `, e);
+      return [];
     }
   }
 
