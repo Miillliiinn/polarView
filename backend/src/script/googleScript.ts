@@ -24,7 +24,8 @@ export class CallGoogleAPI implements OnModuleInit
     //
     //
 
-    async onModuleInit() {
+    async onModuleInit()
+    {
         if (process.env.RUN_TEST_ON_BOOT === 'true')
         {
             setInterval(async () => {
