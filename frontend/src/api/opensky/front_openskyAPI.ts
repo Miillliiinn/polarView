@@ -15,7 +15,7 @@ function planesData()
         const interval = setInterval(() => {
         webcamAPI().then((data) => {
             setPlanes(data);
-        })}, 500);
+        })}, 100);
         return () => clearInterval(interval)
     }, []);
     return planes
