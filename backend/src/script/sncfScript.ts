@@ -19,6 +19,7 @@ export class CallSncfAPI implements OnModuleInit {
         const interval: NodeJS.Timeout = setInterval( async () => {
             const data = await this.ApiService.getSncfAPI();
             this.ApiService.setSncfCache(data);
-        }, 300000);
+            console.log("scnf request");
+        }, 150000); // 300 000 = 5 min
     }
 }

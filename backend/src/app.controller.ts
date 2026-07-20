@@ -16,7 +16,7 @@ export class AppController {
     return await this.appService.getOpenskyCache();
   }
 
-  @Get('train')
+  @Get('trains')
   async getTrains() {
     return await this.appService.getSncfCache();
   }

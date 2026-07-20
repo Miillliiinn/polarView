@@ -116,12 +116,10 @@ async getSncfAPI() {
 
     const authHeader = 'Basic ' + Buffer.from(apiKey.trim() + ':').toString('base64');
 
-    // 1. Formatage de la date locale strict
     const now = new Date();
     const pad = (num: number) => String(num).padStart(2, '0');
     const datetimeSncf = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}T${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
 
-    // 2. Dictionnaire des gares majeures de France (ID et Nom pour debug)
     const garesMajeures = [
       { id: 'stop_area:SNCF:87686006', name: 'Paris Gare de Lyon' },
       { id: 'stop_area:SNCF:87384008', name: 'Paris Gare du Nord' },
@@ -135,7 +133,6 @@ async getSncfAPI() {
       { id: 'stop_area:SNCF:87611004', name: 'Toulouse Matabiau' }
     ];
 
-    // 3. Lancement de TOUTES les requêtes en parallèle avec Promise.all
     const promessesGares = garesMajeures.map(async (gare) => {
       try {
         const url = `https://api.sncf.com/v1/coverage/sncf/stop_areas/${gare.id}/departures?from_datetime=${datetimeSncf}&count=100`;
@@ -154,7 +151,6 @@ async getSncfAPI() {
             type: display?.commercial_mode,
             operator: display?.network,
             departureTime: dep.stop_date_time?.departure_date_time,
-           // status: dep.stop_date_time?.state || 'Inconnu',
             stationName: stopPoint?.name,
             latitude: stopPoint?.coord?.lat ? parseFloat(stopPoint.coord.lat) : null,
             longitude: stopPoint?.coord?.lon ? parseFloat(stopPoint.coord.lon) : null,
@@ -165,12 +161,8 @@ async getSncfAPI() {
         return [];
       }
     });
-
-    // 4. Attente des résultats et fusion des tableaux (.flat())
     const résultatsParGare = await Promise.all(promessesGares);
     const tousLesTrains = résultatsParGare.flat();
-
-    // Optionnel : Filtrer les doublons au cas où un train apparaîtrait dans deux gares
     const trainsUniques = tousLesTrains.filter((train, index, self) =>
       index === self.findIndex((t) => t.id === train.id)
     );
@@ -186,10 +178,8 @@ async getSncfAPI() {
   private MeteofranceCache: any = [];
   setMeteofranceCache(newdata: any){this.MeteofranceCache = newdata;};
   getMeteofranceCache(){return this.MeteofranceCache;};
-  async getMeteofranceAPI()
-  {
-    try
-    {
+  async getMeteofranceAPI() {
+    try {
       const apiKey = this.configService.get('METEOFRANCE_API');
       const apiResult = await fetch(
         `https://public-api.meteofrance.fr/public/DPVigilance/v1/cartevigilance/encours`,
@@ -201,39 +191,34 @@ async getSncfAPI() {
           },
         }
       );
-      if (!apiResult.ok)
-      {
+
+      if (!apiResult.ok) {
         throw new Error(`Météo-France repond avec un statut : ${apiResult.status}`);
       }
+
       const data = await apiResult.json();
       const domainIds = data.product?.periods?.[0]?.timelaps?.domain_ids || [];
-      
+
       if (domainIds.length === 0) {
         console.warn("Météo-France a renvoyé un tableau domain_ids vide. Structure reçue :", JSON.stringify(data));
-        return { message: "Aucune donnée disponible" };
+        return [];
       }
 
-      return domainIds.map((dep: any) => {
-        return {
-          department: dep.domain_id, 
-          maxColorId: dep.max_color_id, 
-          
-          phenomenons: dep.phenomenon_items?.map((p: any) => ({
-            id: p.phenomenon_id, 
-            colorId: p.phenomenon_max_color_id, 
-            
-            schedule: p.timelaps_items?.map((t: any) => ({
-              begin: t.begin_time,
-              end: t.end_time,
-              color: t.color_id,
-            })) || []
+      return domainIds.map((dep: any) => ({
+        department: dep.domain_id,
+        maxColorId: dep.max_color_id,
+        phenomenons: dep.phenomenon_items?.map((p: any) => ({
+          id: p.phenomenon_id,
+          colorId: p.phenomenon_max_color_id,
+          schedule: p.timelaps_items?.map((t: any) => ({
+            begin: t.begin_time,
+            end: t.end_time,
+            color: t.color_id,
           })) || []
-        };
-      });
+        })) || []
+      }));
 
-    }
-    catch (e)
-    {
+    } catch (e) {
       console.error("Error 'async getMeteofranceAPI' : ", e);
       return [];
     }

@@ -29,7 +29,8 @@ let CallSncfAPI = class CallSncfAPI {
         const interval = setInterval(async () => {
             const data = await this.ApiService.getSncfAPI();
             this.ApiService.setSncfCache(data);
-        }, 300000);
+            console.log("scnf request");
+        }, 150000);
     }
 };
 exports.CallSncfAPI = CallSncfAPI;

@@ -1,24 +1,24 @@
-import { useState, useEffect } from "react";
-
+import { useEffect } from "react";
 import api from "../apiBridge.ts"
+import { globalCache } from "../classCache.ts";
 
-const webcamAPI = async () => {
+const planesAPI = async () => {
     const res = await api.get('/planes');
     return res.data;
 }
 
-function planesData()
-{
-    const [planes, setPlanes] = useState([]);
-    
-    useEffect(() => {
+export function PlanesData()
+{  
+    useEffect(() => 
+    {
         const interval = setInterval(() => {
-        webcamAPI().then((data) => {
-            setPlanes(data);
-        })}, 100);
-        return () => clearInterval(interval)
+        planesAPI().then((data) => { globalCache.setOpCache(data); })}, 100);
+        return () => clearInterval(interval);
     }, []);
-    return planes
+    return;
 }
 
-export default planesData;
+export function swapJsonToGeoJson()
+{
+    // changer les coord long et lat (json) en geojson
+}

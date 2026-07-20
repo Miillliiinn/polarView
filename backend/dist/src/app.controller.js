@@ -44,7 +44,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppController.prototype, "getPlanes", null);
 __decorate([
-    (0, common_1.Get)('train'),
+    (0, common_1.Get)('trains'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
