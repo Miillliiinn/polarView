@@ -1,15 +1,15 @@
 export class Cache
 {
     constructor(){}
-    private openskyCache : [] = [];
-    private scnfCache : [] = [];
-    private meteofranceCache : [] = []
+    private openskyCache : any[] = [];
+    private scnfCache : any[] = [];
+    private meteofranceCache : any[] = []
 
-    setOpCache(newCache : []) { this.openskyCache = newCache };
-    setSncfCache(newCache : []) { this.scnfCache = newCache };
-    setMfCache(newCache: []) { this.meteofranceCache = newCache };
+    setOpCache(newCache : any[]) { this.openskyCache = newCache };
+    setSncfCache(newCache : any[]) { this.scnfCache = newCache };
+    setMfCache(newCache: any[]) { this.meteofranceCache = newCache };
 
-    getOpcach() { return this.openskyCache };
+    getOpCache() { return this.openskyCache };
     getSncfCache() { return this.scnfCache };
     getMfCache() { return this.meteofranceCache };
 }

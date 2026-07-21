@@ -8,7 +8,8 @@ import { PlanesData } from './api/opensky/front_openskyAPI';
 import ShowAllMeteoFranceData from './api/meteofrance/showData';
 import { MeteoFranceData } from './api/meteofrance/front_meteofranceAPI';
 
-function AppContent() {
+function AppContent()
+{
   const location = useLocation();
   const isHome = location.pathname === '/';
 
@@ -21,7 +22,6 @@ function AppContent() {
         <Link to="/meteo">meteo</Link>
       </nav>
 
-      {/* Toujours monté, juste caché en CSS quand on n'est pas sur "/" */}
       <div style={{ display: isHome ? 'block' : 'none' }}>
         <FranceMap />
       </div>
@@ -35,7 +35,8 @@ function AppContent() {
   );
 }
 
-function App() {
+function App()
+{
   PlanesData();
   TrainsData();
   MeteoFranceData();

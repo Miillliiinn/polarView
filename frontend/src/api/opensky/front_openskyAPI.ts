@@ -17,8 +17,3 @@ export function PlanesData()
     }, []);
     return;
 }
-
-export function swapJsonToGeoJson()
-{
-    // changer les coord long et lat (json) en geojson
-}

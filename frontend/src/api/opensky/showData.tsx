@@ -2,7 +2,8 @@ import { globalCache } from "../classCache";
 
 export default function ShowAllPlanesData()
 {
-    const planes = globalCache.getOpcach();
+    const planes = globalCache.getOpCache();
+    console.log('cache aviosn brut: ', planes[0])
     return (
         <ul>
             {planes.map((plane: any) => (
