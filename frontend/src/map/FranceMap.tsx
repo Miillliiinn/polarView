@@ -5,6 +5,72 @@ import './FranceMap.css';
 import { toGeoJsonFeatureCollection } from '../api/geoJsonConvertion';
 import { globalCache } from '../api/classCache';
 
+// Silhouette d'avion plus réaliste (vue du dessus), pointant vers le haut (nord)
+function createPlaneIcon(color: string, size = 96): ImageData {
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d')!;
+
+  ctx.translate(size / 2, size / 2);
+  ctx.fillStyle = color;
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = size * 0.02;
+
+  const s = size / 100; // facteur d'échelle sur une grille de référence 100x100
+
+  ctx.beginPath();
+  // Fuselage / nez
+  ctx.moveTo(0, -45 * s);
+  ctx.lineTo(4 * s, -30 * s);
+  ctx.lineTo(4 * s, -5 * s);
+  // Aile droite
+  ctx.lineTo(42 * s, 12 * s);
+  ctx.lineTo(42 * s, 18 * s);
+  ctx.lineTo(5 * s, 8 * s);
+  // Fuselage arrière droit
+  ctx.lineTo(5 * s, 28 * s);
+  // Empennage droit
+  ctx.lineTo(16 * s, 38 * s);
+  ctx.lineTo(16 * s, 43 * s);
+  ctx.lineTo(2 * s, 35 * s);
+  // Pointe queue
+  ctx.lineTo(0, 45 * s);
+  // Symétrie côté gauche
+  ctx.lineTo(-2 * s, 35 * s);
+  ctx.lineTo(-16 * s, 43 * s);
+  ctx.lineTo(-16 * s, 38 * s);
+  ctx.lineTo(-5 * s, 28 * s);
+  ctx.lineTo(-5 * s, 8 * s);
+  ctx.lineTo(-42 * s, 18 * s);
+  ctx.lineTo(-42 * s, 12 * s);
+  ctx.lineTo(-4 * s, -5 * s);
+  ctx.lineTo(-4 * s, -30 * s);
+  ctx.closePath();
+
+  ctx.fill();
+  ctx.stroke();
+
+  return ctx.getImageData(0, 0, size, size);
+}
+
+function createTrainIcon(color = '#457b9d', size = 64): ImageData {
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d')!;
+
+  ctx.beginPath();
+  ctx.arc(size / 2, size / 2, size * 0.3, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  return ctx.getImageData(0, 0, size, size);
+}
+
 const FRANCE_BOUNDS: [[number, number], [number, number]] = [
   [-5.5, 41.0],
   [9.9, 51.3]
@@ -16,14 +82,8 @@ export default function FranceMap() {
 
   // Initialisation de la carte (une seule fois)
   useEffect(() => {
-    console.log('[FranceMap] useEffect init — début');
+    if (map.current) return;
 
-    if (map.current) {
-      console.log('[FranceMap] map.current existe déjà, on sort');
-      return;
-    }
-
-    console.log('[FranceMap] création de la map...');
     map.current = new maplibregl.Map({
       container: mapContainer.current!,
       style: 'https://tiles.openfreemap.org/styles/liberty',
@@ -34,19 +94,27 @@ export default function FranceMap() {
         [FRANCE_BOUNDS[1][0] + 2, FRANCE_BOUNDS[1][1] + 2]
       ]
     });
-    console.log('[FranceMap] map créée:', map.current);
+
+    map.current.addControl(new maplibregl.NavigationControl(), 'top-right');
 
     map.current.on('error', (e) => {
       console.error('[FranceMap] Erreur MapLibre:', e);
     });
 
-    map.current.addControl(new maplibregl.NavigationControl(), 'top-right');
-
     map.current.on('load', () => {
-      console.log('[FranceMap] événement load déclenché');
       if (!map.current) return;
 
-      // --- Avions (cercle rouge temporaire, sans icône) ---
+      // --- Icônes avion par tranche d'altitude (couleurs différentes) ---
+      map.current.addImage('plane-ground', createPlaneIcon('#6c757d', 96));   // gris — au sol
+      map.current.addImage('plane-low', createPlaneIcon('#f4a261', 96));      // orange — basse altitude
+      map.current.addImage('plane-mid', createPlaneIcon('#e9c46a', 96));      // jaune — moyenne altitude
+      map.current.addImage('plane-high', createPlaneIcon('#e63946', 96));     // rouge — haute altitude
+      map.current.addImage('plane-cruise', createPlaneIcon('#457b9d', 96));   // bleu — croisière
+
+      const trainCanvas = createTrainIcon('#457b9d', 64);
+      map.current.addImage('train-icon', trainCanvas, { pixelRatio: 2 });
+
+      // --- Source et couche avions ---
       map.current.addSource('planes', {
         type: 'geojson',
         data: { type: 'FeatureCollection', features: [] }
@@ -54,13 +122,22 @@ export default function FranceMap() {
 
       map.current.addLayer({
         id: 'planes-layer',
-        type: 'circle',
+        type: 'symbol',
         source: 'planes',
-        paint: {
-          'circle-radius': 6,
-          'circle-color': '#ff0000',
-          'circle-stroke-width': 1,
-          'circle-stroke-color': '#ffffff'
+        layout: {
+          'icon-image': [
+            'step',
+            ['coalesce', ['get', 'altitude'], 0],
+            'plane-ground',
+            100, 'plane-low',
+            3000, 'plane-mid',
+            8000, 'plane-high',
+            11000, 'plane-cruise'
+          ],
+          'icon-size': 0.5,
+          'icon-rotate': ['coalesce', ['get', 'heading'], 0],
+          'icon-rotation-alignment': 'map',
+          'icon-allow-overlap': true
         }
       });
 
@@ -69,7 +146,7 @@ export default function FranceMap() {
         if (!feature || !map.current) return;
         new maplibregl.Popup()
           .setLngLat((feature.geometry as any).coordinates)
-          .setHTML(`<strong>${feature.properties?.callsign || 'Vol inconnu'}</strong>`)
+          .setHTML(`<strong>${feature.properties?.callsign || 'Vol inconnu'}</strong><br/>Altitude: ${feature.properties?.altitude ?? '?'} m`)
           .addTo(map.current);
       });
 
@@ -80,7 +157,7 @@ export default function FranceMap() {
         if (map.current) map.current.getCanvas().style.cursor = '';
       });
 
-      // --- Trains (cercle bleu temporaire, sans icône) ---
+      // --- Source et couche trains ---
       map.current.addSource('trains', {
         type: 'geojson',
         data: { type: 'FeatureCollection', features: [] }
@@ -88,13 +165,12 @@ export default function FranceMap() {
 
       map.current.addLayer({
         id: 'trains-layer',
-        type: 'circle',
+        type: 'symbol',
         source: 'trains',
-        paint: {
-          'circle-radius': 6,
-          'circle-color': '#0000ff',
-          'circle-stroke-width': 1,
-          'circle-stroke-color': '#ffffff'
+        layout: {
+          'icon-image': 'train-icon',
+          'icon-size': 0.5,
+          'icon-allow-overlap': true
         }
       });
 
@@ -113,8 +189,6 @@ export default function FranceMap() {
       map.current.on('mouseleave', 'trains-layer', () => {
         if (map.current) map.current.getCanvas().style.cursor = '';
       });
-
-      console.log('[FranceMap] sources et couches ajoutées avec succès');
     });
   }, []);
 
@@ -131,10 +205,14 @@ export default function FranceMap() {
           planes.map((p: any) => ({
             long: p.longitude,
             lat: p.latitude,
-            properties: { icao24: p.icao24, callsign: p.callsign, heading: p.heading ?? 0 }
+            properties: {
+              icao24: p.icao24,
+              callsign: p.callsign,
+              heading: p.heading ?? 0,
+              altitude: p.altitude ?? 0
+            }
           }))
         );
-        console.log('[FranceMap] planes — nb features:', planesGeojson.features.length);
         planesSource.setData(planesGeojson);
       }
 
@@ -149,7 +227,6 @@ export default function FranceMap() {
             properties: { name: t.name ?? t.trainNumber ?? '' }
           }))
         );
-        console.log('[FranceMap] trains — nb features:', trainsGeojson.features.length);
         trainsSource.setData(trainsGeojson);
       }
     }, 5000);
@@ -163,42 +240,3 @@ export default function FranceMap() {
     </div>
   );
 }
-
-
-// import { useEffect, useRef } from 'react';
-// import maplibregl from 'maplibre-gl';
-// import 'maplibre-gl/dist/maplibre-gl.css';
-// import './FranceMap.css';
-// import { toGeoJsonFeatureCollection } from '../api/geoJsonConvertion';
-// import { globalCache } from '../api/classCache';
-
-// const FRANCE_BOUNDS: [[number, number], [number, number]] = [
-//   [-5.5, 41.0],
-//   [9.9, 51.3]
-// ];
-
-// export default function FranceMap() {
-//   const mapContainer = useRef<HTMLDivElement>(null);
-//   const map = useRef<maplibregl.Map | null>(null);
-
-//   useEffect(() =>
-//   {
-//     if (map.current) return;
-
-//     map.current = new maplibregl.Map(
-//     {
-//       container: mapContainer.current!,
-//       style: 'https://tiles.openfreemap.org/styles/liberty',
-//       bounds: FRANCE_BOUNDS,
-//       fitBoundsOptions: { padding: 100 },
-//       maxBounds: [ [FRANCE_BOUNDS[0][0] - 2, FRANCE_BOUNDS[0][1] - 2], [FRANCE_BOUNDS[1][0] + 2, FRANCE_BOUNDS[1][1] + 2] ]
-//     });
-//     map.current.addControl(new maplibregl.NavigationControl(), 'top-right');
-//   }, []);
-
-//   return (
-//     <div className="france-map-wrapper">
-//       <div ref={mapContainer} className="map-container" />
-//     </div>
-//   );
-// }
