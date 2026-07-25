@@ -22,7 +22,6 @@ let PrismaService = class PrismaService extends client_1.PrismaClient {
     }
     async onModuleInit() {
         await this.$connect();
-        console.log('🐘 Connexion réussie à PostgreSQL (Prisma 7 Adapter) !');
     }
     async onModuleDestroy() {
         await this.$disconnect();

@@ -19,7 +19,7 @@ export class CallOpenskyAPI implements OnModuleInit {
         const interval: NodeJS.Timeout = setInterval( async () => {
             const data = await this.ApiService.getOpenskyAPI()
             this.ApiService.setOpenskyCache(data);
-        }, 87000);
+        }, 87000); // 87000
     }
 }
 

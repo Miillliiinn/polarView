@@ -35,8 +35,8 @@ let ApiService = class ApiService {
     async getGoogleAPI(city) {
         try {
             const apiKey = this.configService.get('GOOGLE_API');
-            const query = encodeURIComponent(`webcam ${city} live`);
-            const apiResult = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&eventType=live&q=${query}&maxResults=50&key=${apiKey}`);
+            const query = encodeURIComponent(`"webcam ${city}" live`);
+            const apiResult = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&eventType=live&q=${query}&relevanceLanguage=fr&maxResults=50&key=${apiKey}`);
             const resJson = await apiResult.json();
             const videoLive = resJson.items || [];
             return videoLive.map((item) => ({
@@ -62,7 +62,7 @@ let ApiService = class ApiService {
             const clientId = this.configService.get('OPENSKY_CLIENTID');
             const clientsecret = this.configService.get('OPENSKY_CLIENTSECRET');
             const token = Buffer.from(`${clientId}:${clientsecret}`).toString('base64');
-            const url = `https://opensky-network.org/api/states/all?lamin=41.0&lamax=51.5&lomin=-5.5&lomax=9.5`;
+            const url = `https://opensky-network.org/api/states/all?lamin=39.0&lamax=53.5&lomin=-7.5&lomax=12.5`;
             const apiResult = await fetch(url, {
                 headers: {
                     'Authorization': `Basic ${token}`,

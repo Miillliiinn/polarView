@@ -29,7 +29,7 @@ let CallOpenskyAPI = class CallOpenskyAPI {
         const interval = setInterval(async () => {
             const data = await this.ApiService.getOpenskyAPI();
             this.ApiService.setOpenskyCache(data);
-        }, 5500);
+        }, 87000);
     }
 };
 exports.CallOpenskyAPI = CallOpenskyAPI;
