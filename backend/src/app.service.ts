@@ -26,29 +26,93 @@ export class ApiService {
   }
 
   async getGoogleAPI(city: string)
-  { 
-    try
-    {
-      const apiKey = this.configService.get('GOOGLE_API');
-      const query = encodeURIComponent(`"webcam ${city}" live`);
-      const apiResult = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&eventType=live&q=${query}&relevanceLanguage=fr&maxResults=50&key=${apiKey}`);
-      const resJson = await apiResult.json();
-      const videoLive = resJson.items || [];
+  {
+      try {
+          const apiKey = this.configService.get('GOOGLE_API');
+          const query = encodeURIComponent(`webcam ${city}`);
+          const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&eventType=live&q=${query}&relevanceLanguage=fr&regionCode=FR&maxResults=50&key=${apiKey}`;
 
-      return videoLive.map((item : any) => ({
-        youtubeVideoId: item.id.videoId,
-        title: item.snippet.title,
-        thumbnail: item.snippet.thumbnails.medium.url,
-        channel: item.snippet.channelTitle,
-        city: city,
-      }));
-    }
-    catch (e)
-    {
-      console.error(`Error 'async getGoogleAPI(${city})' : `, e);
-      return [];
-    }
+          const apiResult = await fetch(url);
+          const resJson = await apiResult.json();
+
+          if (resJson.error) {
+              console.error(`❌ Erreur API YouTube pour "${city}" :`, resJson.error.message);
+              return [];
+          }
+
+          const videoLive = resJson.items || [];
+
+          const sanitize = (text: string) => {
+              if (!text) return '';
+              return text
+                  .replace(/&#39;/g, "'")
+                  .replace(/&amp;/g, "&")
+                  .replace(/&quot;/g, '"')
+                  .normalize("NFD")
+                  .replace(/[\u0300-\u036f]/g, "")
+                  .toLowerCase();
+          };
+
+          const cleanCity = sanitize(city);
+
+          const blacklist = [
+              'illinois', 'usa', 'los angeles', 'thailand', 'indonesia', 'italia'
+          ];
+
+          const strictVideos = videoLive.filter((item: any) => {
+              const title = sanitize(item.snippet.title);
+              const description = sanitize(item.snippet.description);
+              const channel = sanitize(item.snippet.channelTitle);
+
+              const isBlacklisted = blacklist.some((term) => title.includes(term));
+              if (isBlacklisted) {
+                  return false;
+              }
+
+              const hasCity = title.includes(cleanCity) || description.includes(cleanCity) || channel.includes(cleanCity);
+              const isCam = title.includes('webcam') || title.includes('live') || title.includes('cam') || title.includes('direct');
+
+              return hasCity && isCam;
+          });
+
+          return strictVideos.map((item: any) => ({
+              youtubeVideoId: item.id.videoId,
+              title: item.snippet.title,
+              thumbnail: item.snippet.thumbnails?.medium?.url || item.snippet.thumbnails?.default?.url,
+              channel: item.snippet.channelTitle,
+              city: city,
+          }));
+      }
+      catch (e) {
+          console.error(`Error 'async getGoogleAPI(${city})' : `, e);
+          return [];
+      }
   }
+
+  // async getGoogleAPI(city: string)
+  // { 
+  //   try
+  //   {
+  //     const apiKey = this.configService.get('GOOGLE_API');
+  //     const query = encodeURIComponent(`"webcam ${city}" live`);
+  //     const apiResult = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&eventType=live&q=${query}&relevanceLanguage=fr&maxResults=50&key=${apiKey}`);
+  //     const resJson = await apiResult.json();
+  //     const videoLive = resJson.items || [];
+
+  //     return videoLive.map((item : any) => ({
+  //       youtubeVideoId: item.id.videoId,
+  //       title: item.snippet.title,
+  //       thumbnail: item.snippet.thumbnails.medium.url,
+  //       channel: item.snippet.channelTitle,
+  //       city: city,
+  //     }));
+  //   }
+  //   catch (e)
+  //   {
+  //     console.error(`Error 'async getGoogleAPI(${city})' : `, e);
+  //     return [];
+  //   }
+  // }
 
 
 

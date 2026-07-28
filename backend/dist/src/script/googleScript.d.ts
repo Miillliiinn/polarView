@@ -10,4 +10,5 @@ export declare class CallGoogleAPI implements OnModuleInit {
     onModuleInit(): Promise<void>;
     scheduledUpdate(): Promise<void>;
     updateDatabaseCache(citiesToFetch?: string[]): Promise<void>;
+    rebuildDatabaseCache(citiesToFetch?: string[]): Promise<void>;
 }

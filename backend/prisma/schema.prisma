@@ -14,11 +14,7 @@ model Webcam {
   youtubeVideoId String   @unique
   title          String
   thumbnail      String?
-  channel        String?
   city           String?
-  isLive         Boolean  @default(true)
-  createdAt      DateTime @default(now())
-  lastCheckedAt  DateTime @default(now()) @updatedAt
-
+  updatedAt      DateTime @updatedAt
   @@map("webcams")
 }

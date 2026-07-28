@@ -25,6 +25,7 @@ let CallGoogleAPI = class CallGoogleAPI {
         'Chamonix', 'Les Arcs', 'Val d\'Isère', 'Courchevel', 'Megève',
         'Mont-Saint-Michel', 'Lourdes', 'Annecy',
         'Versailles', 'Montpellier', 'Lorient', 'Nantes', 'Rouen', 'Ajaccio',
+        'Rennes', 'Vannes',
     ];
     constructor(apiService, prisma) {
         this.apiService = apiService;
@@ -33,16 +34,24 @@ let CallGoogleAPI = class CallGoogleAPI {
     testCityIndex = 0;
     async onModuleInit() {
         if (process.env.RUN_TEST_ON_BOOT === 'true') {
-            setInterval(async () => {
+            const maxExecutions = 37;
+            let executionCount = 0;
+            const intervalId = setInterval(async () => {
+                if (executionCount >= maxExecutions) {
+                    console.log("🛑 Limite de 37 tests atteinte. Arret de l'intervalle.");
+                    clearInterval(intervalId);
+                    return;
+                }
                 const city = this.cities[this.testCityIndex];
                 this.testCityIndex = (this.testCityIndex + 1) % this.cities.length;
-                console.log(`⏱️ ${new Date().toLocaleTimeString()} — ville : ${city}`);
+                console.log(`⏱️ ${new Date().toLocaleTimeString()} — [${executionCount + 1}/${maxExecutions}] ville : ${city}`);
+                executionCount++;
                 await this.updateDatabaseCache([city]);
             }, 10000);
         }
     }
     async scheduledUpdate() {
-        await this.updateDatabaseCache(this.cities);
+        await this.rebuildDatabaseCache();
     }
     async updateDatabaseCache(citiesToFetch = this.cities) {
         try {
@@ -52,14 +61,63 @@ let CallGoogleAPI = class CallGoogleAPI {
                 console.warn("Aucune donnée reçue de l'API, mise à jour ignorée.");
                 return;
             }
-            const result = await this.prisma.webcam.createMany({
-                data: allWebcams,
-                skipDuplicates: true,
+            const now = new Date();
+            await this.prisma.$transaction(allWebcams.map((webcam) => this.prisma.webcam.upsert({
+                where: { youtubeVideoId: webcam.youtubeVideoId },
+                update: {
+                    title: webcam.title,
+                    thumbnail: webcam.thumbnail,
+                    updatedAt: now,
+                },
+                create: {
+                    youtubeVideoId: webcam.youtubeVideoId,
+                    title: webcam.title,
+                    thumbnail: webcam.thumbnail,
+                    city: webcam.city,
+                    updatedAt: now,
+                },
+            })));
+            const deleted = await this.prisma.webcam.deleteMany({
+                where: {
+                    city: { in: citiesToFetch },
+                    updatedAt: { lt: now },
+                },
             });
-            console.log(`✅ ${result.count} nouvelle(s) webcam(s) ajoutée(s) sur ${allWebcams.length} récupérée(s) (${citiesToFetch.length} villes).`);
+            console.log(`✅ Cache synchronisé (${allWebcams.length} webcams actives).`);
+            if (deleted.count > 0) {
+                console.log(`🧹 Nettoyage : ${deleted.count} webcam(s) hors-ligne supprimée(s) de Neon.`);
+            }
         }
         catch (e) {
             console.error("Erreur lors de la mise à jour du cache DB Google : ", e);
+        }
+    }
+    async rebuildDatabaseCache(citiesToFetch = this.cities) {
+        try {
+            const resultsByCity = await Promise.all(citiesToFetch.map((city) => this.apiService.getGoogleAPI(city)));
+            const allWebcams = resultsByCity.flat();
+            if (allWebcams.length === 0) {
+                console.warn("⚠️ Aucune donnée reçue de l'API, la table n'a PAS été vidée pour éviter de tout perdre.");
+                return;
+            }
+            const now = new Date();
+            await this.prisma.$transaction([
+                this.prisma.webcam.deleteMany({}),
+                this.prisma.webcam.createMany({
+                    data: allWebcams.map((webcam) => ({
+                        youtubeVideoId: webcam.youtubeVideoId,
+                        title: webcam.title,
+                        thumbnail: webcam.thumbnail,
+                        city: webcam.city,
+                        updatedAt: now,
+                    })),
+                    skipDuplicates: true,
+                }),
+            ]);
+            console.log(`✅ Cache reconstruit de zéro (${allWebcams.length} webcams actives).`);
+        }
+        catch (e) {
+            console.error("Erreur lors de la reconstruction du cache DB Google : ", e);
         }
     }
 };

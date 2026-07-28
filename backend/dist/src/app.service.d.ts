@@ -9,11 +9,8 @@ export declare class ApiService {
         youtubeVideoId: string;
         title: string;
         thumbnail: string | null;
-        channel: string | null;
         city: string | null;
-        isLive: boolean;
-        createdAt: Date;
-        lastCheckedAt: Date;
+        updatedAt: Date;
     }[]>;
     getGoogleAPI(city: string): Promise<any>;
     private OpenskyCache;
