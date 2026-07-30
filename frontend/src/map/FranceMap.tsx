@@ -105,11 +105,11 @@ export default function FranceMap() {
       if (!map.current) return;
 
       // --- Icônes avion par tranche d'altitude (couleurs différentes) ---
-      map.current.addImage('plane-ground', createPlaneIcon('#6c757d', 96));   // gris — au sol
-      map.current.addImage('plane-low', createPlaneIcon('#f4a261', 96));      // orange — basse altitude
-      map.current.addImage('plane-mid', createPlaneIcon('#e9c46a', 96));      // jaune — moyenne altitude
-      map.current.addImage('plane-high', createPlaneIcon('#e63946', 96));     // rouge — haute altitude
-      map.current.addImage('plane-cruise', createPlaneIcon('#457b9d', 96));   // bleu — croisière
+      map.current.addImage('plane-ground', createPlaneIcon('#000000', 96));   // gris — au sol
+      map.current.addImage('plane-low', createPlaneIcon('#a199ff', 96));      // orange — basse altitude
+      map.current.addImage('plane-mid', createPlaneIcon('#7c70ff', 96));      // jaune — moyenne altitude
+      map.current.addImage('plane-high', createPlaneIcon('#5b4dff', 96));     // rouge — haute altitude
+      map.current.addImage('plane-cruise', createPlaneIcon('#1500ff', 96));   // bleu — croisière
 
       const trainCanvas = createTrainIcon('#457b9d', 64);
       map.current.addImage('train-icon', trainCanvas, { pixelRatio: 2 });
@@ -141,13 +141,47 @@ export default function FranceMap() {
         }
       });
 
-      map.current.on('click', 'planes-layer', (e) => {
-        const feature = e.features?.[0];
-        if (!feature || !map.current) return;
-        new maplibregl.Popup()
-          .setLngLat((feature.geometry as any).coordinates)
-          .setHTML(`<strong>${feature.properties?.callsign || 'Vol inconnu'}</strong><br/>Altitude: ${feature.properties?.altitude ?? '?'} m`)
-          .addTo(map.current);
+      map.current.on('click', 'planes-layer', async (e) => {
+          const feature = e.features?.[0];
+          if (!feature || !map.current) return;
+
+          const icao24 = feature.properties?.icao24;
+          const callsign = feature.properties?.callsign || 'Vol inconnu';
+          const altitude = feature.properties?.altitude ?? '?';
+          const coordinates = (feature.geometry as any).coordinates;
+
+          const popup = new maplibregl.Popup()
+              .setLngLat(coordinates)
+              .setHTML(`
+                  <strong>${callsign}</strong><br/>
+                  Altitude: ${altitude} m<br/>
+                  <em>Chargement de la photo...</em>
+              `)
+              .addTo(map.current);
+
+          if (!icao24) return;
+          try
+          {
+              const res = await fetch(`/planes/${icao24}/photo`);
+              const photo = await res.json();
+              popup.setHTML(`
+                  <strong>${callsign}</strong><br/>
+                  Altitude: ${altitude} m<br/>
+                  ${photo?.thumbnailSrc
+                      ? `<img src="${photo.thumbnailSrc}" width="${photo.thumbnailWidth || 150}" style="border-radius:4px;margin-top:4px;" /><br/><small>📷 ${photo.photographer || 'Inconnu'}</small>`
+                      : `<em>Aucune photo disponible</em>`
+                  }
+              `);
+          }
+          catch (err)
+          {
+              console.error('Erreur récupération photo avion :', err);
+              popup.setHTML(`
+                  <strong>${callsign}</strong><br/>
+                  Altitude: ${altitude} m<br/>
+                  <em>Erreur de chargement de la photo</em>
+              `);
+          }
       });
 
       map.current.on('mouseenter', 'planes-layer', () => {
@@ -217,18 +251,18 @@ export default function FranceMap() {
       }
 
       // Trains
-      const trainsSource = map.current.getSource('trains') as maplibregl.GeoJSONSource | undefined;
-      if (trainsSource) {
-        const trains = globalCache.getSncfCache();
-        const trainsGeojson = toGeoJsonFeatureCollection(
-          trains.map((t: any) => ({
-            long: t.longitude,
-            lat: t.latitude,
-            properties: { name: t.name ?? t.trainNumber ?? '' }
-          }))
-        );
-        trainsSource.setData(trainsGeojson);
-      }
+      // const trainsSource = map.current.getSource('trains') as maplibregl.GeoJSONSource | undefined;
+      // if (trainsSource) {
+      //   const trains = globalCache.getSncfCache();
+      //   const trainsGeojson = toGeoJsonFeatureCollection(
+      //     trains.map((t: any) => ({
+      //       long: t.longitude,
+      //       lat: t.latitude,
+      //       properties: { name: t.name ?? t.trainNumber ?? '' }
+      //     }))
+      //   );
+      //   trainsSource.setData(trainsGeojson);
+      // }
     }, 5000);
 
     return () => clearInterval(interval);
