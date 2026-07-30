@@ -230,6 +230,43 @@ let ApiService = class ApiService {
             return [];
         }
     }
+    ;
+    async getPlaneSpotterApi(icao24) {
+        const existInDatabase = await this.prisma.planes.findUnique({
+            where: { id: icao24 },
+        });
+        if (existInDatabase) {
+            return existInDatabase;
+        }
+        try {
+            const url = `https://api.planespotters.net/pub/photos/hex/${icao24}`;
+            const result = await fetch(url, {
+                headers: {
+                    'User-Agent': 'polarview/1.0 (+mailto:thomasmilin1@gmail.com)',
+                },
+            });
+            const json = await result.json();
+            const photo = json.photos?.[0];
+            if (!photo) {
+                return null;
+            }
+            const saved = await this.prisma.planes.create({
+                data: {
+                    id: icao24,
+                    link: photo.link ?? null,
+                    photographer: photo.photographer ?? null,
+                    thumbnailSrc: photo.thumbnail_large?.src ?? photo.thumbnail?.src ?? null,
+                    thumbnailWidth: photo.thumbnail_large?.size?.width ?? photo.thumbnail?.size?.width ?? null,
+                    thumbnailHeight: photo.thumbnail_large?.size?.height ?? photo.thumbnail?.size?.height ?? null,
+                },
+            });
+            return saved;
+        }
+        catch (e) {
+            console.error(`Erreur 'getPlaneSpotterApi(${icao24})' : `, e);
+            return null;
+        }
+    }
 };
 exports.ApiService = ApiService;
 exports.ApiService = ApiService = __decorate([
@@ -237,4 +274,4 @@ exports.ApiService = ApiService = __decorate([
     __metadata("design:paramtypes", [config_1.ConfigService,
         prisma_service_1.PrismaService])
 ], ApiService);
-//# sourceMappingURL=app.service.js.map
+//# sourceMappingURL=ApiService.js.map

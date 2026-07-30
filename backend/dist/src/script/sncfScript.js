@@ -11,7 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CallSncfAPI = void 0;
 const common_1 = require("@nestjs/common");
-const app_service_1 = require("../app.service");
+const ApiService_1 = require("../ApiService");
 let CallSncfAPI = class CallSncfAPI {
     ApiService;
     constructor(ApiService) {
@@ -36,6 +36,6 @@ let CallSncfAPI = class CallSncfAPI {
 exports.CallSncfAPI = CallSncfAPI;
 exports.CallSncfAPI = CallSncfAPI = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [app_service_1.ApiService])
+    __metadata("design:paramtypes", [ApiService_1.ApiService])
 ], CallSncfAPI);
 //# sourceMappingURL=sncfScript.js.map

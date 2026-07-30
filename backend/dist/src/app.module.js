@@ -9,7 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const app_controller_1 = require("./app.controller");
-const app_service_1 = require("./app.service");
+const ApiService_1 = require("./ApiService");
 const config_1 = require("@nestjs/config");
 const openskyScript_1 = require("./script/openskyScript");
 const sncfScript_1 = require("./script/sncfScript");
@@ -28,7 +28,7 @@ exports.AppModule = AppModule = __decorate([
         ],
         controllers: [app_controller_1.AppController],
         providers: [
-            app_service_1.ApiService,
+            ApiService_1.ApiService,
             openskyScript_1.CallOpenskyAPI,
             meteofranceScript_1.CallMeteofranceAPI,
             sncfScript_1.CallSncfAPI,

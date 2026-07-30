@@ -4,6 +4,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import './FranceMap.css';
 import { toGeoJsonFeatureCollection } from '../api/geoJsonConvertion';
 import { globalCache } from '../api/classCache';
+import api from '../api/apiBridge';
 
 // Silhouette d'avion plus réaliste (vue du dessus), pointant vers le haut (nord)
 function createPlaneIcon(color: string, size = 96): ImageData {
@@ -105,7 +106,7 @@ export default function FranceMap() {
       if (!map.current) return;
 
       // --- Icônes avion par tranche d'altitude (couleurs différentes) ---
-      map.current.addImage('plane-ground', createPlaneIcon('#000000', 96));   // gris — au sol
+      map.current.addImage('plane-ground', createPlaneIcon('#989898', 96));   // gris — au sol
       map.current.addImage('plane-low', createPlaneIcon('#a199ff', 96));      // orange — basse altitude
       map.current.addImage('plane-mid', createPlaneIcon('#7c70ff', 96));      // jaune — moyenne altitude
       map.current.addImage('plane-high', createPlaneIcon('#5b4dff', 96));     // rouge — haute altitude
@@ -162,8 +163,9 @@ export default function FranceMap() {
           if (!icao24) return;
           try
           {
-              const res = await fetch(`/planes/${icao24}/photo`);
-              const photo = await res.json();
+            console.log(icao24);
+              const res = await api.get(`/planes/${icao24}/picture`);
+              const photo = res.data;
               popup.setHTML(`
                   <strong>${callsign}</strong><br/>
                   Altitude: ${altitude} m<br/>
@@ -263,7 +265,7 @@ export default function FranceMap() {
       //   );
       //   trainsSource.setData(trainsGeojson);
       // }
-    }, 5000);
+    }, 500);
 
     return () => clearInterval(interval);
   }, []);

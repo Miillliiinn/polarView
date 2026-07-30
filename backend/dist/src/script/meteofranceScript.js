@@ -11,7 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CallMeteofranceAPI = void 0;
 const common_1 = require("@nestjs/common");
-const app_service_1 = require("../app.service");
+const ApiService_1 = require("../ApiService");
 let CallMeteofranceAPI = class CallMeteofranceAPI {
     ApiService;
     constructor(ApiService) {
@@ -35,6 +35,6 @@ let CallMeteofranceAPI = class CallMeteofranceAPI {
 exports.CallMeteofranceAPI = CallMeteofranceAPI;
 exports.CallMeteofranceAPI = CallMeteofranceAPI = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [app_service_1.ApiService])
+    __metadata("design:paramtypes", [ApiService_1.ApiService])
 ], CallMeteofranceAPI);
 //# sourceMappingURL=meteofranceScript.js.map

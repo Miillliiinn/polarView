@@ -15,16 +15,19 @@ const client_1 = require("@prisma/client");
 const adapter_pg_1 = require("@prisma/adapter-pg");
 const pg_1 = require("pg");
 let PrismaService = class PrismaService extends client_1.PrismaClient {
+    pool;
     constructor() {
         const pool = new pg_1.Pool({ connectionString: process.env.DATABASE_URL });
         const adapter = new adapter_pg_1.PrismaPg(pool);
         super({ adapter });
+        this.pool = pool;
     }
     async onModuleInit() {
         await this.$connect();
     }
     async onModuleDestroy() {
         await this.$disconnect();
+        await this.pool.end();
     }
 };
 exports.PrismaService = PrismaService;

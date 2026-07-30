@@ -1,5 +1,5 @@
 import { OnModuleInit } from "@nestjs/common";
-import { ApiService } from "../app.service";
+import { ApiService } from "../ApiService";
 import { PrismaService } from "../../prisma/prisma.service";
 export declare class CallGoogleAPI implements OnModuleInit {
     private apiService;

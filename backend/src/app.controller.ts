@@ -16,7 +16,7 @@ export class AppController {
     return await this.appService.getOpenskyCache();
   }
 
-  @Get('planes/picture')
+  @Get('planes/:icao24/picture')
   async getPlanesPicture(@Param('icao24') icao24 : string) {
     return await this.appService.getPlaneSpotterApi(icao24);
   }

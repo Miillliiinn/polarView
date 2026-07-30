@@ -1,4 +1,4 @@
-import { ApiService } from './app.service';
+import { ApiService } from './ApiService';
 export declare class AppController {
     private readonly appService;
     constructor(appService: ApiService);
@@ -11,6 +11,15 @@ export declare class AppController {
         updatedAt: Date;
     }[]>;
     getPlanes(): Promise<any>;
+    getPlanesPicture(icao24: string): Promise<{
+        id: string;
+        link: string | null;
+        photographer: string | null;
+        thumbnailSrc: string | null;
+        thumbnailWidth: number | null;
+        thumbnailHeight: number | null;
+        createdAt: Date;
+    } | null>;
     getTrains(): Promise<any>;
     getWeather(): Promise<any>;
 }

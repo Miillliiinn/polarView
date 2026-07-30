@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CallGoogleAPI = void 0;
 const common_1 = require("@nestjs/common");
 const schedule_1 = require("@nestjs/schedule");
-const app_service_1 = require("../app.service");
+const ApiService_1 = require("../ApiService");
 const prisma_service_1 = require("../../prisma/prisma.service");
 let CallGoogleAPI = class CallGoogleAPI {
     apiService;
@@ -130,7 +130,7 @@ __decorate([
 ], CallGoogleAPI.prototype, "scheduledUpdate", null);
 exports.CallGoogleAPI = CallGoogleAPI = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [app_service_1.ApiService,
+    __metadata("design:paramtypes", [ApiService_1.ApiService,
         prisma_service_1.PrismaService])
 ], CallGoogleAPI);
 //# sourceMappingURL=googleScript.js.map
