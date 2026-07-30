@@ -89,30 +89,6 @@ export class ApiService {
       }
   }
 
-  // async getGoogleAPI(city: string)
-  // { 
-  //   try
-  //   {
-  //     const apiKey = this.configService.get('GOOGLE_API');
-  //     const query = encodeURIComponent(`"webcam ${city}" live`);
-  //     const apiResult = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&eventType=live&q=${query}&relevanceLanguage=fr&maxResults=50&key=${apiKey}`);
-  //     const resJson = await apiResult.json();
-  //     const videoLive = resJson.items || [];
-
-  //     return videoLive.map((item : any) => ({
-  //       youtubeVideoId: item.id.videoId,
-  //       title: item.snippet.title,
-  //       thumbnail: item.snippet.thumbnails.medium.url,
-  //       channel: item.snippet.channelTitle,
-  //       city: city,
-  //     }));
-  //   }
-  //   catch (e)
-  //   {
-  //     console.error(`Error 'async getGoogleAPI(${city})' : `, e);
-  //     return [];
-  //   }
-  // }
 
 
 
@@ -285,7 +261,48 @@ async getSncfAPI() {
       console.error("Error 'async getMeteofranceAPI' : ", e);
       return [];
     }
-  }
+  };
+
+
+
+  async getPlaneSpotterApi(icao24: string)
+  {
+    const existInDatabase = await this.prisma.planes.findMany({
+      where : {id: icao24},
+    });
+
+    if (existInDatabase)
+      return existInDatabase;
+
+    try
+    {
+      const url = `https://api.planespotters.net/pub/photos/hex/${icao24}`;
+      const result = await fetch(url);
+      const json = await result.json();
+      const photo = json.photos?.[0];
+      if (!photo)
+      {
+        return null;
+      }
+      const saved = await this.prisma.planes.create({
+        data:
+        {
+          id: icao24,
+          link: photo.link ?? null,
+          photographer: photo.photographer ?? null,
+          thumbnailSrc: photo.thumbnail_large?.src ?? photo.thumbnail?.src ?? 0,
+          thumbnailWidth: photo.thumbnail_large?.size?.width ?? photo.thumbnail?.size?.width ?? 0,
+          thumbnailHeight: photo.thumbnail_large?.size?.height ?? photo.thumbnail?.size?.height ?? 0,
+        },
+      });
+      return saved;
+    }
+    catch (e)
+    {
+      console.error("Error 'async getMeteofranceAPI' : ", e);
+    }
+  };
+
 }
 
 

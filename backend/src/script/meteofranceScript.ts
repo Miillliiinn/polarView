@@ -1,5 +1,5 @@
 import { Injectable, OnModuleInit } from "@nestjs/common";
-import { ApiService } from "../app.service";
+import { ApiService } from "../ApiService";
 
 @Injectable()
 export class CallMeteofranceAPI implements OnModuleInit {

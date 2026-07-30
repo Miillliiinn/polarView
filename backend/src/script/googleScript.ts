@@ -1,6 +1,6 @@
 import { Injectable, OnModuleInit } from "@nestjs/common";
 import { Cron } from "@nestjs/schedule";
-import { ApiService } from "src/app.service";
+import { ApiService } from "src/ApiService";
 import { PrismaService } from 'prisma/prisma.service';
 
 @Injectable()

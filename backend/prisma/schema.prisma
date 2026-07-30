@@ -10,11 +10,23 @@ datasource db {
 }
 
 model Webcam {
-  id             String   @id @default(uuid())
+  id String   @id @default(uuid())
   youtubeVideoId String   @unique
-  title          String
-  thumbnail      String?
-  city           String?
-  updatedAt      DateTime @updatedAt
+  title String
+  thumbnail String?
+  city String?
+  updatedAt DateTime @updatedAt
   @@map("webcams")
+}
+
+model Planes {
+  id String   @id
+  link String ?
+  photographer String ?
+  thumbnailSrc String ?
+  thumbnailWidth Int ?
+  thumbnailHeight Int ?
+
+  createdAt     DateTime @default(now())
+  @@map("planes")
 }

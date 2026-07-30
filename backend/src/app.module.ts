@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { ApiService } from './app.service';
+import { ApiService } from './ApiService';
 import { ConfigModule } from '@nestjs/config';
 import { CallOpenskyAPI } from './script/openskyScript';
 import { CallSncfAPI } from './script/sncfScript'
