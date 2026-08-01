@@ -27,6 +27,7 @@ function AppContent()
       </div>
 
       <Routes>
+        <Route path="/" element={null} />
         <Route path="/avions" element={<ShowAllPlanesData />} />
         <Route path="/trains" element={<ShowAllTrainsData />} />
         <Route path="/meteo" element={<ShowAllMeteoFranceData />} />

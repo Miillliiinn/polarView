@@ -1,10 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import './FranceMap.css';
 import { toGeoJsonFeatureCollection } from '../api/geoJsonConvertion';
 import { globalCache } from '../api/classCache';
 import api from '../api/apiBridge';
+import { applyVigilanceColors } from './meteofranceFeature';
 
 // Silhouette d'avion plus réaliste (vue du dessus), pointant vers le haut (nord)
 function createPlaneIcon(color: string, size = 96): ImageData {
@@ -21,23 +22,17 @@ function createPlaneIcon(color: string, size = 96): ImageData {
   const s = size / 100; // facteur d'échelle sur une grille de référence 100x100
 
   ctx.beginPath();
-  // Fuselage / nez
   ctx.moveTo(0, -45 * s);
   ctx.lineTo(4 * s, -30 * s);
   ctx.lineTo(4 * s, -5 * s);
-  // Aile droite
   ctx.lineTo(42 * s, 12 * s);
   ctx.lineTo(42 * s, 18 * s);
   ctx.lineTo(5 * s, 8 * s);
-  // Fuselage arrière droit
   ctx.lineTo(5 * s, 28 * s);
-  // Empennage droit
   ctx.lineTo(16 * s, 38 * s);
   ctx.lineTo(16 * s, 43 * s);
   ctx.lineTo(2 * s, 35 * s);
-  // Pointe queue
   ctx.lineTo(0, 45 * s);
-  // Symétrie côté gauche
   ctx.lineTo(-2 * s, 35 * s);
   ctx.lineTo(-16 * s, 43 * s);
   ctx.lineTo(-16 * s, 38 * s);
@@ -77,17 +72,24 @@ const FRANCE_BOUNDS: [[number, number], [number, number]] = [
   [9.9, 51.3]
 ];
 
+const VIGILANCE_COLORS: Record<number, string> = {
+  1: '#2fa84f',
+  2: '#ffd500',
+  3: '#ff8c00',
+  4: '#e30613',
+};
+
 export default function FranceMap() {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
+  const [vigilanceVisible, setVigilanceVisible] = useState(false);
 
-  // Initialisation de la carte (une seule fois)
   useEffect(() => {
     if (map.current) return;
 
-    map.current = new maplibregl.Map({
+    const mapInstance = new maplibregl.Map({
       container: mapContainer.current!,
-      style: 'https://tiles.openfreemap.org/styles/liberty', //positron / bright / liberty / dark / fiord 
+      style: 'https://tiles.openfreemap.org/styles/liberty',
       bounds: FRANCE_BOUNDS,
       fitBoundsOptions: { padding: 100 },
       maxBounds: [
@@ -95,33 +97,97 @@ export default function FranceMap() {
         [FRANCE_BOUNDS[1][0] + 2, FRANCE_BOUNDS[1][1] + 2]
       ]
     });
+    map.current = mapInstance;
 
-    map.current.addControl(new maplibregl.NavigationControl(), 'top-right');
+    mapInstance.addControl(new maplibregl.NavigationControl(), 'top-right');
 
-    map.current.on('error', (e) => {
+    mapInstance.on('error', (e) => {
       console.error('[FranceMap] Erreur MapLibre:', e);
     });
 
-    map.current.on('load', () => {
+    let vigilanceInterval: ReturnType<typeof setInterval> | null = null;
+
+    mapInstance.on('load', () => {
       if (!map.current) return;
 
-      // --- Icônes avion par tranche d'altitude (couleurs différentes) ---
-      map.current.addImage('plane-ground', createPlaneIcon('#989898', 96));   // gris — au sol
-      map.current.addImage('plane-low', createPlaneIcon('#a199ff', 96));      // orange — basse altitude
-      map.current.addImage('plane-mid', createPlaneIcon('#7c70ff', 96));      // jaune — moyenne altitude
-      map.current.addImage('plane-high', createPlaneIcon('#5b4dff', 96));     // rouge — haute altitude
-      map.current.addImage('plane-cruise', createPlaneIcon('#1500ff', 96));   // bleu — croisière
+      //////////////////////////////////////////////////////////////////////
+      // --- VIGILANCE MÉTÉO FRANCE ---
+      //////////////////////////////////////////////////////////////////////
+
+      mapInstance.addSource('departements', {
+        type: 'geojson',
+        data: 'https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements.geojson',
+        promoteId: 'code'
+      });
+
+      mapInstance.addLayer({
+        id: 'vigilance-fill',
+        type: 'fill',
+        source: 'departements',
+        layout: {
+          visibility: 'none' // masqué par défaut
+        },
+        paint: {
+          'fill-color': [
+            'match',
+            ['feature-state', 'couleur'],
+            1, VIGILANCE_COLORS[1],
+            2, VIGILANCE_COLORS[2],
+            3, VIGILANCE_COLORS[3],
+            4, VIGILANCE_COLORS[4],
+            'rgba(0,0,0,0)'
+          ],
+          'fill-opacity': 0.35
+        }
+      });
+
+      mapInstance.addLayer({
+        id: 'vigilance-outline',
+        type: 'line',
+        source: 'departements',
+        layout: {
+          visibility: 'none' // masqué par défaut
+        },
+        paint: {
+          'line-color': '#ffffff',
+          'line-width': 0.5,
+          'line-opacity': 0.4
+        }
+      });
+
+      const onDepartementsLoaded = (e: maplibregl.MapSourceDataEvent) => {
+        if (e.sourceId === 'departements' && e.isSourceLoaded)
+        {
+          applyVigilanceColors(mapInstance);
+        }
+      };
+      mapInstance.on('sourcedata', onDepartementsLoaded);
+
+      vigilanceInterval = setInterval(() => {
+        if (map.current && map.current.isStyleLoaded()) {
+          applyVigilanceColors(map.current);
+        }
+      }, 5000);
+
+      //////////////////////////////////////////////////////////////////////
+      // --- AVIONS ---
+      //////////////////////////////////////////////////////////////////////
+
+      mapInstance.addImage('plane-ground', createPlaneIcon('#989898', 96));
+      mapInstance.addImage('plane-low', createPlaneIcon('#a199ff', 96));
+      mapInstance.addImage('plane-mid', createPlaneIcon('#7c70ff', 96));
+      mapInstance.addImage('plane-high', createPlaneIcon('#5b4dff', 96));
+      mapInstance.addImage('plane-cruise', createPlaneIcon('#1500ff', 96));
 
       const trainCanvas = createTrainIcon('#457b9d', 64);
-      map.current.addImage('train-icon', trainCanvas, { pixelRatio: 2 });
+      mapInstance.addImage('train-icon', trainCanvas, { pixelRatio: 2 });
 
-      // --- Source et couche avions ---
-      map.current.addSource('planes', {
+      mapInstance.addSource('planes', {
         type: 'geojson',
         data: { type: 'FeatureCollection', features: [] }
       });
 
-      map.current.addLayer({
+      mapInstance.addLayer({
         id: 'planes-layer',
         type: 'symbol',
         source: 'planes',
@@ -142,64 +208,63 @@ export default function FranceMap() {
         }
       });
 
-      map.current.on('click', 'planes-layer', async (e) => {
-          const feature = e.features?.[0];
-          if (!feature || !map.current) return;
+      mapInstance.on('click', 'planes-layer', async (e) => {
+        const feature = e.features?.[0];
+        if (!feature || !map.current) return;
 
-          const icao24 = feature.properties?.icao24;
-          const callsign = feature.properties?.callsign || 'Vol inconnu';
-          const altitude = feature.properties?.altitude ?? '?';
-          const coordinates = (feature.geometry as any).coordinates;
+        const icao24 = feature.properties?.icao24;
+        const callsign = feature.properties?.callsign || 'Vol inconnu';
+        const altitude = feature.properties?.altitude ?? '?';
+        const coordinates = (feature.geometry as any).coordinates;
 
-          const popup = new maplibregl.Popup()
-              .setLngLat(coordinates)
-              .setHTML(`
-                  <strong>${callsign}</strong><br/>
-                  Altitude: ${altitude} m<br/>
-                  <em>Chargement de la photo...</em>
-              `)
-              .addTo(map.current);
+        const popup = new maplibregl.Popup()
+          .setLngLat(coordinates)
+          .setHTML(`
+              <strong>${callsign}</strong><br/>
+              Altitude: ${altitude} m<br/>
+              <em>Chargement de la photo...</em>
+          `)
+          .addTo(map.current);
 
-          if (!icao24) return;
-          try
-          {
-            console.log(icao24);
-              const res = await api.get(`/planes/${icao24}/picture`);
-              const photo = res.data;
-              popup.setHTML(`
-                  Callsign: <strong>${callsign}</strong><br/>
-                  Altitude: <strong>${altitude} m</strong><br/>
-                  ${photo?.thumbnailSrc
-                      ? `<img src="${photo.thumbnailSrc}" width="${220}" style="border-radius:4px;margin-top:4px;" /><br/><small>${photo.photographer || 'Inconnu'}</small>`
-                      : `<em>Aucune photo disponible</em>`
-                  }
-              `);
-          }
-          catch (err)
-          {
-              console.error('Erreur récupération photo avion :', err);
-              popup.setHTML(`
-                  <strong>${callsign}</strong><br/>
-                  Altitude: ${altitude} m<br/>
-                  <em>Erreur de chargement de la photo</em>
-              `);
-          }
+        if (!icao24) return;
+        try {
+          const res = await api.get(`/planes/${icao24}/picture`);
+          const photo = res.data;
+          popup.setHTML(`
+              Callsign: <strong>${callsign}</strong><br/>
+              Altitude: <strong>${altitude} m</strong><br/>
+              ${photo?.thumbnailSrc
+                  ? `<img src="${photo.thumbnailSrc}" width="220" style="border-radius:4px;margin-top:4px;" /><br/><small>${photo.photographer || 'Inconnu'}</small>`
+                  : `<em>Aucune photo disponible</em>`
+              }
+          `);
+        } catch (err) {
+          console.error('Erreur récupération photo avion :', err);
+          popup.setHTML(`
+              <strong>${callsign}</strong><br/>
+              Altitude: ${altitude} m<br/>
+              <em>Erreur de chargement de la photo</em>
+          `);
+        }
       });
 
-      map.current.on('mouseenter', 'planes-layer', () => {
-        if (map.current) map.current.getCanvas().style.cursor = 'pointer';
+      mapInstance.on('mouseenter', 'planes-layer', () => {
+        mapInstance.getCanvas().style.cursor = 'pointer';
       });
-      map.current.on('mouseleave', 'planes-layer', () => {
-        if (map.current) map.current.getCanvas().style.cursor = '';
+      mapInstance.on('mouseleave', 'planes-layer', () => {
+        mapInstance.getCanvas().style.cursor = '';
       });
 
-      // --- Source et couche trains ---
-      map.current.addSource('trains', {
+      //////////////////////////////////////////////////////////////////////
+      // --- TRAINS ---
+      //////////////////////////////////////////////////////////////////////
+
+      mapInstance.addSource('trains', {
         type: 'geojson',
         data: { type: 'FeatureCollection', features: [] }
       });
 
-      map.current.addLayer({
+      mapInstance.addLayer({
         id: 'trains-layer',
         type: 'symbol',
         source: 'trains',
@@ -210,7 +275,7 @@ export default function FranceMap() {
         }
       });
 
-      map.current.on('click', 'trains-layer', (e) => {
+      mapInstance.on('click', 'trains-layer', (e) => {
         const feature = e.features?.[0];
         if (!feature || !map.current) return;
         new maplibregl.Popup()
@@ -219,21 +284,25 @@ export default function FranceMap() {
           .addTo(map.current);
       });
 
-      map.current.on('mouseenter', 'trains-layer', () => {
-        if (map.current) map.current.getCanvas().style.cursor = 'pointer';
+      mapInstance.on('mouseenter', 'trains-layer', () => {
+        mapInstance.getCanvas().style.cursor = 'pointer';
       });
-      map.current.on('mouseleave', 'trains-layer', () => {
-        if (map.current) map.current.getCanvas().style.cursor = '';
+      mapInstance.on('mouseleave', 'trains-layer', () => {
+        mapInstance.getCanvas().style.cursor = '';
       });
     });
+
+    return () => {
+      if (vigilanceInterval) clearInterval(vigilanceInterval);
+      mapInstance.remove();
+      map.current = null;
+    };
   }, []);
 
-  // Rafraîchissement périodique des données depuis le cache
   useEffect(() => {
     const interval = setInterval(() => {
       if (!map.current || !map.current.isStyleLoaded()) return;
 
-      // Avions
       const planesSource = map.current.getSource('planes') as maplibregl.GeoJSONSource | undefined;
       if (planesSource) {
         const planes = globalCache.getOpCache();
@@ -251,28 +320,29 @@ export default function FranceMap() {
         );
         planesSource.setData(planesGeojson);
       }
-
-      // Trains
-      // const trainsSource = map.current.getSource('trains') as maplibregl.GeoJSONSource | undefined;
-      // if (trainsSource) {
-      //   const trains = globalCache.getSncfCache();
-      //   const trainsGeojson = toGeoJsonFeatureCollection(
-      //     trains.map((t: any) => ({
-      //       long: t.longitude,
-      //       lat: t.latitude,
-      //       properties: { name: t.name ?? t.trainNumber ?? '' }
-      //     }))
-      //   );
-      //   trainsSource.setData(trainsGeojson);
-      // }
     }, 500);
 
     return () => clearInterval(interval);
   }, []);
 
+  // Toggle affichage/masquage de la couche vigilance
+  const toggleVigilance = () => {
+    if (!map.current || !map.current.getLayer('vigilance-fill')) return;
+    const newVisibility = !vigilanceVisible;
+    const visibilityValue = newVisibility ? 'visible' : 'none';
+
+    map.current.setLayoutProperty('vigilance-fill', 'visibility', visibilityValue);
+    map.current.setLayoutProperty('vigilance-outline', 'visibility', visibilityValue);
+
+    setVigilanceVisible(newVisibility);
+  };
+
   return (
     <div className="france-map-wrapper">
       <div ref={mapContainer} className="map-container" />
+      <button className="vigilance-toggle-btn" onClick={toggleVigilance}>
+        {vigilanceVisible ? 'Masquer vigilance' : 'Afficher vigilance'}
+      </button>
     </div>
   );
 }

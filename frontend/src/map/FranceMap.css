@@ -22,6 +22,8 @@
   z-index: 1;
 }
 
+/*--------------------------------------------------------*/
+
 .maplibregl-popup-content {
   color: #1a1a1a;
   font-family: 'Inter', sans-serif;
@@ -35,4 +37,32 @@
 
 .maplibregl-popup-content small {
   color: #666;
+}
+
+/*--------------------------------------------------------*/
+
+.vigilance-toggle-btn {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 10;
+  padding: 10px 16px;
+  background: rgba(15, 29, 56, 0.85);
+  backdrop-filter: blur(10px);
+  color: #e8e6df;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.vigilance-toggle-btn:hover {
+  background: rgba(15, 29, 56, 0.95);
+  transform: translateY(-1px);
+}
+
+.vigilance-toggle-btn:active {
+  transform: translateY(0);
 }
