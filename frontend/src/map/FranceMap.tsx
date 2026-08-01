@@ -87,7 +87,7 @@ export default function FranceMap() {
 
     map.current = new maplibregl.Map({
       container: mapContainer.current!,
-      style: 'https://tiles.openfreemap.org/styles/dark', //positron / bright / liberty / dark / fiord 
+      style: 'https://tiles.openfreemap.org/styles/liberty', //positron / bright / liberty / dark / fiord 
       bounds: FRANCE_BOUNDS,
       fitBoundsOptions: { padding: 100 },
       maxBounds: [
