@@ -87,7 +87,7 @@ export default function FranceMap() {
 
     map.current = new maplibregl.Map({
       container: mapContainer.current!,
-      style: 'https://tiles.openfreemap.org/styles/liberty',
+      style: 'https://tiles.openfreemap.org/styles/dark', //positron / bright / liberty / dark / fiord 
       bounds: FRANCE_BOUNDS,
       fitBoundsOptions: { padding: 100 },
       maxBounds: [
@@ -167,10 +167,10 @@ export default function FranceMap() {
               const res = await api.get(`/planes/${icao24}/picture`);
               const photo = res.data;
               popup.setHTML(`
-                  <strong>${callsign}</strong><br/>
-                  Altitude: ${altitude} m<br/>
+                  Callsign: <strong>${callsign}</strong><br/>
+                  Altitude: <strong>${altitude} m</strong><br/>
                   ${photo?.thumbnailSrc
-                      ? `<img src="${photo.thumbnailSrc}" width="${photo.thumbnailWidth || 150}" style="border-radius:4px;margin-top:4px;" /><br/><small>📷 ${photo.photographer || 'Inconnu'}</small>`
+                      ? `<img src="${photo.thumbnailSrc}" width="${220}" style="border-radius:4px;margin-top:4px;" /><br/><small>${photo.photographer || 'Inconnu'}</small>`
                       : `<em>Aucune photo disponible</em>`
                   }
               `);

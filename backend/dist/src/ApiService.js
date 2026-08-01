@@ -89,16 +89,42 @@ let ApiService = class ApiService {
     ;
     getOpenskyCache() { return this.OpenskyCache; }
     ;
+    accessToken = null;
+    tokenExpiry = 0;
+    async getAccessToken() {
+        const now = Date.now();
+        if (this.accessToken && now < this.tokenExpiry) {
+            return this.accessToken;
+        }
+        const clientId = this.configService.get('OPENSKY_CLIENTID');
+        const clientSecret = this.configService.get('OPENSKY_CLIENTSECRET');
+        const tokenUrl = 'https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token';
+        const res = await fetch(tokenUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                grant_type: 'client_credentials',
+                client_id: clientId,
+                client_secret: clientSecret,
+            }),
+        });
+        if (!res.ok) {
+            throw new Error(`Erreur récupération token OAuth2 : ${res.status}`);
+        }
+        const data = await res.json();
+        const newToken = data.access_token;
+        this.accessToken = newToken;
+        this.tokenExpiry = now + (data.expires_in - 30) * 1000;
+        return newToken;
+    }
     async getOpenskyAPI() {
         try {
-            const clientId = this.configService.get('OPENSKY_CLIENTID');
-            const clientsecret = this.configService.get('OPENSKY_CLIENTSECRET');
-            const token = Buffer.from(`${clientId}:${clientsecret}`).toString('base64');
-            const url = `https://opensky-network.org/api/states/all?lamin=39.0&lamax=53.5&lomin=-7.5&lomax=12.5`;
+            const token = await this.getAccessToken();
+            const url = `https://opensky-network.org/api/states/all?lamin=37.5&lamax=55.5&lomin=-9.0&lomax=13.0`;
             const apiResult = await fetch(url, {
                 headers: {
-                    'Authorization': `Basic ${token}`,
-                    'Accept': `application/json`,
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json',
                 }
             });
             if (!apiResult.ok) {
@@ -106,6 +132,8 @@ let ApiService = class ApiService {
             }
             const data = await apiResult.json();
             const state = data.states || [];
+            console.log("✈️ OpenSky Api request ✈️");
+            console.log('Headers:', Object.fromEntries(apiResult.headers.entries()));
             return state
                 .filter((f) => f[5] !== null && f[6] !== null)
                 .map((f) => ({

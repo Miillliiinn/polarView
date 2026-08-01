@@ -21,3 +21,18 @@
 .maplibregl-ctrl-bottom-right {
   z-index: 1;
 }
+
+.maplibregl-popup-content {
+  color: #1a1a1a;
+  font-family: 'Inter', sans-serif;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.maplibregl-popup-content strong {
+  color: #0a1628;
+}
+
+.maplibregl-popup-content small {
+  color: #666;
+}

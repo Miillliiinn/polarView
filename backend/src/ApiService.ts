@@ -95,41 +95,80 @@ export class ApiService {
   private OpenskyCache: any = [];
   setOpenskyCache(newData: any) {this.OpenskyCache = newData;};
   getOpenskyCache(){return this.OpenskyCache;};
-  async getOpenskyAPI()
+  private accessToken: string | null = null;
+  private tokenExpiry = 0;
+
+  private async getAccessToken(): Promise<string>
   {
-    try 
+    const now = Date.now();
+    if (this.accessToken && now < this.tokenExpiry)
     {
-      const clientId = this.configService.get('OPENSKY_CLIENTID');
-      const clientsecret = this.configService.get('OPENSKY_CLIENTSECRET');
+      return this.accessToken;
+    }
 
-      const token = Buffer.from(`${clientId}:${clientsecret}`).toString('base64');
+    const clientId = this.configService.get('OPENSKY_CLIENTID');
+    const clientSecret = this.configService.get('OPENSKY_CLIENTSECRET');
 
-      const url = `https://opensky-network.org/api/states/all?lamin=39.0&lamax=53.5&lomin=-7.5&lomax=12.5`;
+    const tokenUrl = 'https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token';
+
+    const res = await fetch(tokenUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type: 'client_credentials',
+        client_id: clientId,
+        client_secret: clientSecret,
+      }),
+    });
+
+    if (!res.ok)
+    {
+      throw new Error(`Erreur récupération token OAuth2 : ${res.status}`);
+    }
+
+    const data = await res.json();
+    const newToken: string = data.access_token;
+
+    this.accessToken = newToken;
+    this.tokenExpiry = now + (data.expires_in - 30) * 1000;
+
+    return newToken;
+  }
+
+  async getOpenskyAPI() {
+    try {
+      const token = await this.getAccessToken();
+
+      const url = `https://opensky-network.org/api/states/all?lamin=37.5&lamax=55.5&lomin=-9.0&lomax=13.0`; // lamin=41.0&lamax=51.0&lomin=-13.0&lomax=21.0
 
       const apiResult = await fetch(url, {
         headers: {
-          'Authorization': `Basic ${token}`,
-          'Accept': `application/json`,
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
         }
       });
-      if (!apiResult.ok)
-      {
-        throw new Error(`Opensky Network repond avec un statut : ${apiResult.status}`)
+
+      if (!apiResult.ok) {
+        throw new Error(`Opensky Network repond avec un statut : ${apiResult.status}`);
       }
+
       const data = await apiResult.json();
       const state = data.states || [];
+
+      console.log("✈️ OpenSky Api request ✈️")
+      console.log('Headers:', Object.fromEntries(apiResult.headers.entries()))
       return state
-      .filter((f : any) => f[5] !== null && f[6] !== null)
-      .map((f : any) => ({
-        icao24: f[0], // avion id
-        callsign: f[1]?.trim(), // numero du vol
-        country: f[2], // pays d'origine
-        longitude: f[5],
-        latitude: f[6],
-        altitude: f[7] || f[13] || 0,
-        heading: f[10] || 0, // cap / direction en degres (0 = Nord)
-        velocity: f[9] || 0,
-      }))
+        .filter((f: any) => f[5] !== null && f[6] !== null)
+        .map((f: any) => ({
+          icao24: f[0],
+          callsign: f[1]?.trim(),
+          country: f[2],
+          longitude: f[5],
+          latitude: f[6],
+          altitude: f[7] || f[13] || 0,
+          heading: f[10] || 0,
+          velocity: f[9] || 0,
+        }));
     }
     catch (e)
     {
@@ -309,6 +348,8 @@ async getSncfAPI() {
           return null;
       }
   }
+
+  // APPELER L'API DE https://aisstream.io/documentation pour les bateaux
 
 }
 

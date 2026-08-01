@@ -16,6 +16,9 @@ export declare class ApiService {
     private OpenskyCache;
     setOpenskyCache(newData: any): void;
     getOpenskyCache(): any;
+    private accessToken;
+    private tokenExpiry;
+    private getAccessToken;
     getOpenskyAPI(): Promise<any>;
     private SncfCache;
     setSncfCache(newData: any): void;
