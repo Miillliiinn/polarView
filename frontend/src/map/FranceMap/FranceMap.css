@@ -1,0 +1,147 @@
+.france-map-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #0a1628;
+}
+
+.map-container {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+}
+
+.maplibregl-ctrl-bottom-left,
+.maplibregl-ctrl-bottom-right {
+  z-index: 1;
+}
+
+/* ---------------------------------------------------------- */
+/* Panneau de contrôle (voyants avions / trains / vigilance)  */
+/* ---------------------------------------------------------- */
+
+.map-controls {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: max-content;
+}
+
+.map-toggle-btn {
+  --accent: #5db8ff;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px 10px 12px;
+  background: rgba(15, 29, 56, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: rgba(232, 230, 223, 0.75);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease,
+    color 0.2s ease, transform 0.15s ease;
+}
+
+.map-toggle-btn:hover {
+  background: rgba(15, 29, 56, 0.95);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #e8e6df;
+  transform: translateY(-1px);
+}
+
+.map-toggle-btn:active {
+  transform: translateY(0);
+}
+
+.map-toggle-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Voyant : gris éteint, s'allume dans la couleur de la couche une fois active */
+.map-toggle-btn__dot {
+  width: 7px;
+  height: 7px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: none;
+  transition: background-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.map-toggle-btn[data-active='true'] {
+  color: #e8e6df;
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.map-toggle-btn[data-active='true'] .map-toggle-btn__dot {
+  background: var(--accent);
+  box-shadow: 0 0 6px var(--accent), 0 0 1px var(--accent);
+}
+
+/* Teinte propre à chaque source de données, cohérente avec les icônes de la carte */
+.map-toggle-btn--vigilance {
+  --accent: #ff8c00; /* aligné sur le niveau orange de vigilance météo */
+}
+
+.map-toggle-btn--rail {
+  --accent: #c30e0e; /* rouge, distinct des avions/vigilance */
+}
+
+.map-toggle-btn--plane {
+  --accent: #7c70ff; /* aligné sur la teinte médiane des icônes avion */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-toggle-btn {
+    transition: none;
+  }
+  .map-toggle-btn:hover {
+    transform: none;
+  }
+}
+
+/* ---------------------------------------------------------- */
+/* Popups (avions / trains)                                   */
+/* ---------------------------------------------------------- */
+
+.maplibregl-popup-content {
+  color: #1a1a1a;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  border-radius: 10px;
+  padding: 14px 16px;
+  box-shadow: 0 8px 24px rgba(10, 22, 40, 0.35);
+}
+
+.maplibregl-popup-content strong {
+  color: #0a1628;
+  font-weight: 600;
+}
+
+.maplibregl-popup-content small {
+  color: #666;
+}
+
+.maplibregl-popup-tip {
+  border-top-color: #fff;
+}

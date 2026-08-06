@@ -1,4 +1,4 @@
-import api from "../api/apiBridge";
+import api from "../../../../api/apiBridge";
 
 export async function applyVigilanceColors(map: maplibregl.Map) {
   try {

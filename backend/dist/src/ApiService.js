@@ -195,6 +195,7 @@ let ApiService = class ApiService {
                             operator: display?.network,
                             departureTime: dep.stop_date_time?.departure_date_time,
                             stationName: stopPoint?.name,
+                            direction: display?.direction ?? null,
                             latitude: stopPoint?.coord?.lat ? parseFloat(stopPoint.coord.lat) : null,
                             longitude: stopPoint?.coord?.lon ? parseFloat(stopPoint.coord.lon) : null,
                         };

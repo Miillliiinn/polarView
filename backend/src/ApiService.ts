@@ -187,69 +187,70 @@ export class ApiService {
   private SncfCache: any = [];
   setSncfCache(newData: any) {this.SncfCache = newData;};
   getSncfCache() {return this.SncfCache;};
-async getSncfAPI() {
-  try {
-    const apiKey = this.configService.get('SNCF_API');
-    if (!apiKey) throw new Error("La clé SNCF_API est introuvable.");
+  async getSncfAPI() {
+    try {
+      const apiKey = this.configService.get('SNCF_API');
+      if (!apiKey) throw new Error("La clé SNCF_API est introuvable.");
 
-    const authHeader = 'Basic ' + Buffer.from(apiKey.trim() + ':').toString('base64');
+      const authHeader = 'Basic ' + Buffer.from(apiKey.trim() + ':').toString('base64');
 
-    const now = new Date();
-    const pad = (num: number) => String(num).padStart(2, '0');
-    const datetimeSncf = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}T${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+      const now = new Date();
+      const pad = (num: number) => String(num).padStart(2, '0');
+      const datetimeSncf = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}T${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
 
-    const garesMajeures = [
-      { id: 'stop_area:SNCF:87686006', name: 'Paris Gare de Lyon' },
-      { id: 'stop_area:SNCF:87384008', name: 'Paris Gare du Nord' },
-      { id: 'stop_area:SNCF:87682005', name: 'Paris Gare d\'Austerlitz' },
-      { id: 'stop_area:SNCF:87723163', name: 'Lyon Part-Dieu' },
-      { id: 'stop_area:SNCF:87751008', name: 'Marseille Saint-Charles' },
-      { id: 'stop_area:SNCF:87581009', name: 'Bordeaux Saint-Jean' },
-      { id: 'stop_area:SNCF:87286005', name: 'Lille Flandres' },
-      { id: 'stop_area:SNCF:87481002', name: 'Nantes' },
-      { id: 'stop_area:SNCF:87212027', name: 'Strasbourg Ville' },
-      { id: 'stop_area:SNCF:87611004', name: 'Toulouse Matabiau' }
-    ];
+      const garesMajeures = [
+        { id: 'stop_area:SNCF:87686006', name: 'Paris Gare de Lyon' },
+        { id: 'stop_area:SNCF:87384008', name: 'Paris Gare du Nord' },
+        { id: 'stop_area:SNCF:87682005', name: 'Paris Gare d\'Austerlitz' },
+        { id: 'stop_area:SNCF:87723163', name: 'Lyon Part-Dieu' },
+        { id: 'stop_area:SNCF:87751008', name: 'Marseille Saint-Charles' },
+        { id: 'stop_area:SNCF:87581009', name: 'Bordeaux Saint-Jean' },
+        { id: 'stop_area:SNCF:87286005', name: 'Lille Flandres' },
+        { id: 'stop_area:SNCF:87481002', name: 'Nantes' },
+        { id: 'stop_area:SNCF:87212027', name: 'Strasbourg Ville' },
+        { id: 'stop_area:SNCF:87611004', name: 'Toulouse Matabiau' }
+      ];
 
-    const promessesGares = garesMajeures.map(async (gare) => {
-      try {
-        const url = `https://api.sncf.com/v1/coverage/sncf/stop_areas/${gare.id}/departures?from_datetime=${datetimeSncf}&count=100`;
-        const res = await fetch(url, { headers: { 'Authorization': authHeader } });
-        
-        if (!res.ok) return []; // Si une gare plante, on renvoie un tableau vide pour ne pas bloquer les autres
-        
-        const data = await res.json();
-        return (data.departures || []).map((dep: any) => {
-          const display = dep.display_informations;
-          const stopPoint = dep.stop_point;
+      const promessesGares = garesMajeures.map(async (gare) => {
+        try {
+          const url = `https://api.sncf.com/v1/coverage/sncf/stop_areas/${gare.id}/departures?from_datetime=${datetimeSncf}&count=100`;
+          const res = await fetch(url, { headers: { 'Authorization': authHeader } });
+          
+          if (!res.ok) return [];
+          
+          const data = await res.json();
+          return (data.departures || []).map((dep: any) => {
+            const display = dep.display_informations;
+            const stopPoint = dep.stop_point;
 
-          return {
-            id: `${display?.headsign}-${dep.stop_date_time?.departure_date_time}`,
-            trainNumber: display?.headsign,
-            type: display?.commercial_mode,
-            operator: display?.network,
-            departureTime: dep.stop_date_time?.departure_date_time,
-            stationName: stopPoint?.name,
-            latitude: stopPoint?.coord?.lat ? parseFloat(stopPoint.coord.lat) : null,
-            longitude: stopPoint?.coord?.lon ? parseFloat(stopPoint.coord.lon) : null,
-          };
-        });
-      } catch (err) {
-        console.warn(`Impossible de récupérer les trains pour ${gare.name}`);
-        return [];
-      }
-    });
-    const résultatsParGare = await Promise.all(promessesGares);
-    const tousLesTrains = résultatsParGare.flat();
-    const trainsUniques = tousLesTrains.filter((train, index, self) =>
-      index === self.findIndex((t) => t.id === train.id)
-    );
-    return trainsUniques;
-  } catch (e) {
-    console.error("Error 'async getSncfAPI()' : ", e);
-    return [];
+            return {
+              id: `${display?.headsign}-${dep.stop_date_time?.departure_date_time}`,
+              trainNumber: display?.headsign,
+              type: display?.commercial_mode,
+              operator: display?.network,
+              departureTime: dep.stop_date_time?.departure_date_time,
+              stationName: stopPoint?.name,
+              direction: display?.direction ?? null,
+              latitude: stopPoint?.coord?.lat ? parseFloat(stopPoint.coord.lat) : null,
+              longitude: stopPoint?.coord?.lon ? parseFloat(stopPoint.coord.lon) : null,
+            };
+          });
+        } catch (err) {
+          console.warn(`Impossible de récupérer les trains pour ${gare.name}`);
+          return [];
+        }
+      });
+      const résultatsParGare = await Promise.all(promessesGares);
+      const tousLesTrains = résultatsParGare.flat();
+      const trainsUniques = tousLesTrains.filter((train, index, self) =>
+        index === self.findIndex((t) => t.id === train.id)
+      );
+      return trainsUniques;
+    } catch (e) {
+      console.error("Error 'async getSncfAPI()' : ", e);
+      return [];
+    }
   }
-}
 
 
 
