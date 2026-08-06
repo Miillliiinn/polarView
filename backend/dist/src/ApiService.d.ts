@@ -24,6 +24,10 @@ export declare class ApiService {
     setSncfCache(newData: any): void;
     getSncfCache(): any;
     getSncfAPI(): Promise<any[]>;
+    private gareCache;
+    setGareCache(newCache: any): void;
+    getGareCache(): any;
+    getGareAPI(): Promise<any>;
     private MeteofranceCache;
     setMeteofranceCache(newdata: any): void;
     getMeteofranceCache(): any;

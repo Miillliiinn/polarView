@@ -17,6 +17,7 @@ const meteofranceScript_1 = require("./script/meteofranceScript");
 const prisma_service_1 = require("../prisma/prisma.service");
 const googleScript_1 = require("./script/googleScript");
 const schedule_1 = require("@nestjs/schedule");
+const gareScript_1 = require("./script/gareScript");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -32,6 +33,7 @@ exports.AppModule = AppModule = __decorate([
             openskyScript_1.CallOpenskyAPI,
             meteofranceScript_1.CallMeteofranceAPI,
             sncfScript_1.CallSncfAPI,
+            gareScript_1.CallGareAPI,
             googleScript_1.CallGoogleAPI,
             prisma_service_1.PrismaService,
         ],

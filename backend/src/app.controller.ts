@@ -10,7 +10,7 @@ export class AppController {
   async getWebcams() {
     return await this.appService.getGoogleAPIFromDatabase();
   }
-
+// ---------------------------------------------------------------------
   @Get('planes')
   async getPlanes() {
     return await this.appService.getOpenskyCache();
@@ -20,12 +20,17 @@ export class AppController {
   async getPlanesPicture(@Param('icao24') icao24 : string) {
     return await this.appService.getPlaneSpotterApi(icao24);
   }
-
+// ---------------------------------------------------------------------
   @Get('trains')
   async getTrains() {
     return await this.appService.getSncfCache();
   }
 
+@Get('trains/gare')
+async getGare() {
+  return this.appService.getGareCache();
+}
+// ---------------------------------------------------------------------
   @Get('weather')
   async getWeather() {
     return await this.appService.getMeteofranceCache();

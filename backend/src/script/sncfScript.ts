@@ -20,6 +20,6 @@ export class CallSncfAPI implements OnModuleInit {
             const data = await this.ApiService.getSncfAPI();
             this.ApiService.setSncfCache(data);
             console.log("scnf request");
-        }, 150000); // 300 000 = 5 min
+        }, 1800000); // 1800000 = 30 min
     }
 }

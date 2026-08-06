@@ -8,6 +8,7 @@ import { CallMeteofranceAPI } from './script/meteofranceScript';
 import { PrismaService } from 'prisma/prisma.service';
 import { CallGoogleAPI } from './script/googleScript';
 import { ScheduleModule } from '@nestjs/schedule';
+import { CallGareAPI } from './script/gareScript';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     CallOpenskyAPI, 
     CallMeteofranceAPI, 
     CallSncfAPI,
+    CallGareAPI,
     CallGoogleAPI,
     PrismaService,
   ],

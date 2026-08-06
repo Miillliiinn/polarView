@@ -9,10 +9,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CallSncfAPI = void 0;
+exports.CallGareAPI = void 0;
 const common_1 = require("@nestjs/common");
 const ApiService_1 = require("../ApiService");
-let CallSncfAPI = class CallSncfAPI {
+let CallGareAPI = class CallGareAPI {
     ApiService;
     constructor(ApiService) {
         this.ApiService = ApiService;
@@ -20,22 +20,20 @@ let CallSncfAPI = class CallSncfAPI {
     ;
     async onModuleInit() {
         try {
-            const firstCache = await this.ApiService.getSncfAPI();
-            this.ApiService.setSncfCache(firstCache);
+            const data = await this.ApiService.getGareAPI();
+            this.ApiService.setGareCache(data);
+            console.log(data.features[0].properties);
+            console.log('🚉 SNCF (gare) Api request 🚉');
         }
         catch (e) {
-            console.error("Error lors du chargement du premier cache SNCF, : ", e);
+            console.error("Error lors du chargement du premier cache SNCF (gare), : ", e);
         }
-        const interval = setInterval(async () => {
-            const data = await this.ApiService.getSncfAPI();
-            this.ApiService.setSncfCache(data);
-            console.log("scnf request");
-        }, 1800000);
     }
 };
-exports.CallSncfAPI = CallSncfAPI;
-exports.CallSncfAPI = CallSncfAPI = __decorate([
+exports.CallGareAPI = CallGareAPI;
+exports.CallGareAPI = CallGareAPI = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [ApiService_1.ApiService])
-], CallSncfAPI);
-//# sourceMappingURL=sncfScript.js.map
+], CallGareAPI);
+;
+//# sourceMappingURL=gareScript.js.map

@@ -132,8 +132,7 @@ let ApiService = class ApiService {
             }
             const data = await apiResult.json();
             const state = data.states || [];
-            console.log("✈️ OpenSky Api request ✈️");
-            console.log('Headers:', Object.fromEntries(apiResult.headers.entries()));
+            console.log("✈️  OpenSky Api request ✈️");
             return state
                 .filter((f) => f[5] !== null && f[6] !== null)
                 .map((f) => ({
@@ -168,15 +167,26 @@ let ApiService = class ApiService {
             const datetimeSncf = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}T${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
             const garesMajeures = [
                 { id: 'stop_area:SNCF:87686006', name: 'Paris Gare de Lyon' },
-                { id: 'stop_area:SNCF:87384008', name: 'Paris Gare du Nord' },
-                { id: 'stop_area:SNCF:87682005', name: 'Paris Gare d\'Austerlitz' },
+                { id: 'stop_area:SNCF:87271007', name: 'Paris Gare du Nord' },
+                { id: 'stop_area:SNCF:87547000', name: 'Paris Gare d\'Austerlitz' },
                 { id: 'stop_area:SNCF:87723163', name: 'Lyon Part-Dieu' },
                 { id: 'stop_area:SNCF:87751008', name: 'Marseille Saint-Charles' },
                 { id: 'stop_area:SNCF:87581009', name: 'Bordeaux Saint-Jean' },
                 { id: 'stop_area:SNCF:87286005', name: 'Lille Flandres' },
                 { id: 'stop_area:SNCF:87481002', name: 'Nantes' },
                 { id: 'stop_area:SNCF:87212027', name: 'Strasbourg Ville' },
-                { id: 'stop_area:SNCF:87611004', name: 'Toulouse Matabiau' }
+                { id: 'stop_area:SNCF:87611004', name: 'Toulouse Matabiau' },
+                { id: 'stop_area:SNCF:87391003', name: 'Paris Montparnasse' },
+                { id: 'stop_area:SNCF:87113001', name: 'Paris Est' },
+                { id: 'stop_area:SNCF:87384008', name: 'Paris Saint-Lazare' },
+                { id: 'stop_area:SNCF:87471003', name: 'Rennes' },
+                { id: 'stop_area:SNCF:87756056', name: 'Nice Ville' },
+                { id: 'stop_area:SNCF:87773002', name: 'Montpellier Saint-Roch' },
+                { id: 'stop_area:SNCF:87755009', name: 'Toulon' },
+                { id: 'stop_area:SNCF:87141002', name: 'Nancy Ville' },
+                { id: 'stop_area:SNCF:87111849', name: 'Marne-la-Vallée Chessy' },
+                { id: 'stop_area:SNCF:87393702', name: 'Massy TGV' },
+                { id: 'stop_area:SNCF:87271494', name: 'Aéroport CDG2 TGV' }
             ];
             const promessesGares = garesMajeures.map(async (gare) => {
                 try {
@@ -213,6 +223,25 @@ let ApiService = class ApiService {
         }
         catch (e) {
             console.error("Error 'async getSncfAPI()' : ", e);
+            return [];
+        }
+    }
+    gareCache;
+    setGareCache(newCache) { this.gareCache = newCache; }
+    ;
+    getGareCache() { return this.gareCache; }
+    ;
+    async getGareAPI() {
+        try {
+            const apiResult = await fetch('https://ressources.data.sncf.com/api/explore/v2.1/catalog/datasets/gares-de-voyageurs/exports/geojson');
+            if (!apiResult.ok) {
+                throw new Error(`SNCF (gare) repond avec un statut : ${apiResult.status}`);
+            }
+            const data = await apiResult.json();
+            return data;
+        }
+        catch (e) {
+            console.error("Error 'async getGareAPI' : ", e);
             return [];
         }
     }

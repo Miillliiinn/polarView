@@ -1,10 +1,9 @@
 import maplibregl from 'maplibre-gl';
-import { createTrainIcon } from '../../icons/trainIcon';
+import { registerTrainIcons, DEFAULT_TRAIN_ICON_ID } from '../../icons/trainType';
 
 export function setupTrainsLayer(map: maplibregl.Map)
 {
-  const trainCanvas = createTrainIcon('#c30e0e', 64);
-  map.addImage('train-icon', trainCanvas, { pixelRatio: 2 });
+  registerTrainIcons(map);
 
   map.addSource('trains', {
     type: 'geojson',
@@ -16,7 +15,18 @@ export function setupTrainsLayer(map: maplibregl.Map)
     type: 'symbol',
     source: 'trains',
     layout: {
-      'icon-image': 'train-icon',
+      'icon-image': [
+        'match',
+        ['coalesce', ['get', 'type'], ''],
+        'RER', 'train-rer',
+        'TRANSILIEN', 'train-transilien',
+        'TGV INOUI', 'train-tgv-inoui',
+        'OUIGO', 'train-ouigo',
+        'BreizhGo', 'train-breizhgo',
+        'ZOU !', 'train-zou',
+        'FLUO', 'train-fluo',
+        DEFAULT_TRAIN_ICON_ID
+      ],
       'icon-size': 0.5,
       'icon-allow-overlap': true
     }
@@ -25,9 +35,22 @@ export function setupTrainsLayer(map: maplibregl.Map)
   map.on('click', 'trains-layer', (e) => {
     const feature = e.features?.[0];
     if (!feature) return;
+
+    const props = feature.properties ?? {};
+    const trainNumber = props.trainNumber || props.nb || 'Train inconnu';
+    const type = props.type || 'Type inconnu';
+    const direction = props.direction ? `Direction : <strong>${props.direction}</strong><br/>` : '';
+    const departureTime = props.departureTime
+      ? `Départ : <strong>${props.departureTime}</strong><br/>`
+      : '';
+
     new maplibregl.Popup()
       .setLngLat((feature.geometry as any).coordinates)
-      .setHTML(`<strong>${feature.properties?.name || 'Train inconnu'}</strong>`)
+      .setHTML(`
+        <strong>${trainNumber}</strong> — ${type}<br/>
+        ${direction}
+        ${departureTime}
+      `)
       .addTo(map);
   });
 
