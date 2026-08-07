@@ -1,5 +1,6 @@
 import maplibregl from 'maplibre-gl';
 import { registerTrainIcons, DEFAULT_TRAIN_ICON_ID } from '../../icons/trainType';
+import { globalCache } from '../../../../api/classCache';
 
 export function setupTrainsLayer(map: maplibregl.Map)
 {
@@ -61,16 +62,15 @@ export function setupTrainsLayer(map: maplibregl.Map)
     map.getCanvas().style.cursor = '';
   });
 }
-
-const RAIL_SOURCE_URL =
-  'https://ressources.data.sncf.com/api/explore/v2.1/catalog/datasets/formes-des-lignes-du-rfn/exports/geojson';
  
 export function setupRailLayer(map: maplibregl.Map){
   if (map.getSource('railways')) return;
  
   map.addSource('railways', {
     type: 'geojson',
-    data: RAIL_SOURCE_URL,
+    data: globalCache.getRailCache(),
+    buffer: 512,
+    tolerance: 0,
   });
  
   map.addLayer({

@@ -30,6 +30,11 @@ export class AppController {
 async getGare() {
   return this.appService.getGareCache();
 }
+
+@Get('trains/rail')
+async getRail() {
+  return this.appService.getRailCache();
+}
 // ---------------------------------------------------------------------
   @Get('weather')
   async getWeather() {

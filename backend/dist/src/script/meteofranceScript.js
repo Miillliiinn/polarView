@@ -14,22 +14,33 @@ const common_1 = require("@nestjs/common");
 const ApiService_1 = require("../ApiService");
 let CallMeteofranceAPI = class CallMeteofranceAPI {
     ApiService;
+    POLL_INTERVAL_MS = 1_800_000;
+    timeoutHandle = null;
     constructor(ApiService) {
         this.ApiService = ApiService;
     }
-    ;
     async onModuleInit() {
+        await this.refreshCache();
+        this.scheduleNextRefresh();
+    }
+    scheduleNextRefresh() {
+        this.timeoutHandle = setTimeout(async () => {
+            await this.refreshCache();
+            this.scheduleNextRefresh();
+        }, this.POLL_INTERVAL_MS);
+    }
+    async refreshCache() {
         try {
-            const firstCache = await this.ApiService.getMeteofranceAPI();
-            this.ApiService.setMeteofranceCache(firstCache);
+            const data = await this.ApiService.getMeteofranceAPI();
+            this.ApiService.setMeteofranceCache(data);
         }
         catch (e) {
-            console.error("Error lors du chargement du premier cache Meteo-France, : ", e);
+            console.error("Error lors du chargement du cache Meteo-France, : ", e);
         }
-        const interval = setInterval(async () => {
-            const data = this.ApiService.getMeteofranceAPI();
-            this.ApiService.setMeteofranceCache(data);
-        }, 1800000);
+    }
+    onModuleDestroy() {
+        if (this.timeoutHandle)
+            clearTimeout(this.timeoutHandle);
     }
 };
 exports.CallMeteofranceAPI = CallMeteofranceAPI;

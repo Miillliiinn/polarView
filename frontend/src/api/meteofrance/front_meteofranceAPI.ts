@@ -9,10 +9,11 @@ const meteoFranceAPI = async () => {
 
 export function MeteoFranceData()
 {  
+    let time : number = 100;
     useEffect(() => 
     {
         const interval = setInterval(() => {
-        meteoFranceAPI().then((data) => { globalCache.setMfCache(data); })}, 100);
+            meteoFranceAPI().then((data) => { globalCache.setMfCache(data); })}, time);
         return () => clearInterval(interval); 
     }, []);
     return;

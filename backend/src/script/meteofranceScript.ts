@@ -1,24 +1,43 @@
-import { Injectable, OnModuleInit } from "@nestjs/common";
+import { Injectable, OnModuleInit, OnModuleDestroy } from "@nestjs/common";
 import { ApiService } from "../ApiService";
 
 @Injectable()
-export class CallMeteofranceAPI implements OnModuleInit {
+export class CallMeteofranceAPI implements OnModuleInit, OnModuleDestroy
+{
+  private readonly POLL_INTERVAL_MS = 1_800_000; // 30 min
+  private timeoutHandle: NodeJS.Timeout | null = null;
 
-    constructor(private readonly ApiService: ApiService) {};
+  constructor(private readonly ApiService: ApiService) {}
 
-    async onModuleInit() {
+  async onModuleInit()
+  {
+        await this.refreshCache();
+        this.scheduleNextRefresh();
+    }
+
+    private scheduleNextRefresh()
+    {
+        this.timeoutHandle = setTimeout(async () => {
+            await this.refreshCache();
+            this.scheduleNextRefresh();
+        }, this.POLL_INTERVAL_MS);
+    }
+
+    private async refreshCache()
+    {
         try
         {
-            const firstCache = await this.ApiService.getMeteofranceAPI();
-            this.ApiService.setMeteofranceCache(firstCache);
+            const data = await this.ApiService.getMeteofranceAPI();
+            this.ApiService.setMeteofranceCache(data);
         }
         catch (e)
         {
-            console.error("Error lors du chargement du premier cache Meteo-France, : ", e);
+            console.error("Error lors du chargement du cache Meteo-France, : ", e);
         }
-        const interval: NodeJS.Timeout = setInterval(async () => {
-            const data = this.ApiService.getMeteofranceAPI();
-            this.ApiService.setMeteofranceCache(data);
-        }, 1800000);
+    }
+
+    onModuleDestroy()
+    {
+        if (this.timeoutHandle) clearTimeout(this.timeoutHandle);
     }
 }

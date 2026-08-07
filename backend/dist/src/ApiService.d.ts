@@ -28,6 +28,10 @@ export declare class ApiService {
     setGareCache(newCache: any): void;
     getGareCache(): any;
     getGareAPI(): Promise<any>;
+    private railCache;
+    setRailCache(newCache: any): void;
+    getRailCache(): any;
+    getRailAPI(): Promise<any>;
     private MeteofranceCache;
     setMeteofranceCache(newdata: any): void;
     getMeteofranceCache(): any;

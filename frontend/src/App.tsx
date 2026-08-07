@@ -7,6 +7,8 @@ import { TrainsData } from './api/sncf/front_sncfAPI';
 import { PlanesData } from './api/opensky/front_openskyAPI';
 import ShowAllMeteoFranceData from './api/meteofrance/showData';
 import { MeteoFranceData } from './api/meteofrance/front_meteofranceAPI';
+import { GareData } from './api/sncf/gare/front_gareAPI';
+import { RailData } from './api/sncf/rail/rail';
 
 function AppContent()
 {
@@ -41,6 +43,8 @@ function App()
   PlanesData();
   TrainsData();
   MeteoFranceData();
+  GareData();
+  RailData();
 
   return (
     <BrowserRouter>

@@ -18,6 +18,7 @@ const prisma_service_1 = require("../prisma/prisma.service");
 const googleScript_1 = require("./script/googleScript");
 const schedule_1 = require("@nestjs/schedule");
 const gareScript_1 = require("./script/gareScript");
+const railScript_1 = require("./script/railScript");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -34,6 +35,7 @@ exports.AppModule = AppModule = __decorate([
             meteofranceScript_1.CallMeteofranceAPI,
             sncfScript_1.CallSncfAPI,
             gareScript_1.CallGareAPI,
+            railScript_1.CallRailAPI,
             googleScript_1.CallGoogleAPI,
             prisma_service_1.PrismaService,
         ],

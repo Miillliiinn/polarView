@@ -9,10 +9,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CallGareAPI = void 0;
+exports.CallRailAPI = void 0;
 const common_1 = require("@nestjs/common");
 const ApiService_1 = require("../ApiService");
-let CallGareAPI = class CallGareAPI {
+let CallRailAPI = class CallRailAPI {
     ApiService;
     POLL_INTERVAL_MS = 600_000_000;
     timeoutHandle = null;
@@ -31,12 +31,12 @@ let CallGareAPI = class CallGareAPI {
     }
     async refreshCache() {
         try {
-            const data = await this.ApiService.getGareAPI();
-            this.ApiService.setGareCache(data);
-            console.log('🚉 SNCF (gare) Api request 🚉');
+            const apiResult = await this.ApiService.getRailAPI();
+            this.ApiService.setRailCache(apiResult);
+            console.log('🛤️  SNCF (rail) Api request 🛤️');
         }
         catch (e) {
-            console.error("Error lors du chargement du cache SNCF (gare), : ", e);
+            console.error("Error lors du chargement du cache SNCF (rail), : ", e);
         }
     }
     onModuleDestroy() {
@@ -44,9 +44,9 @@ let CallGareAPI = class CallGareAPI {
             clearTimeout(this.timeoutHandle);
     }
 };
-exports.CallGareAPI = CallGareAPI;
-exports.CallGareAPI = CallGareAPI = __decorate([
+exports.CallRailAPI = CallRailAPI;
+exports.CallRailAPI = CallRailAPI = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [ApiService_1.ApiService])
-], CallGareAPI);
-//# sourceMappingURL=gareScript.js.map
+], CallRailAPI);
+//# sourceMappingURL=railScript.js.map

@@ -270,7 +270,8 @@ export class ApiService {
     try
     {
       const apiResult = await fetch('https://ressources.data.sncf.com/api/explore/v2.1/catalog/datasets/gares-de-voyageurs/exports/geojson')
-      if (!apiResult.ok) {
+      if (!apiResult.ok)
+      {
         throw new Error(`SNCF (gare) repond avec un statut : ${apiResult.status}`)
       }
       const data = await apiResult.json();
@@ -279,9 +280,29 @@ export class ApiService {
     catch (e)
     {
       console.error("Error 'async getGareAPI' : ", e);
-      return [];
+      return { type: 'FeatureCollection', features: [] };
     }
   }
+
+  private railCache: any;
+  setRailCache(newCache: any){this.railCache = newCache;};
+  getRailCache(){return this.railCache};
+  async getRailAPI()
+  {
+    try
+    {
+      const apiResult = await fetch(`https://ressources.data.sncf.com/api/explore/v2.1/catalog/datasets/formes-des-lignes-du-rfn/exports/geojson`);
+      if (!apiResult.ok)
+        throw new Error(`SNCF (rail) repond avec un statut : ${apiResult.status}`);
+      const data = await apiResult.json();
+      return data;
+    }
+    catch (e)
+    {
+      console.error("Error 'async getGareAPI' : ", e);
+      return [];
+    }
+  };
 
 
 

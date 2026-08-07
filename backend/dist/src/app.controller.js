@@ -35,6 +35,9 @@ let AppController = class AppController {
     async getGare() {
         return this.appService.getGareCache();
     }
+    async getRail() {
+        return this.appService.getRailCache();
+    }
     async getWeather() {
         return await this.appService.getMeteofranceCache();
     }
@@ -71,6 +74,12 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], AppController.prototype, "getGare", null);
+__decorate([
+    (0, common_1.Get)('trains/rail'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], AppController.prototype, "getRail", null);
 __decorate([
     (0, common_1.Get)('weather'),
     __metadata("design:type", Function),

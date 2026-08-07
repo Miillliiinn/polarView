@@ -1,6 +1,7 @@
 import maplibregl from 'maplibre-gl';
 import api from '../../../../api/apiBridge';
 import { createPlaneIcon } from '../../icons/planeIcon';
+import { globalCache } from '../../../../api/classCache';
 
 export function setupPlanesLayer(map: maplibregl.Map) {
   map.addImage('plane-ground', createPlaneIcon('#989898', 96));
@@ -43,8 +44,11 @@ export function setupPlanesLayer(map: maplibregl.Map) {
     const icao24 = feature.properties?.icao24;
     const callsign = feature.properties?.callsign || 'Vol inconnu';
     const altitude = feature.properties?.altitude ?? '?';
+    const cap = feature.properties?.heading || null;
     const coordinates = (feature.geometry as any).coordinates;
-
+    const cache = globalCache.getOpCache();
+    const country = cache.find((f) => f.icao24 === icao24)?.country;
+    const vel = cache.find((f) => f.icao24 === icao24)?.velocity;
     const popup = new maplibregl.Popup()
       .setLngLat(coordinates)
       .setHTML(`
@@ -60,9 +64,12 @@ export function setupPlanesLayer(map: maplibregl.Map) {
       const photo = res.data;
       popup.setHTML(`
           Callsign: <strong>${callsign}</strong><br/>
+          From: <strong>${country}</strong></br>
           Altitude: <strong>${altitude} m</strong><br/>
+          Cap: <strong>${cap} °C</strong></br>
+          Vitesse: <strong>${vel} km</strong></br>
           ${photo?.thumbnailSrc
-              ? `<img src="${photo.thumbnailSrc}" width="220" style="border-radius:4px;margin-top:4px;" /><br/><small>${photo.photographer || 'Inconnu'}</small>`
+              ? `<img src="${photo.thumbnailSrc}" width="210" style="border-radius:4px;margin-top:4px;" /><br/><small><small>🖼️ ${photo.photographer || 'Inconnu'}</small></small>`
               : `<em>Aucune photo disponible</em>`
           }
       `);

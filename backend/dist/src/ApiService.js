@@ -242,9 +242,28 @@ let ApiService = class ApiService {
         }
         catch (e) {
             console.error("Error 'async getGareAPI' : ", e);
+            return { type: 'FeatureCollection', features: [] };
+        }
+    }
+    railCache;
+    setRailCache(newCache) { this.railCache = newCache; }
+    ;
+    getRailCache() { return this.railCache; }
+    ;
+    async getRailAPI() {
+        try {
+            const apiResult = await fetch(`https://ressources.data.sncf.com/api/explore/v2.1/catalog/datasets/formes-des-lignes-du-rfn/exports/geojson`);
+            if (!apiResult.ok)
+                throw new Error(`SNCF (rail) repond avec un statut : ${apiResult.status}`);
+            const data = await apiResult.json();
+            return data;
+        }
+        catch (e) {
+            console.error("Error 'async getGareAPI' : ", e);
             return [];
         }
     }
+    ;
     MeteofranceCache = [];
     setMeteofranceCache(newdata) { this.MeteofranceCache = newdata; }
     ;

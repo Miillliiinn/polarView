@@ -14,22 +14,33 @@ const common_1 = require("@nestjs/common");
 const ApiService_1 = require("../ApiService");
 let CallOpenskyAPI = class CallOpenskyAPI {
     ApiService;
+    POLL_INTERVAL_MS = 70_000;
+    timeoutHandle = null;
     constructor(ApiService) {
         this.ApiService = ApiService;
     }
-    ;
     async onModuleInit() {
+        await this.refreshCache();
+        this.scheduleNextRefresh();
+    }
+    scheduleNextRefresh() {
+        this.timeoutHandle = setTimeout(async () => {
+            await this.refreshCache();
+            this.scheduleNextRefresh();
+        }, this.POLL_INTERVAL_MS);
+    }
+    async refreshCache() {
         try {
-            const firstCache = await this.ApiService.getOpenskyAPI();
-            this.ApiService.setOpenskyCache(firstCache);
-        }
-        catch (e) {
-            console.error("Error lors du chargement du premier cache Opensky, : ", e);
-        }
-        const interval = setInterval(async () => {
             const data = await this.ApiService.getOpenskyAPI();
             this.ApiService.setOpenskyCache(data);
-        }, 70000);
+        }
+        catch (e) {
+            console.error("Error lors du chargement du cache Opensky, : ", e);
+        }
+    }
+    onModuleDestroy() {
+        if (this.timeoutHandle)
+            clearTimeout(this.timeoutHandle);
     }
 };
 exports.CallOpenskyAPI = CallOpenskyAPI;

@@ -1,25 +1,45 @@
-import { Injectable, OnModuleInit } from "@nestjs/common";
+import { Injectable, OnModuleInit, OnModuleDestroy } from "@nestjs/common";
 import { ApiService } from "../ApiService";
 
 @Injectable()
-export class CallOpenskyAPI implements OnModuleInit {
+export class CallOpenskyAPI implements OnModuleInit, OnModuleDestroy
+{
+    private readonly POLL_INTERVAL_MS = 70_000; // 1 min 10s
 
-    constructor(private readonly ApiService: ApiService) {};
+    private timeoutHandle: NodeJS.Timeout | null = null;
 
-    async onModuleInit() {
+    constructor(private readonly ApiService: ApiService) {}
+
+    async onModuleInit()
+    {
+        await this.refreshCache();
+        this.scheduleNextRefresh();
+    }
+
+    private scheduleNextRefresh()
+    {
+        this.timeoutHandle = setTimeout(async () => {
+        await this.refreshCache();
+        this.scheduleNextRefresh();
+        }, this.POLL_INTERVAL_MS);
+    }
+
+    private async refreshCache()
+    {
         try
         {
-            const firstCache = await this.ApiService.getOpenskyAPI();
-            this.ApiService.setOpenskyCache(firstCache);
+            const data = await this.ApiService.getOpenskyAPI();
+            this.ApiService.setOpenskyCache(data);
         }
         catch (e)
         {
-             console.error("Error lors du chargement du premier cache Opensky, : ", e);
+            console.error("Error lors du chargement du cache Opensky, : ", e);
         }
-        const interval: NodeJS.Timeout = setInterval( async () => {
-            const data = await this.ApiService.getOpenskyAPI()
-            this.ApiService.setOpenskyCache(data);
-        }, 70000); // 70000
+    }
+
+    onModuleDestroy()
+    {
+        if (this.timeoutHandle) clearTimeout(this.timeoutHandle);
     }
 }
 

@@ -1,15 +1,14 @@
 import maplibregl from 'maplibre-gl';
-
-const GARE_DATA_FRANCE =
-  'https://ressources.data.sncf.com/api/explore/v2.1/catalog/datasets/gares-de-voyageurs/exports/geojson';
+import { globalCache } from '../../../../api/classCache';
 
 export function setupGareLayer(map: maplibregl.Map)
 {
+  //console.log("setupGareLayer +");
   if (map.getSource('gare')) return;
 
   map.addSource('gare', {
     type: 'geojson',
-    data: GARE_DATA_FRANCE
+    data: globalCache.getGareCache(),
   });
 
   map.addLayer({
@@ -30,7 +29,7 @@ export function setupGareLayer(map: maplibregl.Map)
   map.on('click', 'gare-layer', (e) => {
     const feature = e.features?.[0];
     if (!feature) return;
-    console.log(feature.properties);
+    //console.log(feature.properties);
     new maplibregl.Popup()
       .setLngLat((feature.geometry as any).coordinates)
       .setHTML(`<strong>${feature.properties?.nom || 'e'}</strong>`)

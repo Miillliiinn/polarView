@@ -1,10 +1,10 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from "@nestjs/common";
-import { ApiService } from "../ApiService";
+import { ApiService } from "src/ApiService";
 
 @Injectable()
-export class CallGareAPI implements OnModuleInit, OnModuleDestroy
+export class CallRailAPI implements OnModuleInit, OnModuleDestroy
 {
-    private readonly POLL_INTERVAL_MS = 600_000_000; // 7 jour
+    private readonly POLL_INTERVAL_MS = 600_000_000; // 7 jours
     private timeoutHandle: NodeJS.Timeout | null = null;
 
     constructor(private readonly ApiService: ApiService) {}
@@ -27,13 +27,14 @@ export class CallGareAPI implements OnModuleInit, OnModuleDestroy
     {
         try
         {
-        const data = await this.ApiService.getGareAPI();
-        this.ApiService.setGareCache(data);
-        console.log('🚉 SNCF (gare) Api request 🚉');
+            const apiResult = await this.ApiService.getRailAPI();
+            this.ApiService.setRailCache(apiResult);
+            console.log('🛤️  SNCF (rail) Api request 🛤️');
         }
-        catch (e)
+        catch
+        (e)
         {
-        console.error("Error lors du chargement du cache SNCF (gare), : ", e);
+            console.error("Error lors du chargement du cache SNCF (rail), : ", e);
         }
     }
 

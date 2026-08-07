@@ -22,5 +22,6 @@ export declare class AppController {
     } | null>;
     getTrains(): Promise<any>;
     getGare(): Promise<any>;
+    getRail(): Promise<any>;
     getWeather(): Promise<any>;
 }
