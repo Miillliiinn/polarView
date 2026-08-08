@@ -133,6 +133,7 @@ let ApiService = class ApiService {
             const data = await apiResult.json();
             const state = data.states || [];
             console.log("✈️  OpenSky Api request ✈️");
+            console.log('Headers:', Object.fromEntries(apiResult.headers.entries()));
             return state
                 .filter((f) => f[5] !== null && f[6] !== null)
                 .map((f) => ({

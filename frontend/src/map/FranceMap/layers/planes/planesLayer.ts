@@ -64,10 +64,10 @@ export function setupPlanesLayer(map: maplibregl.Map) {
       const photo = res.data;
       popup.setHTML(`
           Callsign: <strong>${callsign}</strong><br/>
-          From: <strong>${country}</strong></br>
+          Country: <strong>${country}</strong></br>
           Altitude: <strong>${altitude} m</strong><br/>
-          Cap: <strong>${cap} °C</strong></br>
-          Vitesse: <strong>${vel} km</strong></br>
+          Cap: <strong>${cap} °</strong></br>
+          Vitesse: <strong>${(vel * 3.6).toFixed(3)} km/h</strong></br>
           ${photo?.thumbnailSrc
               ? `<img src="${photo.thumbnailSrc}" width="210" style="border-radius:4px;margin-top:4px;" /><br/><small><small>🖼️ ${photo.photographer || 'Inconnu'}</small></small>`
               : `<em>Aucune photo disponible</em>`

@@ -156,7 +156,7 @@ export class ApiService {
       const state = data.states || [];
 
       console.log("✈️  OpenSky Api request ✈️")
-      //console.log('Headers:', Object.fromEntries(apiResult.headers.entries()))
+      console.log('Headers:', Object.fromEntries(apiResult.headers.entries()))
       return state
         .filter((f: any) => f[5] !== null && f[6] !== null)
         .map((f: any) => ({
