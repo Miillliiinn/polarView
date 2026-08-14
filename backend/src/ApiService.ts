@@ -139,7 +139,7 @@ export class ApiService {
     try {
       const token = await this.getAccessToken();
 
-      const url = `https://opensky-network.org/api/states/all?lamin=37.5&lamax=55.5&lomin=-9.0&lomax=13.0`; // lamin=41.0&lamax=51.0&lomin=-13.0&lomax=21.0
+      const url = `https://opensky-network.org/api/states/all?lamin=37.5&lamax=55.5&lomin=-9.0&lomax=13.0`;
 
       const apiResult = await fetch(url, {
         headers: {
@@ -156,7 +156,7 @@ export class ApiService {
       const state = data.states || [];
 
       console.log("✈️  OpenSky Api request ✈️")
-      console.log('Headers:', Object.fromEntries(apiResult.headers.entries()))
+      //console.log('Headers:', Object.fromEntries(apiResult.headers.entries()))
       return state
         .filter((f: any) => f[5] !== null && f[6] !== null)
         .map((f: any) => ({
@@ -187,8 +187,10 @@ export class ApiService {
   private SncfCache: any = [];
   setSncfCache(newData: any) {this.SncfCache = newData;};
   getSncfCache() {return this.SncfCache;};
-  async getSncfAPI() {
-    try {
+  async getSncfAPI()
+  {
+    try
+    {
       const apiKey = this.configService.get('SNCF_API');
       if (!apiKey) throw new Error("La clé SNCF_API est introuvable.");
 
@@ -245,7 +247,9 @@ export class ApiService {
               longitude: stopPoint?.coord?.lon ? parseFloat(stopPoint.coord.lon) : null,
             };
           });
-        } catch (err) {
+        }
+        catch (err)
+        {
           console.warn(`Impossible de récupérer les trains pour ${gare.name}`);
           return [];
         }
@@ -256,7 +260,9 @@ export class ApiService {
         index === self.findIndex((t) => t.id === train.id)
       );
       return trainsUniques;
-    } catch (e) {
+    }
+    catch (e)
+    {
       console.error("Error 'async getSncfAPI()' : ", e);
       return [];
     }

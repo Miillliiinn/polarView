@@ -1,4 +1,5 @@
 import { ApiService } from './ApiService';
+import { AisStreamAPI, ShipPosition } from './script/aisstreamScript';
 export declare class AppController {
     private readonly appService;
     constructor(appService: ApiService);
@@ -24,4 +25,9 @@ export declare class AppController {
     getGare(): Promise<any>;
     getRail(): Promise<any>;
     getWeather(): Promise<any>;
+}
+export declare class AisStreamController {
+    private readonly aisService;
+    constructor(aisService: AisStreamAPI);
+    getShips(): ShipPosition[];
 }

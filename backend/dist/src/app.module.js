@@ -10,6 +10,7 @@ exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const app_controller_1 = require("./app.controller");
 const ApiService_1 = require("./ApiService");
+const aisstreamScript_1 = require("./script/aisstreamScript");
 const config_1 = require("@nestjs/config");
 const openskyScript_1 = require("./script/openskyScript");
 const sncfScript_1 = require("./script/sncfScript");
@@ -28,7 +29,7 @@ exports.AppModule = AppModule = __decorate([
             config_1.ConfigModule.forRoot({ isGlobal: true }),
             schedule_1.ScheduleModule.forRoot(),
         ],
-        controllers: [app_controller_1.AppController],
+        controllers: [app_controller_1.AppController, app_controller_1.AisStreamController,],
         providers: [
             ApiService_1.ApiService,
             openskyScript_1.CallOpenskyAPI,
@@ -38,6 +39,7 @@ exports.AppModule = AppModule = __decorate([
             railScript_1.CallRailAPI,
             googleScript_1.CallGoogleAPI,
             prisma_service_1.PrismaService,
+            aisstreamScript_1.AisStreamAPI,
         ],
     })
 ], AppModule);

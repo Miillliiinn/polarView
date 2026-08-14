@@ -9,7 +9,7 @@ const meteoFranceAPI = async () => {
 
 export function MeteoFranceData()
 {  
-    let time : number = 100;
+    let time : number = 10000;
     useEffect(() => 
     {
         const interval = setInterval(() => {

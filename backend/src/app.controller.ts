@@ -1,10 +1,12 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { ApiService } from './ApiService';
+import { AisStreamAPI, ShipPosition } from './script/aisstreamScript';
 
 @Controller()
-export class AppController {
+export class AppController
+{
 
-  constructor(private readonly appService: ApiService) {}
+  constructor(private readonly appService: ApiService) {};
 
   @Get('webcams')
   async getWebcams() {
@@ -39,6 +41,17 @@ async getRail() {
   @Get('weather')
   async getWeather() {
     return await this.appService.getMeteofranceCache();
+  }
+}
+
+@Controller()
+export class AisStreamController 
+{
+  constructor(private readonly aisService: AisStreamAPI) {};
+
+  @Get('ships')
+  getShips(): ShipPosition[] {
+    return this.aisService.getAllShips();
   }
 }
 

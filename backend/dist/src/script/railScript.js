@@ -20,6 +20,8 @@ let CallRailAPI = class CallRailAPI {
         this.ApiService = ApiService;
     }
     async onModuleInit() {
+        if (process.env.RUN_TRAINS_API === 'false')
+            return;
         await this.refreshCache();
         this.scheduleNextRefresh();
     }

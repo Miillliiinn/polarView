@@ -11,6 +11,8 @@ export class CallRailAPI implements OnModuleInit, OnModuleDestroy
 
     async onModuleInit()
     {
+        if (process.env.RUN_TRAINS_API === 'false')
+            return ;
         await this.refreshCache();
         this.scheduleNextRefresh();
     }

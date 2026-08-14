@@ -9,6 +9,8 @@ import ShowAllMeteoFranceData from './api/meteofrance/showData';
 import { MeteoFranceData } from './api/meteofrance/front_meteofranceAPI';
 import { GareData } from './api/sncf/gare/front_gareAPI';
 import { RailData } from './api/sncf/rail/rail';
+import { AisStreamData } from './api/aisstream/front_aisStreamAPI';
+import ShowAllShipsData from './api/aisstream/showData';
 
 function AppContent()
 {
@@ -21,6 +23,7 @@ function AppContent()
         <Link to="/">France</Link>
         <Link to="/avions">avions</Link>
         <Link to="/trains">trains</Link>
+        <Link to="/bateaux">bateaux</Link>
         <Link to="/meteo">meteo</Link>
       </nav>
 
@@ -33,6 +36,7 @@ function AppContent()
         <Route path="/avions" element={<ShowAllPlanesData />} />
         <Route path="/trains" element={<ShowAllTrainsData />} />
         <Route path="/meteo" element={<ShowAllMeteoFranceData />} />
+        <Route path="/bateaux" element={<ShowAllShipsData/>}></Route>
       </Routes>
     </>
   );
@@ -45,6 +49,7 @@ function App()
   MeteoFranceData();
   GareData();
   RailData();
+  AisStreamData();
 
   return (
     <BrowserRouter>

@@ -33,7 +33,7 @@ let CallGoogleAPI = class CallGoogleAPI {
     }
     testCityIndex = 0;
     async onModuleInit() {
-        if (process.env.RUN_TEST_ON_BOOT === 'true') {
+        if (process.env.RUN_WEBCAM_API === 'true') {
             const maxExecutions = 37;
             let executionCount = 0;
             const intervalId = setInterval(async () => {

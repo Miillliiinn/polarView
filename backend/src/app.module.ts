@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
+import { AppController, AisStreamController } from './app.controller';
 import { ApiService } from './ApiService';
+import { AisStreamAPI } from './script/aisstreamScript';
 import { ConfigModule } from '@nestjs/config';
 import { CallOpenskyAPI } from './script/openskyScript';
 import { CallSncfAPI } from './script/sncfScript'
@@ -16,7 +17,7 @@ import { CallRailAPI } from './script/railScript';
     ConfigModule.forRoot({ isGlobal: true }),
     ScheduleModule.forRoot(),
   ],
-  controllers: [AppController],
+  controllers: [AppController, AisStreamController, ],
   providers: [
     ApiService,
     CallOpenskyAPI, 
@@ -26,6 +27,7 @@ import { CallRailAPI } from './script/railScript';
     CallRailAPI,
     CallGoogleAPI,
     PrismaService,
+    AisStreamAPI,
   ],
 })
 export class AppModule {}

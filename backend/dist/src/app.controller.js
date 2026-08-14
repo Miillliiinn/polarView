@@ -12,14 +12,16 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AppController = void 0;
+exports.AisStreamController = exports.AppController = void 0;
 const common_1 = require("@nestjs/common");
 const ApiService_1 = require("./ApiService");
+const aisstreamScript_1 = require("./script/aisstreamScript");
 let AppController = class AppController {
     appService;
     constructor(appService) {
         this.appService = appService;
     }
+    ;
     async getWebcams() {
         return await this.appService.getGoogleAPIFromDatabase();
     }
@@ -90,4 +92,25 @@ exports.AppController = AppController = __decorate([
     (0, common_1.Controller)(),
     __metadata("design:paramtypes", [ApiService_1.ApiService])
 ], AppController);
+let AisStreamController = class AisStreamController {
+    aisService;
+    constructor(aisService) {
+        this.aisService = aisService;
+    }
+    ;
+    getShips() {
+        return this.aisService.getAllShips();
+    }
+};
+exports.AisStreamController = AisStreamController;
+__decorate([
+    (0, common_1.Get)('ships'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Array)
+], AisStreamController.prototype, "getShips", null);
+exports.AisStreamController = AisStreamController = __decorate([
+    (0, common_1.Controller)(),
+    __metadata("design:paramtypes", [aisstreamScript_1.AisStreamAPI])
+], AisStreamController);
 //# sourceMappingURL=app.controller.js.map

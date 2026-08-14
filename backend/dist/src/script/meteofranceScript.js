@@ -20,6 +20,8 @@ let CallMeteofranceAPI = class CallMeteofranceAPI {
         this.ApiService = ApiService;
     }
     async onModuleInit() {
+        if (process.env.RUN_VIGILANCE_API === 'false')
+            return;
         await this.refreshCache();
         this.scheduleNextRefresh();
     }

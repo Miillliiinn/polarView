@@ -1,12 +1,16 @@
-import { Injectable, OnModuleInit } from "@nestjs/common";
+import { Injectable, OnModuleInit, OnModuleDestroy } from "@nestjs/common";
 import { ApiService } from "../ApiService";
 
 @Injectable()
-export class CallSncfAPI implements OnModuleInit {
-
+export class CallSncfAPI implements OnModuleInit, OnModuleDestroy
+{
     constructor(private readonly ApiService: ApiService) {};
+    private timeoutHandle: NodeJS.Timeout | null = null;
 
-    async onModuleInit() {
+    async onModuleInit()
+    {
+        if (process.env.RUN_TRAINS_API === 'false')
+            return;
         try
         {
             const firstCache = await this.ApiService.getSncfAPI();
@@ -16,10 +20,15 @@ export class CallSncfAPI implements OnModuleInit {
         {
              console.error("Error lors du chargement du premier cache SNCF, : ", e);
         }
-        const interval: NodeJS.Timeout = setInterval( async () => {
+        this.timeoutHandle = setInterval( async () => {
             const data = await this.ApiService.getSncfAPI();
             this.ApiService.setSncfCache(data);
             console.log("scnf request");
         }, 1800000); // 1800000 = 30 min
+    }
+
+    onModuleDestroy()
+    {
+        if (this.timeoutHandle) clearTimeout(this.timeoutHandle);
     }
 }
