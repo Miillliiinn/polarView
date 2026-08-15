@@ -1,86 +1,424 @@
-/* Reset de base */
-* {
-  box-sizing: border-box;
+/* ==========================================================================
+   Design tokens — poste de contrôle nocturne : navy profond, vert radar,
+   accent ambre pour les alertes/liens actifs, typo technique.
+   ========================================================================== */
+:root {
+  --bg-deep: #060e1c;
+  --bg-panel: #0f1d38;
+  --bg-panel-soft: rgba(15, 29, 56, 0.55);
+  --line: rgba(255, 255, 255, 0.1);
+  --line-soft: rgba(255, 255, 255, 0.06);
+
+  --accent-radar: #7a9d6f;
+  --accent-radar-bright: #93c283;
+  --accent-amber: #e8a33d;
+
+  --text-primary: #f2f0e8;
+  --text-muted: #b8c4d9;
+  --text-dim: #66799c;
+
+  --font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'SFMono-Regular', Menlo, monospace;
+
+  --radius-lg: 16px;
+  --radius-md: 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+.app-shell {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 15% -10%, rgba(122, 157, 111, 0.08), transparent 45%),
+    var(--bg-deep);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+}
+
+/* ==========================================================================
+   Navigation — bandeau de contrôle
+   ========================================================================== */
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(6, 14, 28, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.nav-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.nav-brand-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-radar-bright);
+  box-shadow: 0 0 0 3px rgba(122, 157, 111, 0.18);
+  animation: pulse-dot 2.4s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.nav-link:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-link.active {
+  color: var(--bg-deep);
+  background: var(--accent-radar-bright);
+  border-color: var(--accent-radar-bright);
+  font-weight: 600;
+}
+
+.nav-link:focus-visible,
+.close-expanded-btn:focus-visible,
+.expand-badge:focus-visible {
+  outline: 2px solid var(--accent-amber);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Page d'accueil / vue France
+   ========================================================================== */
+.home-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 24px 56px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  animation: fade-up 0.5s ease both;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.home-page.is-expanded {
+  padding: 0;
+  max-width: 100vw;
+  gap: 0;
+  animation: none;
+}
+
+/* Masquée (pas démontée) quand on quitte la page d'accueil : la carte reste
+   en mémoire et n'est jamais rechargée en changeant d'onglet. */
+.home-page.is-hidden-route {
+  display: none;
+}
+
+/* Section Présentation */
+.project-intro {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-radar-bright);
+  margin: 0 0 14px;
+}
+
+.project-intro h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 3.4vw, 2.6rem);
+  font-weight: 600;
+  line-height: 1.2;
+  color: #ffffff;
+  margin: 0 0 14px;
+  letter-spacing: -0.01em;
+}
+
+.intro-lead {
+  font-size: 0.98rem;
+  line-height: 1.65;
+  color: var(--text-muted);
+  margin: 0 0 22px;
+}
+
+.source-tags {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
   margin: 0;
   padding: 0;
 }
 
-html, body, #root {
-  height: 100%;
-  width: 100%;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: radial-gradient(circle at 20% -10%, #14264a 0%, #0a1628 45%, #060e1c 100%);
-  color: #e8e6df;
-  -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+.source-tags li {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  padding: 5px 11px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
 }
 
-/* Navigation */
-nav {
-  display: flex;
-  gap: 8px;
-  place-content: center;
-  align-items: center;
-  padding: 14px 24px;
-  width: 100%;
-  background: rgba(15, 29, 56, 0.75);
-  backdrop-filter: blur(14px) saturate(140%);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-}
-
-nav a {
+/* ==========================================================================
+   Structure du Wrapper de la Carte
+   ========================================================================== */
+.map-wrapper {
   position: relative;
-  color: #b8c4d9;
-  text-decoration: none;
-  font-size: 0.95rem;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  padding: 9px 16px;
-  border-radius: 8px;
-  transition: color 0.25s ease, background-color 0.25s ease, transform 0.2s ease;
-}
-
-nav a:hover {
-  color: #ffffff;
-  background-color: rgba(255, 255, 255, 0.07);
-  transform: translateY(-1px);
-}
-
-nav a.active,
-nav a[aria-current="page"] {
-  color: #9fc491;
-  background: linear-gradient(180deg, rgba(122, 157, 111, 0.18), rgba(122, 157, 111, 0.08));
-  box-shadow: inset 0 0 0 1px rgba(122, 157, 111, 0.25);
-}
-
-nav a.active::after,
-nav a[aria-current="page"]::after {
-  content: "";
-  position: absolute;
-  left: 16px;
-  right: 16px;
-  bottom: -15px;
-  height: 2px;
-  background: #7a9d6f;
-  border-radius: 2px;
-}
-
-/* Conteneur principal sous le nav — occupe TOUTE la largeur */
-.app-content {
   width: 100%;
-  height: calc(100vh - 64px);
-  height: calc(100dvh - 64px);
+  transition: all 0.3s ease;
+}
+
+.map-wrapper.hidden {
+  display: none;
+}
+
+.map-wrapper.preview {
+  height: 540px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  position: relative;
+  background: var(--bg-panel-soft);
+  border: 1px solid var(--line);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
 }
 
-/* Si tu as une div qui contient la carte (ex: .map-container) */
-.app-content > * {
+.map-wrapper.preview:hover {
+  border-color: rgba(122, 157, 111, 0.4);
+  transform: translateY(-2px);
+}
+
+.map-wrapper.fullscreen {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 999;
+  background: var(--bg-deep);
+  border-radius: 0;
+}
+
+/* Conteneur interne & événements */
+.disabled-events {
+  pointer-events: none;
+}
+
+.map-wrapper.fullscreen .disabled-events {
+  pointer-events: auto;
+}
+
+.map-container-inner,
+.map-container-inner > * {
   width: 100% !important;
   height: 100% !important;
+}
+
+/* Survol : Voile sombre et badge "Agrandir" */
+.map-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 14, 28, 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  transition: background-color 0.3s ease;
+}
+
+.expand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 30px;
+  background: rgba(15, 29, 56, 0.85);
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.map-wrapper.preview:hover .map-overlay {
+  background: rgba(6, 14, 28, 0.45);
+}
+
+.map-wrapper.preview:hover .expand-badge {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Bouton pour réduire la carte */
+.close-expanded-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(15, 29, 56, 0.85);
+  color: #e8e6df;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.close-expanded-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+/* --------------------------------------------------------------------------
+   Signature : cadre "verrouillage radar" — les quatre coins et le repère
+   texte évoquent un écran de contrôle, en écho direct au sujet (tracking).
+   -------------------------------------------------------------------------- */
+.map-frame-corner {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--accent-radar-bright);
+  opacity: 0.55;
+  z-index: 6;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.map-wrapper.fullscreen .map-frame-corner {
+  width: 28px;
+  height: 28px;
+}
+
+.map-frame-corner.tl { top: 14px; left: 14px; border-right: none; border-bottom: none; border-top-left-radius: 4px; }
+.map-frame-corner.tr { top: 14px; right: 14px; border-left: none; border-bottom: none; border-top-right-radius: 4px; }
+.map-frame-corner.bl { bottom: 14px; left: 14px; border-right: none; border-top: none; border-bottom-left-radius: 4px; }
+.map-frame-corner.br { bottom: 14px; right: 14px; border-left: none; border-top: none; border-bottom-right-radius: 4px; }
+
+.map-wrapper.preview:hover .map-frame-corner {
+  opacity: 0.95;
+}
+
+.map-readout {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  color: var(--accent-radar-bright);
+  background: rgba(6, 14, 28, 0.7);
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(122, 157, 111, 0.35);
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   Contenu des sous-pages (avions / trains / bateaux / météo)
+   ========================================================================== */
+.app-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px 56px;
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+@media (max-width: 720px) {
+  .nav-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .nav-links {
+    width: 100%;
+  }
+
+  .nav-link span {
+    display: none;
+  }
+
+  .nav-link {
+    padding: 9px;
+  }
+
+  .map-wrapper.preview {
+    height: 380px;
+    border-radius: var(--radius-md);
+  }
+
+  .home-page {
+    padding: 28px 16px 40px;
+    gap: 24px;
+  }
 }

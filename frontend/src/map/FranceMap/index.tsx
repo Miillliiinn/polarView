@@ -23,7 +23,7 @@ export default function FranceMap() {
 
     const mapInstance = new maplibregl.Map({
       container: mapContainer.current!,
-      style: 'https://tiles.openfreemap.org/styles/liberty',
+      style: 'https://tiles.openfreemap.org/styles/bright',
       bounds: FRANCE_BOUNDS,
       fitBoundsOptions: { padding: 100 },
       maxBounds: [
