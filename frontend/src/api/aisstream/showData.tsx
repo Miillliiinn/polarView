@@ -8,7 +8,9 @@ export default function ShowAllShipsData()
     (listener) => globalCache.subscribeAis(listener),
     () => globalCache.getAisCache()
   );
-
+  //
+  
+    //
   return (
     <ul>
       {ships.map((ship: ShipPosition) => (
