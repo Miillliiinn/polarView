@@ -20,7 +20,7 @@ let CallSncfAPI = class CallSncfAPI {
     ;
     timeoutHandle = null;
     async onModuleInit() {
-        if (process.env.RUN_TRAINS_API === 'false')
+        if (process.env.RUN_TRAINS_API !== 'true')
             return;
         try {
             const firstCache = await this.ApiService.getSncfAPI();

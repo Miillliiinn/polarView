@@ -1,5 +1,6 @@
 import { OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Observable } from 'rxjs';
 export interface ShipPosition {
     mmsi: number;
     name: string;
@@ -8,12 +9,16 @@ export interface ShipPosition {
     speed: number;
     heading: number;
     lastUpdate: Date;
+    shipType: number | null;
+    shipTypeLabel: string;
 }
 export declare class AisStreamAPI implements OnModuleInit, OnModuleDestroy {
     private readonly configService;
     private readonly logger;
     private ws;
     private readonly ships;
+    private readonly shipTypes;
+    private readonly shipUpdates$;
     private reconnectTimeout;
     private cleanupInterval;
     private destroyed;
@@ -21,8 +26,10 @@ export declare class AisStreamAPI implements OnModuleInit, OnModuleDestroy {
     onModuleInit(): void;
     private connect;
     private scheduleReconnect;
+    private updateShipType;
     private updateShipData;
     private pruneStaleShips;
+    getShipUpdates(): Observable<ShipPosition>;
     getAllShips(): ShipPosition[];
     onModuleDestroy(): void;
 }

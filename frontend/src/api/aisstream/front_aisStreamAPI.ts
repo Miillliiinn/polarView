@@ -1,21 +1,45 @@
-import { globalCache } from "../classCache";
-import api from "../apiBridge";
 import { useEffect } from "react";
+import { globalCache } from "../classCache";
 
-const aisStreamAPI = async () => {
-    const res = await api.get("/ships");
-    console.log(res.data);
-    return res.data;
+export interface ShipPosition
+{
+  mmsi: number;
+  name: string;
+  latitude: number;
+  longitude: number;
+  speed: number;
+  heading: number;
+  lastUpdate: string;
+  shipType: number | null;
+  shipTypeLabel: string;
 }
 
+const STALE_SHIP_MAX_AGE_MS = 30 * 60 * 1000; 
+const PRUNE_INTERVAL_MS = 60 * 1000; 
+
 export function AisStreamData()
-{  
-    let time : number = 10000;
-    useEffect(() => 
-    {
-        const interval = setInterval(() => {
-            aisStreamAPI().then((data) => { globalCache.setAisCache(data); })}, time);
-        return () => clearInterval(interval); 
-    }, []);
-    return;
+{
+  useEffect(() => {
+    const source = new EventSource("http://localhost:3000/ships/stream");
+
+    source.onmessage = (event) => {
+      const ship: ShipPosition = JSON.parse(event.data);
+      globalCache.upsertAisShip(ship);
+    };
+
+    source.onerror = (err) => {
+      console.error("AIS SSE error", err);
+    };
+
+    const pruneInterval = setInterval(() => {
+      globalCache.pruneStaleAisShips(STALE_SHIP_MAX_AGE_MS);
+    }, PRUNE_INTERVAL_MS);
+
+    return () => {
+      source.close();
+      clearInterval(pruneInterval);
+    };
+  }, []);
+
+  return null;
 }

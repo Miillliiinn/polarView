@@ -1,6 +1,7 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Sse, MessageEvent } from '@nestjs/common';
 import { ApiService } from './ApiService';
 import { AisStreamAPI, ShipPosition } from './script/aisstreamScript';
+import { Observable, concat, from, map } from 'rxjs';
 
 @Controller()
 export class AppController
@@ -45,13 +46,25 @@ async getRail() {
 }
 
 @Controller()
-export class AisStreamController 
-{
-  constructor(private readonly aisService: AisStreamAPI) {};
+export class AisStreamController {
+  constructor(private readonly aisService: AisStreamAPI) {}
 
   @Get('ships')
   getShips(): ShipPosition[] {
     return this.aisService.getAllShips();
+  }
+
+  @Sse('ships/stream')
+  streamShips(): Observable<MessageEvent> {
+    const initial$ = from(this.aisService.getAllShips()).pipe(
+      map((ship) => ({ data: JSON.stringify(ship) }) as MessageEvent),
+    );
+
+    const updates$ = this.aisService.getShipUpdates().pipe(
+      map((ship) => ({ data: JSON.stringify(ship) }) as MessageEvent),
+    );
+
+    return concat(initial$, updates$);
   }
 }
 

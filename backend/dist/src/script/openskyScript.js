@@ -20,7 +20,7 @@ let CallOpenskyAPI = class CallOpenskyAPI {
         this.ApiService = ApiService;
     }
     async onModuleInit() {
-        if (process.env.RUN_PLANES_API === 'false')
+        if (process.env.RUN_PLANES_API !== 'true')
             return;
         await this.refreshCache();
         this.scheduleNextRefresh();

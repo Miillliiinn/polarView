@@ -1,6 +1,7 @@
 import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import WebSocket from 'ws';
+import { Subject, Observable } from 'rxjs';
 
 export interface ShipPosition {
   mmsi: number;
@@ -10,17 +11,51 @@ export interface ShipPosition {
   speed: number;
   heading: number;
   lastUpdate: Date;
+  shipType: number | null;
+  shipTypeLabel: string;
 }
 
 const RECONNECT_DELAY_MS = 5000;
 const STALE_SHIP_MAX_AGE_MS = 30 * 60 * 1000;
 const STALE_CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
 
+// Table des codes AIS standard (norme ITU-R M.1371). Les tranches sont volontairement
+// groupées ; à l'intérieur d'une tranche (ex: 70-79 cargo), le dernier chiffre encode
+// des sous-catégories (dangereux, polluant...) qu'on ignore ici pour rester lisible.
+function getShipTypeLabel(type: number | null): string {
+  if (type === null) return 'Inconnu';
+  if (type === 30) return 'Pêche';
+  if (type === 31 || type === 32) return 'Remorqueur';
+  if (type === 33) return 'Dragage';
+  if (type === 34) return 'Plongée';
+  if (type === 35) return 'Militaire';
+  if (type === 36) return 'Voilier';
+  if (type === 37) return 'Plaisance';
+  if (type >= 40 && type <= 49) return 'Engin rapide';
+  if (type === 50) return 'Pilotage';
+  if (type === 51) return 'Secours (SAR)';
+  if (type === 52) return 'Remorqueur portuaire';
+  if (type === 53) return 'Bateau-port';
+  if (type === 55) return 'Autorité / police';
+  if (type >= 60 && type <= 69) return 'Passagers';
+  if (type >= 70 && type <= 79) return 'Cargo';
+  if (type >= 80 && type <= 89) return 'Tanker';
+  if (type >= 90 && type <= 99) return 'Autre';
+  return 'Non spécifié';
+}
+
 @Injectable()
-export class AisStreamAPI implements OnModuleInit, OnModuleDestroy {
+export class AisStreamAPI implements OnModuleInit, OnModuleDestroy
+{
   private readonly logger = new Logger(AisStreamAPI.name);
   private ws: WebSocket | null = null;
+
   private readonly ships = new Map<number, ShipPosition>();
+  // Table statique séparée : les infos de type arrivent moins souvent et
+  // indépendamment des positions, on les garde à part pour pouvoir les
+  // fusionner dans les deux sens (position arrive avant ou après le type).
+  private readonly shipTypes = new Map<number, number>();
+  private readonly shipUpdates$ = new Subject<ShipPosition>();
 
   private reconnectTimeout: NodeJS.Timeout | null = null;
   private cleanupInterval: NodeJS.Timeout | null = null;
@@ -30,13 +65,13 @@ export class AisStreamAPI implements OnModuleInit, OnModuleDestroy {
 
   onModuleInit()
   {
-    if (process.env.RUN_BOATS_API === 'false')
-      return;
+    if (process.env.RUN_BOATS_API !== 'true') return;
     this.connect();
     this.cleanupInterval = setInterval(() => this.pruneStaleShips(), STALE_CLEANUP_INTERVAL_MS);
   }
 
-  private connect() {
+  private connect()
+  {
     if (this.destroyed) return;
 
     const apiKey = this.configService.get<string>('AISSTREAM_API_KEY');
@@ -53,7 +88,7 @@ export class AisStreamAPI implements OnModuleInit, OnModuleDestroy {
       const subscription = {
         APIKey: apiKey,
         BoundingBoxes: [[[37.5, -9.0], [55.5, 13.0]]],
-        FilterMessageTypes: ['PositionReport'],
+        FilterMessageTypes: ['PositionReport', 'ShipStaticData'],
       };
 
       this.ws?.send(JSON.stringify(subscription));
@@ -74,7 +109,11 @@ export class AisStreamAPI implements OnModuleInit, OnModuleDestroy {
         return;
       }
 
-      this.updateShipData(data);
+      if (data.MessageType === 'ShipStaticData') {
+        this.updateShipType(data);
+      } else {
+        this.updateShipData(data);
+      }
     });
 
     this.ws.on('error', (error: Error) => {
@@ -90,7 +129,8 @@ export class AisStreamAPI implements OnModuleInit, OnModuleDestroy {
     });
   }
 
-  private scheduleReconnect() {
+  private scheduleReconnect()
+  {
     if (this.destroyed || this.reconnectTimeout) return;
     this.reconnectTimeout = setTimeout(() => {
       this.reconnectTimeout = null;
@@ -98,7 +138,27 @@ export class AisStreamAPI implements OnModuleInit, OnModuleDestroy {
     }, RECONNECT_DELAY_MS);
   }
 
-  private updateShipData(data: any) {
+  private updateShipType(data: any)
+  {
+    const mmsi = data.MetaData?.MMSI;
+    const type = data.Message?.ShipStaticData?.Type;
+    if (!mmsi || type === undefined) return;
+
+    this.shipTypes.set(mmsi, type);
+    const existing = this.ships.get(mmsi);
+    if (existing) {
+      const updated: ShipPosition = {
+        ...existing,
+        shipType: type,
+        shipTypeLabel: getShipTypeLabel(type),
+      };
+      this.ships.set(mmsi, updated);
+      this.shipUpdates$.next(updated);
+    }
+  }
+
+  private updateShipData(data: any)
+  {
     const mmsi = data.MetaData?.MMSI;
     if (!mmsi) return;
 
@@ -108,7 +168,9 @@ export class AisStreamAPI implements OnModuleInit, OnModuleDestroy {
 
     if (latitude === undefined || longitude === undefined) return;
 
-    this.ships.set(mmsi, {
+    const shipType = this.shipTypes.get(mmsi) ?? null;
+
+    const updatedShip: ShipPosition = {
       mmsi,
       name: data.MetaData?.ShipName?.trim() || 'Inconnu',
       latitude,
@@ -116,34 +178,49 @@ export class AisStreamAPI implements OnModuleInit, OnModuleDestroy {
       speed: pos?.Sog ?? 0,
       heading: pos?.TrueHeading ?? 0,
       lastUpdate: new Date(),
-    });
-
-    this.logger.log(`Navire mis à jour : ${data.MetaData?.ShipName?.trim() || mmsi}`);
+      shipType,
+      shipTypeLabel: getShipTypeLabel(shipType),
+    };
+    this.ships.set(mmsi, updatedShip);
+    this.shipUpdates$.next(updatedShip);
+    this.logger.log(`Navire mis à jour : ${updatedShip.name || mmsi}`);
   }
 
-  private pruneStaleShips() {
+  private pruneStaleShips()
+  {
     const now = Date.now();
     let removed = 0;
     for (const [mmsi, ship] of this.ships) {
-      if (now - ship.lastUpdate.getTime() > STALE_SHIP_MAX_AGE_MS) {
+      if (now - ship.lastUpdate.getTime() > STALE_SHIP_MAX_AGE_MS)
+      {
         this.ships.delete(mmsi);
+        this.shipTypes.delete(mmsi);
         removed++;
       }
     }
-    if (removed > 0) {
+    if (removed > 0)
+    {
       this.logger.log(`${removed} navires retirés du cache (${this.ships.size} restants).`);
     }
   }
 
-  public getAllShips(): ShipPosition[] {
+  public getShipUpdates(): Observable<ShipPosition>
+  {
+    return this.shipUpdates$.asObservable();
+  }
+
+  public getAllShips(): ShipPosition[]
+  {
     return Array.from(this.ships.values());
   }
 
-  onModuleDestroy() {
+  onModuleDestroy()
+  {
     this.destroyed = true;
     if (this.reconnectTimeout) clearTimeout(this.reconnectTimeout);
     if (this.cleanupInterval) clearInterval(this.cleanupInterval);
     this.ws?.close();
+    this.shipUpdates$.complete();
   }
 }
 

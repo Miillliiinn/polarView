@@ -1,5 +1,7 @@
+import { MessageEvent } from '@nestjs/common';
 import { ApiService } from './ApiService';
 import { AisStreamAPI, ShipPosition } from './script/aisstreamScript';
+import { Observable } from 'rxjs';
 export declare class AppController {
     private readonly appService;
     constructor(appService: ApiService);
@@ -30,4 +32,5 @@ export declare class AisStreamController {
     private readonly aisService;
     constructor(aisService: AisStreamAPI);
     getShips(): ShipPosition[];
+    streamShips(): Observable<MessageEvent>;
 }

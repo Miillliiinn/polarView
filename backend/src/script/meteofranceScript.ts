@@ -11,7 +11,7 @@ export class CallMeteofranceAPI implements OnModuleInit, OnModuleDestroy
 
   async onModuleInit()
   {
-        if (process.env.RUN_VIGILANCE_API === 'false')
+        if (process.env.RUN_VIGILANCE_API !== 'true')
             return;
         await this.refreshCache();
         this.scheduleNextRefresh();

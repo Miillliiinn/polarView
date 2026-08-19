@@ -20,7 +20,7 @@ let CallGareAPI = class CallGareAPI {
         this.ApiService = ApiService;
     }
     async onModuleInit() {
-        if (process.env.RUN_TRAINS_API === 'false')
+        if (process.env.RUN_TRAINS_API !== 'true')
             return;
         await this.refreshCache();
         this.scheduleNextRefresh();

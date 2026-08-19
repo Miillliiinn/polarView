@@ -1,16 +1,21 @@
+import { useSyncExternalStore } from 'react';
 import { globalCache } from "../classCache";
+import { type ShipPosition } from './front_aisStreamAPI';
 
 export default function ShowAllShipsData()
 {
-    const ships = globalCache.getAisCache();
-    // console.log('cache ais brut: ', ships[0]);
-    return (
-        <ul>
-            {ships.map((ships: any) => (
-                <li key={ships.mmsi}>
-                    mmsi: {ships.mmsi} | name: {ships.name} | lat: {ships.latitude} | long: {ships.longitude} | vel: {ships.speed} | cap: {ships.heading} | lastUpdate: {ships.lastUpdate}
-                </li>
-            ))}
-        </ul>
-    );
+  const ships = useSyncExternalStore(
+    (listener) => globalCache.subscribeAis(listener),
+    () => globalCache.getAisCache()
+  );
+
+  return (
+    <ul>
+      {ships.map((ship: ShipPosition) => (
+        <li key={ship.mmsi}>
+          mmsi: {ship.mmsi} | name: {ship.name} | lat: {ship.latitude.toFixed(2)} | long: {ship.longitude.toFixed(2)} | vel: {ship.speed} | cap: {ship.heading} | type: { ship.shipTypeLabel || ""} | lastUpdate: {new Date(ship.lastUpdate).toLocaleTimeString()} 
+        </li>
+      ))}
+    </ul>
+  );
 }

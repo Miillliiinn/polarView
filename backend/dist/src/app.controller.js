@@ -16,6 +16,7 @@ exports.AisStreamController = exports.AppController = void 0;
 const common_1 = require("@nestjs/common");
 const ApiService_1 = require("./ApiService");
 const aisstreamScript_1 = require("./script/aisstreamScript");
+const rxjs_1 = require("rxjs");
 let AppController = class AppController {
     appService;
     constructor(appService) {
@@ -97,9 +98,13 @@ let AisStreamController = class AisStreamController {
     constructor(aisService) {
         this.aisService = aisService;
     }
-    ;
     getShips() {
         return this.aisService.getAllShips();
+    }
+    streamShips() {
+        const initial$ = (0, rxjs_1.from)(this.aisService.getAllShips()).pipe((0, rxjs_1.map)((ship) => ({ data: JSON.stringify(ship) })));
+        const updates$ = this.aisService.getShipUpdates().pipe((0, rxjs_1.map)((ship) => ({ data: JSON.stringify(ship) })));
+        return (0, rxjs_1.concat)(initial$, updates$);
     }
 };
 exports.AisStreamController = AisStreamController;
@@ -109,6 +114,12 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Array)
 ], AisStreamController.prototype, "getShips", null);
+__decorate([
+    (0, common_1.Sse)('ships/stream'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", rxjs_1.Observable)
+], AisStreamController.prototype, "streamShips", null);
 exports.AisStreamController = AisStreamController = __decorate([
     (0, common_1.Controller)(),
     __metadata("design:paramtypes", [aisstreamScript_1.AisStreamAPI])
