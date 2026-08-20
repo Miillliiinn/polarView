@@ -39,7 +39,7 @@ function getShipTypeLabel(type) {
     if (type === 37)
         return 'Plaisance';
     if (type >= 40 && type <= 49)
-        return 'Engin rapide';
+        return 'Vitesse';
     if (type === 50)
         return 'Pilotage';
     if (type === 51)
@@ -48,14 +48,22 @@ function getShipTypeLabel(type) {
         return 'Remorqueur portuaire';
     if (type === 53)
         return 'Bateau-port';
+    if (type === 54)
+        return 'Équipement anti-pollution';
     if (type === 55)
-        return 'Autorité / police';
+        return 'Autorité / Police';
+    if (type === 56 || type === 57)
+        return 'Navire local';
+    if (type === 58)
+        return 'Transport médical';
+    if (type === 59)
+        return 'Navire non combattant';
     if (type >= 60 && type <= 69)
         return 'Passagers';
     if (type >= 70 && type <= 79)
         return 'Cargo';
     if (type >= 80 && type <= 89)
-        return 'Tanker';
+        return 'Pétrolier';
     if (type >= 90 && type <= 99)
         return 'Autre';
     return 'Non spécifié';

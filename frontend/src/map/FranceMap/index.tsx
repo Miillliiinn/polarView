@@ -9,6 +9,7 @@ import { setupPlanesLayer, togglePlaneLayer } from './layers/planes/planesLayer'
 import { setupTrainsLayer } from './layers/trains/trainsLayer';
 import { setupRailLayer, toggleRailLayer } from './layers/trains/trainsLayer';
 import { toggleGareLayer, setupGareLayer } from './layers/trains/gareLayer';
+import { setupBoatsLayer, toggleBoatsLayer } from './layers/boats/boatsLayer'; // TODO: vérifier ce chemin
 import { usePlanesRealtimeSync } from './hooks/usePlanesRealtimeSync';
 
 export default function FranceMap() {
@@ -17,6 +18,7 @@ export default function FranceMap() {
   const [vigilanceVisible, setVigilanceVisible] = useState(false);
   const [visibleTrains, setVisibleTrains] = useState(false);
   const [visiblePlanes, setVisiblePlanes] = useState(false);
+  const [visibleBoats, setVisibleBoats] = useState(false);
 
   useEffect(() => {
     if (map.current) return;
@@ -40,6 +42,7 @@ export default function FranceMap() {
     });
 
     let cleanupVigilance: (() => void) | null = null;
+    let cleanupBoats: (() => void) | null = null;
 
     mapInstance.on('load', () => {
       if (!map.current) return;
@@ -49,10 +52,12 @@ export default function FranceMap() {
       setupTrainsLayer(mapInstance);
       setupGareLayer(mapInstance);
       setupPlanesLayer(mapInstance);
+      cleanupBoats = setupBoatsLayer(mapInstance);
     });
 
     return () => {
       cleanupVigilance?.();
+      cleanupBoats?.();
       mapInstance.remove();
       map.current = null;
     };
@@ -80,6 +85,13 @@ export default function FranceMap() {
     const newVisibility = !visiblePlanes;
     togglePlaneLayer(map.current, newVisibility);
     setVisiblePlanes(newVisibility);
+  };
+
+  const handleBoatsData = () => {
+    if (!map.current) return;
+    const newVisibility = !visibleBoats;
+    toggleBoatsLayer(map.current, newVisibility);
+    setVisibleBoats(newVisibility);
   };
 
   return (
@@ -116,6 +128,16 @@ export default function FranceMap() {
         >
           <span className="map-toggle-btn__dot" aria-hidden="true" />
           {vigilanceVisible ? 'Masquer vigilance' : 'Afficher vigilance'}
+        </button>
+{/*------------------------------------------------------------------------------------*/}
+        <button
+          type="button"
+          className="map-toggle-btn map-toggle-btn--boat"
+          data-active={visibleBoats}
+          onClick={handleBoatsData}
+        >
+          <span className="map-toggle-btn__dot" aria-hidden="true" />
+          {visibleBoats ? 'Masquer les bateaux' : 'Afficher les bateaux'}
         </button>
       </div>
     </div>

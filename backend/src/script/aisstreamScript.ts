@@ -19,9 +19,6 @@ const RECONNECT_DELAY_MS = 5000;
 const STALE_SHIP_MAX_AGE_MS = 30 * 60 * 1000;
 const STALE_CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
 
-// Table des codes AIS standard (norme ITU-R M.1371). Les tranches sont volontairement
-// groupées ; à l'intérieur d'une tranche (ex: 70-79 cargo), le dernier chiffre encode
-// des sous-catégories (dangereux, polluant...) qu'on ignore ici pour rester lisible.
 function getShipTypeLabel(type: number | null): string {
   if (type === null) return 'Inconnu';
   if (type === 30) return 'Pêche';
@@ -31,15 +28,19 @@ function getShipTypeLabel(type: number | null): string {
   if (type === 35) return 'Militaire';
   if (type === 36) return 'Voilier';
   if (type === 37) return 'Plaisance';
-  if (type >= 40 && type <= 49) return 'Engin rapide';
+  if (type >= 40 && type <= 49) return 'Vitesse';
   if (type === 50) return 'Pilotage';
   if (type === 51) return 'Secours (SAR)';
   if (type === 52) return 'Remorqueur portuaire';
   if (type === 53) return 'Bateau-port';
-  if (type === 55) return 'Autorité / police';
+  if (type === 54) return 'Équipement anti-pollution';
+  if (type === 55) return 'Autorité / Police';
+  if (type === 56 || type === 57) return 'Navire local';
+  if (type === 58) return 'Transport médical';
+  if (type === 59) return 'Navire non combattant';
   if (type >= 60 && type <= 69) return 'Passagers';
   if (type >= 70 && type <= 79) return 'Cargo';
-  if (type >= 80 && type <= 89) return 'Tanker';
+  if (type >= 80 && type <= 89) return 'Pétrolier';
   if (type >= 90 && type <= 99) return 'Autre';
   return 'Non spécifié';
 }

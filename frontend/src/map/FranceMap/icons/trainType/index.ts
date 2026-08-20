@@ -40,7 +40,8 @@ export const DEFAULT_TRAIN_ICON_ID = 'train-default';
  * Enregistre toutes les icônes de train dans le style MapLibre.
  * À appeler une seule fois, avant d'ajouter le layer symbol des trains.
  */
-export function registerTrainIcons(map: maplibregl.Map, size = 64) {
+export function registerTrainIcons(map: maplibregl.Map, size = 64)
+{
   map.addImage('train-rer', createRerIcon(size));
   map.addImage('train-transilien', createTransilienIcon(size));
   map.addImage('train-tgv-inoui', createTgvInouiIcon(size));

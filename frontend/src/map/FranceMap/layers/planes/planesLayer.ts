@@ -1,9 +1,10 @@
 import maplibregl from 'maplibre-gl';
 import api from '../../../../api/apiBridge';
-import { createPlaneIcon } from '../../icons/planeIcon';
+import { createPlaneIcon } from '../../icons/planeType/planeIcon'; 
 import { globalCache } from '../../../../api/classCache';
 
-export function setupPlanesLayer(map: maplibregl.Map) {
+export function setupPlanesLayer(map: maplibregl.Map)
+{
   map.addImage('plane-ground', createPlaneIcon('#989898', 96));
   map.addImage('plane-low', createPlaneIcon('#a199ff', 96));
   map.addImage('plane-mid', createPlaneIcon('#7c70ff', 96));

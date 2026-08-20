@@ -22,7 +22,7 @@
 }
 
 /* ---------------------------------------------------------- */
-/* Panneau de contrôle (voyants avions / trains / vigilance)  */
+/* Panneau de contrôle (avions / trains / vigilance / bateaux) */
 /* ---------------------------------------------------------- */
 
 .map-controls {
@@ -110,6 +110,10 @@
   --accent: #7c70ff; /* aligné sur la teinte médiane des icônes avion */
 }
 
+.map-toggle-btn--boat {
+  --accent: #00b4d8; /* bleu océan, distinct des avions/trains/vigilance */
+}
+
 @media (prefers-reduced-motion: reduce) {
   .map-toggle-btn {
     transition: none;
@@ -120,7 +124,7 @@
 }
 
 /* ---------------------------------------------------------- */
-/* Popups (avions / trains)                                   */
+/* Popups (avions / trains / bateaux)                          */
 /* ---------------------------------------------------------- */
 
 .maplibregl-popup-content {
