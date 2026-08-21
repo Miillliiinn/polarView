@@ -156,7 +156,7 @@ export class ApiService {
       const state = data.states || [];
 
       console.log("✈️  OpenSky Api request ✈️")
-      console.log('Headers:', Object.fromEntries(apiResult.headers.entries()))
+      //console.log('Headers:', Object.fromEntries(apiResult.headers.entries()))
       return state
         .filter((f: any) => f[5] !== null && f[6] !== null)
         .map((f: any) => ({
@@ -228,8 +228,17 @@ export class ApiService {
         try {
           const url = `https://api.sncf.com/v1/coverage/sncf/stop_areas/${gare.id}/departures?from_datetime=${datetimeSncf}&count=100`;
           const res = await fetch(url, { headers: { 'Authorization': authHeader } });
-          
-          if (!res.ok) return [];
+          // console.log('--- Headers de réponse SNCF API ---');
+          // res.headers.forEach((value, key) => {
+          //   console.log(`${key}: ${value}`);
+          // });
+          if (!res.ok) {
+            const body = await res.text().catch(() => '');
+            if (res.status === 429 || body.toLowerCase().includes('quota')) {
+              console.error(`Quota SNCF probablement dépassé : ${res.status} — ${body}`);
+            }
+            return [];
+          }
           
           const data = await res.json();
           return (data.departures || []).map((dep: any) => {
