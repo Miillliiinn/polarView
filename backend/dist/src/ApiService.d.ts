@@ -1,10 +1,12 @@
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from "../prisma/prisma.service";
+import { CombinedAircraft } from './api/planes/mergeAdsbOpensky';
 export declare class ApiService {
     private configService;
     private prisma;
     private openskyTokenManager;
     private OpenskyCache;
+    private AdsbCache;
     private SncfCache;
     private gareCache;
     private railCache;
@@ -28,6 +30,29 @@ export declare class ApiService {
     setOpenskyCache(newData: any): void;
     getOpenskyCache(): any;
     getOpenskyAPI(): Promise<any>;
+    setAdsbCache(newData: any): void;
+    getAdsbCache(): any;
+    getAdsbAPI(): Promise<{
+        icao24: any;
+        callsign: any;
+        registration: any;
+        longitude: any;
+        latitude: any;
+        altitude: number;
+        onGround: boolean;
+        heading: any;
+        velocity: number;
+        verticalRate: number;
+        squawk: any;
+        typeCode: any;
+        typeLabel: string | null;
+        engines: number | null;
+        kind: import("./api/planes/aircraftClassifier").AircraftKind;
+        isMilitary: boolean;
+        isHelicopter: boolean;
+        lastSeenSeconds: any;
+    }[]>;
+    getCombinedAircraftCache(): CombinedAircraft[];
     setSncfCache(newData: any): void;
     getSncfCache(): any;
     getSncfAPI(): Promise<any[]>;

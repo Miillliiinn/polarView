@@ -32,6 +32,12 @@ let AppController = class AppController {
     async getPlanesPicture(icao24) {
         return await this.appService.getPlaneSpotterApi(icao24);
     }
+    getAdsb() {
+        return this.appService.getAdsbCache();
+    }
+    getAllPlanes() {
+        return this.appService.getCombinedAircraftCache();
+    }
     async getTrains() {
         return await this.appService.getSncfCache();
     }
@@ -65,6 +71,18 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], AppController.prototype, "getPlanesPicture", null);
+__decorate([
+    (0, common_1.Get)('planes/adsb'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "getAdsb", null);
+__decorate([
+    (0, common_1.Get)('planes/all'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "getAllPlanes", null);
 __decorate([
     (0, common_1.Get)('trains'),
     __metadata("design:type", Function),

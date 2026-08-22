@@ -23,6 +23,8 @@ export declare class AppController {
         thumbnailHeight: number | null;
         createdAt: Date;
     } | null>;
+    getAdsb(): any;
+    getAllPlanes(): import("./api/planes/mergeAdsbOpensky").CombinedAircraft[];
     getTrains(): Promise<any>;
     getGare(): Promise<any>;
     getRail(): Promise<any>;

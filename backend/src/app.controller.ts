@@ -23,6 +23,16 @@ export class AppController
   async getPlanesPicture(@Param('icao24') icao24 : string) {
     return await this.appService.getPlaneSpotterApi(icao24);
   }
+
+  @Get('planes/adsb')
+  getAdsb() {
+    return this.appService.getAdsbCache();
+  }
+
+  @Get('planes/all')
+  getAllPlanes() {
+    return this.appService.getCombinedAircraftCache();
+  }
 // ---------------------------------------------------------------------
   @Get('trains')
   async getTrains() {
@@ -67,6 +77,5 @@ export class AisStreamController {
     return concat(initial$, updates$);
   }
 }
-
 
 

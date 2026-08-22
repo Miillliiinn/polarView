@@ -61,8 +61,12 @@ async function fetchOpenskyStates(tokenManager) {
             longitude: f[5],
             latitude: f[6],
             altitude: f[7] || f[13] || 0,
+            onGround: !!f[8],
             heading: f[10] || 0,
             velocity: f[9] || 0,
+            verticalRate: f[11] ?? null,
+            squawk: f[14] ?? null,
+            category: f[17] ?? 0,
         }));
     }
     catch (e) {

@@ -14,7 +14,9 @@ const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const prisma_service_1 = require("../prisma/prisma.service");
 const youtubeWebcam_1 = require("./api/youtubeWebcam");
-const opensky_1 = require("./api/opensky");
+const opensky_1 = require("./api/planes/opensky");
+const adsb_1 = require("./api/planes/adsb");
+const mergeAdsbOpensky_1 = require("./api/planes/mergeAdsbOpensky");
 const sncf_1 = require("./api/sncf");
 const meteofranceVigilance_1 = require("./api/meteofranceVigilance");
 const planeSpotter_1 = require("./api/planeSpotter");
@@ -23,6 +25,7 @@ let ApiService = class ApiService {
     prisma;
     openskyTokenManager;
     OpenskyCache = [];
+    AdsbCache = [];
     SncfCache = [];
     gareCache;
     railCache;
@@ -51,6 +54,14 @@ let ApiService = class ApiService {
     getOpenskyCache() { return this.OpenskyCache; }
     async getOpenskyAPI() {
         return (0, opensky_1.fetchOpenskyStates)(this.openskyTokenManager);
+    }
+    setAdsbCache(newData) { this.AdsbCache = newData; }
+    getAdsbCache() { return this.AdsbCache; }
+    async getAdsbAPI() {
+        return (0, adsb_1.fetchAdsbStates)(adsb_1.DEFAULT_FRANCE_ZONES);
+    }
+    getCombinedAircraftCache() {
+        return (0, mergeAdsbOpensky_1.mergeAdsbAndOpensky)(this.AdsbCache, this.OpenskyCache);
     }
     setSncfCache(newData) { this.SncfCache = newData; }
     getSncfCache() { return this.SncfCache; }

@@ -20,6 +20,7 @@ const googleScript_1 = require("./script/googleScript");
 const schedule_1 = require("@nestjs/schedule");
 const gareScript_1 = require("./script/gareScript");
 const railScript_1 = require("./script/railScript");
+const adsbScript_1 = require("./script/adsbScript");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -33,6 +34,7 @@ exports.AppModule = AppModule = __decorate([
         providers: [
             ApiService_1.ApiService,
             openskyScript_1.CallOpenskyAPI,
+            adsbScript_1.CallAdsbAPI,
             meteofranceScript_1.CallMeteofranceAPI,
             sncfScript_1.CallSncfAPI,
             gareScript_1.CallGareAPI,

@@ -14,7 +14,8 @@ interface PlaneAnchor
   long: number;
   heading: number;
   velocity: number; 
-  altitude: number; 
+  altitude: number;
+  source: string; 
   capturedAt: number;
 }
 
@@ -46,6 +47,7 @@ export function usePlanesRealtimeSync(mapRef: RefObject<maplibregl.Map | null>, 
             heading: p.heading ?? 0,
             velocity: p.velocity ?? 0,
             altitude: p.altitude ?? 0,
+            source: p.source,
             capturedAt: Date.now()
           });
         }
@@ -74,19 +76,22 @@ export function usePlanesRealtimeSync(mapRef: RefObject<maplibregl.Map | null>, 
         let lat = p.lat;
         let long = p.long;
 
-        if (p.altitude > ALTITUDE_MIN && p.velocity > 0)
+        if (/*p.altitude > ALTITUDE_MIN &&*/ p.velocity > 0)
         {
-          const elapsedSeconds = (now - p.capturedAt) / 1000;
-          const distanceKm = (p.velocity * elapsedSeconds) / 1000;
-          const bearingRad = (p.heading * Math.PI) / 180;
+          if (p.altitude > ALTITUDE_MIN || p.source !== 'opensky')
+          {
+            const elapsedSeconds = (now - p.capturedAt) / 1000;
+            const distanceKm = (p.velocity * elapsedSeconds) / 1000;
+            const bearingRad = (p.heading * Math.PI) / 180;
 
-          const dLat = (distanceKm * Math.cos(bearingRad)) / KM_PER_DEGREE_LAT;
-          const dLong =
-            (distanceKm * Math.sin(bearingRad)) /
-            (KM_PER_DEGREE_LAT * Math.cos((p.lat * Math.PI) / 180));
+            const dLat = (distanceKm * Math.cos(bearingRad)) / KM_PER_DEGREE_LAT;
+            const dLong =
+              (distanceKm * Math.sin(bearingRad)) /
+              (KM_PER_DEGREE_LAT * Math.cos((p.lat * Math.PI) / 180));
 
-          lat = p.lat + dLat;
-          long = p.long + dLong;
+            lat = p.lat + dLat;
+            long = p.long + dLong;
+          }
         }
 
         return toGeoJsonFeature(long, lat, {

@@ -3,7 +3,8 @@ import api from "../apiBridge.ts"
 import { globalCache } from "../classCache.ts";
 
 const planesAPI = async () => {
-    const res = await api.get('/planes');
+    const res = await api.get('/planes/all');
+    console.log(res.data);
     return res.data;
 }
 

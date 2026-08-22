@@ -42,13 +42,28 @@ export function setupPlanesLayer(map: maplibregl.Map)
     const feature = e.features?.[0];
     if (!feature) return;
 
+    const cache = globalCache.getOpCache();
+
     const icao24 = feature.properties?.icao24;
     const callsign = feature.properties?.callsign || 'Vol inconnu';
+    const originCountry = cache.find((f) => f.icao24 === icao24)?.originCountry;
+    const registration = cache.find((f) => f.icao24 === icao24)?.registration;
+    const longitude = cache.find((f) => f.icao24 === icao24)?.longitude;
+    const latitude = cache.find((f) => f.icao24 === icao24)?.latitude;
     const altitude = feature.properties?.altitude ?? '?';
-    const cap = feature.properties?.heading || null;
+    const onGround = cache.find((f) => f.icao24 === icao24)?.onGround;
+    const verticalRate = cache.find((f) => f.icao24 === icao24)?.verticalRate;
+    const squawk = cache.find((f) => f.icao24 === icao24)?.squawk;
+    const typeCode = cache.find((f) => f.icao24 === icao24)?.typeCode;
+    const typeLabel = cache.find((f) => f.icao24 === icao24)?.typeLabel;
+    const engine = cache.find((f) => f.icao24 === icao24)?.engines;
+    const kind = cache.find((f) => f.icao24 === icao24)?.kind;
+    const isMilitary = cache.find((f) => f.icao24 === icao24)?.isMilitary;
+    const isHelicopter = cache.find((f) => f.icao24 === icao24)?.isHelicopter;
+    const lastSeen = cache.find((f) => f.icao24 === icao24)?.lastSeenSeconds;
+    const source = cache.find((f) => f.icao24 === icao24)?.source;
+    const heading = feature.properties?.heading || null;
     const coordinates = (feature.geometry as any).coordinates;
-    const cache = globalCache.getOpCache();
-    const country = cache.find((f) => f.icao24 === icao24)?.country;
     const vel = cache.find((f) => f.icao24 === icao24)?.velocity;
     const popup = new maplibregl.Popup()
       .setLngLat(coordinates)
@@ -64,10 +79,26 @@ export function setupPlanesLayer(map: maplibregl.Map)
       const res = await api.get(`/planes/${icao24}/picture`);
       const photo = res.data;
       popup.setHTML(`
+        registration: <strong>${registration}</strong><br/>
+        longitude: <strong>${longitude}</strong><br/>
+        latitude: <strong>${latitude}</strong><br/>
+        onGround: <strong>${onGround}</strong><br/>
+        verticalRate: <strong>${verticalRate}</strong><br/>
+        squawk: <strong>${squawk}</strong><br/>
+        typeCode: <strong>${typeCode}</strong><br/>
+        typeLabel: <strong>${typeLabel}</strong><br/>
+        engine: <strong>${engine}</strong><br/>
+        kind: <strong>${kind}</strong><br/>
+        isMilitary: <strong>${isMilitary}</strong><br/>
+        isHelicopter: <strong>${isHelicopter}</strong><br/>
+        lastSeen: <strong>${lastSeen}</strong><br/>
+        source: <strong>${source}</strong><br />
+        <br>-----</br>
+
           Callsign: <strong>${callsign}</strong><br/>
-          Country: <strong>${country}</strong></br>
+          Country: <strong>${originCountry}</strong></br>
           Altitude: <strong>${altitude} m</strong><br/>
-          Cap: <strong>${cap} °</strong></br>
+          Cap: <strong>${heading} °</strong></br>
           Vitesse: <strong>${(vel * 3.6).toFixed(3)} km/h</strong></br>
           ${photo?.thumbnailSrc
               ? `<img src="${photo.thumbnailSrc}" width="210" style="border-radius:4px;margin-top:4px;" /><br/><small><small>🖼️ ${photo.photographer || 'Inconnu'}</small></small>`

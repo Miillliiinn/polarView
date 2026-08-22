@@ -3,16 +3,20 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'prisma/prisma.service';
 
 import { fetchYoutubeWebcams } from './api/youtubeWebcam'; 
-import { OpenskyTokenManager, fetchOpenskyStates } from './api/opensky'; 
+import { OpenskyTokenManager, fetchOpenskyStates } from './api/planes/opensky'; 
+import { fetchAdsbStates, DEFAULT_FRANCE_ZONES } from './api/planes/adsb'; 
+import { mergeAdsbAndOpensky } from './api/planes/mergeAdsbOpensky'; 
 import { fetchSncfDepartures, fetchSncfGares, fetchSncfRailLines }  from './api/sncf';
 import { fetchMeteofranceVigilance } from './api/meteofranceVigilance'; 
-import { fetchPlaneSpotterPhoto } from './api/planeSpotter'; 
+import { fetchPlaneSpotterPhoto } from './api/planeSpotter';
+import { CombinedAircraft } from './api/planes/mergeAdsbOpensky'; 
 
 @Injectable()
 export class ApiService {
   private openskyTokenManager: OpenskyTokenManager;
 
   private OpenskyCache: any = [];
+  private AdsbCache: any = [];
   private SncfCache: any = [];
   private gareCache: any;
   private railCache: any;
@@ -52,6 +56,24 @@ export class ApiService {
 
   async getOpenskyAPI() {
     return fetchOpenskyStates(this.openskyTokenManager);
+  }
+
+  // --- ADSB (adsb.fi / adsb.lol) ---
+  // Source plus fréquente qu'OpenSky (pas de token, pas de limite 70s) et plus riche :
+  // type d'appareil (avion de ligne, jet privé, hélicoptère, militaire, etc), nombre de réacteurs.
+
+  setAdsbCache(newData: any) { this.AdsbCache = newData; }
+  getAdsbCache() { return this.AdsbCache; }
+
+  async getAdsbAPI() {
+    return fetchAdsbStates(DEFAULT_FRANCE_ZONES);
+  }
+
+  // Fusionne les deux caches déjà en mémoire (pas de fetch, juste de l'assemblage) :
+  // priorité aux données adsb.fi/adsb.lol (plus riches), complétées par OpenSky pour les avions
+  // que adsb.fi/adsb.lol ne voit pas.
+  getCombinedAircraftCache() {
+    return mergeAdsbAndOpensky(this.AdsbCache, this.OpenskyCache);
   }
 
   // --- SNCF ---

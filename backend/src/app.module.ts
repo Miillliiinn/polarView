@@ -11,6 +11,7 @@ import { CallGoogleAPI } from './script/googleScript';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CallGareAPI } from './script/gareScript';
 import { CallRailAPI } from './script/railScript';
+import { CallAdsbAPI } from './script/adsbScript';
 
 @Module({
   imports: [
@@ -20,7 +21,8 @@ import { CallRailAPI } from './script/railScript';
   controllers: [AppController, AisStreamController, ],
   providers: [
     ApiService,
-    CallOpenskyAPI, 
+    CallOpenskyAPI,
+    CallAdsbAPI, 
     CallMeteofranceAPI, 
     CallSncfAPI,
     CallGareAPI,
