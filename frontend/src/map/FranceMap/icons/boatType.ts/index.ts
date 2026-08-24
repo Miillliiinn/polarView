@@ -54,33 +54,33 @@ export
 function boatIcons(map : maplibregl.Map, type : string)
 {
     if (type === 'Inconnu')
-        map.addImage(type, createInconnuIcon('#ffffff'));
+        map.addImage(type, createInconnuIcon('#17361fb5'));
     else if ( type === 'Pêche')
-         map.addImage(type, createPecheIcon('#0a56ac'));
+         map.addImage(type, createPecheIcon('#006488'));
     else if ( type === 'Remorqueur')
-         map.addImage(type, createRemorqueurIcon('#bb621a'));
+         map.addImage(type, createRemorqueurIcon('#ff7504'));
     else if ( type === 'Dragage')
-         map.addImage(type, createDragageIcon('#7310b4'));
+         map.addImage(type, createDragageIcon('#6a3e00'));
     else if ( type === 'Plongée')
-         map.addImage(type, createPlongeIcon('#1c02ff'));
+         map.addImage(type, createPlongeIcon('#1b02ffd1'));
     else if ( type === 'Militaire')
-         map.addImage(type, createMilitaireIcon('#808080'));
+         map.addImage(type, createMilitaireIcon('#5e5e5e'));
     else if ( type === 'Voilier')
-         map.addImage(type, createVoilierIcon('#ffee00'));
+         map.addImage(type, createVoilierIcon('#7100a1'));
     else if ( type === 'Plaisance')
-         map.addImage(type, createPlaisanceIcon('#fa35bf'));
+         map.addImage(type, createPlaisanceIcon('#7a0e0e'));
     else if ( type === 'Vitesse')
-         map.addImage(type, createVitesseIcon("#835e19"));
+         map.addImage(type, createVitesseIcon("#ac7b20"));
     else if ( type === 'Pilotage')
-         map.addImage(type, createPilotageIcon('#860014'));
+         map.addImage(type, createPilotageIcon('#b12437'));
     else if ( type === 'Secours (SAR)')
          map.addImage(type, createSecoursSarIcon('#c8ff00'));
     else if ( type === 'Remorqueur portuaire')
-         map.addImage(type, createRemorqueurPortuaireIcon('#141414'));
+         map.addImage(type, createRemorqueurPortuaireIcon('#028b4d'));
     else if ( type === 'Bateau-port')
          map.addImage(type, createBateauPortIcon('#065361'));
     else if ( type === 'Équipement anti-pollution')
-         map.addImage(type, createAntiPollutionIcon('#00ff73'));
+         map.addImage(type, createAntiPollutionIcon('#6aa806'));
     else if ( type === 'Autorité / Police')
          map.addImage(type, createPoliceIcon('#ff0000'));
     else if ( type === 'Navire local')
@@ -98,7 +98,7 @@ function boatIcons(map : maplibregl.Map, type : string)
     else if ( type === 'Autre')
          map.addImage(type, createAutreIcon('#fff'));
     else if ( type === 'Non spécifié')
-         map.addImage(type, createNonSpecifieIcon('#17361f'));
+         map.addImage(type, createNonSpecifieIcon('#eeff0049'));
     return;
 }
 

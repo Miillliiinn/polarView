@@ -1,5 +1,5 @@
-// Silhouette de bateau de pêche
-export function createPecheIcon(color: string, size = 43): ImageData {
+// Silhouette de bateau de peche
+export function createPecheIcon(color: string, size = 60): ImageData {
   const canvas = document.createElement('canvas');
   canvas.width = size;
   canvas.height = size;
@@ -8,36 +8,39 @@ export function createPecheIcon(color: string, size = 43): ImageData {
   ctx.translate(size / 2, size / 2);
   ctx.fillStyle = color;
   ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = size * 0.02;
+  ctx.lineWidth = Math.max(1.5, size * 0.04); 
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
 
   const s = size / 100;
 
-  // Coque robuste, arrondie à l'avant
   ctx.beginPath();
-  ctx.moveTo(0, -38 * s);
-  ctx.lineTo(8 * s, -20 * s);
-  ctx.lineTo(10 * s, 22 * s);
-  ctx.lineTo(-10 * s, 22 * s);
-  ctx.lineTo(-8 * s, -20 * s);
+  ctx.moveTo(-5 * s, -5 * s);
+  ctx.lineTo(-32 * s, -18 * s);
+  ctx.moveTo(5 * s, -5 * s);
+  ctx.lineTo(32 * s, -18 * s);
+  ctx.moveTo(-32 * s, -18 * s);
+  ctx.lineTo(-32 * s, -10 * s);
+  ctx.moveTo(32 * s, -18 * s);
+  ctx.lineTo(32 * s, -10 * s);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(0, -40 * s);               // Étrave / Proue pointue
+  ctx.lineTo(16 * s, -10 * s);          // Flanc avant droit évasé
+  ctx.lineTo(14 * s, 32 * s);           // Poupe droite
+  ctx.lineTo(-14 * s, 32 * s);          // Poupe gauche
+  ctx.lineTo(-16 * s, -10 * s);         // Flanc avant gauche évasé
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
-
-  // Timonerie à l'arrière
+  ctx.fillStyle = '#ffffff';
   ctx.beginPath();
-  ctx.rect(-5 * s, 6 * s, 10 * s, 12 * s);
+  ctx.rect(-8 * s, 2 * s, 16 * s, 18 * s);
   ctx.fill();
-  ctx.stroke();
-
-  // Portiques / bômes de chalutage de part et d'autre (traits obliques)
-  ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = size * 0.018;
+  ctx.fillStyle = color;
   ctx.beginPath();
-  ctx.moveTo(-9 * s, -6 * s);
-  ctx.lineTo(-26 * s, 4 * s);
-  ctx.moveTo(9 * s, -6 * s);
-  ctx.lineTo(26 * s, 4 * s);
-  ctx.stroke();
+  ctx.rect(-6 * s, 5 * s, 12 * s, 5 * s);
+  ctx.fill();
 
   return ctx.getImageData(0, 0, size, size);
 }

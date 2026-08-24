@@ -51,8 +51,8 @@ export default function FranceMap() {
       setupRailLayer(mapInstance);
       setupTrainsLayer(mapInstance);
       setupGareLayer(mapInstance);
-      setupPlanesLayer(mapInstance);
       cleanupBoats = setupBoatsLayer(mapInstance);
+      setupPlanesLayer(mapInstance);
     });
 
     return () => {
@@ -80,18 +80,18 @@ export default function FranceMap() {
     setVisibleTrains(newVisibility);
   };
 
+    const handleBoatsData = () => {
+    if (!map.current) return;
+    const newVisibility = !visibleBoats;
+    toggleBoatsLayer(map.current, newVisibility);
+    setVisibleBoats(newVisibility);
+  };
+
   const handlePlanesData = () => {
     if (!map.current) return;
     const newVisibility = !visiblePlanes;
     togglePlaneLayer(map.current, newVisibility);
     setVisiblePlanes(newVisibility);
-  };
-
-  const handleBoatsData = () => {
-    if (!map.current) return;
-    const newVisibility = !visibleBoats;
-    toggleBoatsLayer(map.current, newVisibility);
-    setVisibleBoats(newVisibility);
   };
 
   return (

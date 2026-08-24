@@ -1,27 +1,38 @@
-// Silhouette générique "autre type de navire"
-export function createAutreIcon(color: string, size = 43): ImageData {
+// Silhouette générique
+export function createAutreIcon(color: string, size = 60): ImageData {
   const canvas = document.createElement('canvas');
   canvas.width = size;
   canvas.height = size;
   const ctx = canvas.getContext('2d')!;
 
-  ctx.translate(size / 2, size / 2);
-  ctx.fillStyle = color;
-  ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = size * 0.02;
-
   const s = size / 100;
 
-  // Coque neutre, ni fine ni large, sans superstructure marquée
+  ctx.save();
+  ctx.translate(size / 2, size / 2);
+
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.fillStyle = color;
+  ctx.strokeStyle = '#0a0b0a';
+  ctx.lineWidth = Math.max(1.8, size * 0.035);
+
   ctx.beginPath();
-  ctx.moveTo(0, -32 * s);
-  ctx.lineTo(7 * s, -18 * s);
-  ctx.lineTo(8 * s, 26 * s);
-  ctx.lineTo(-8 * s, 26 * s);
-  ctx.lineTo(-7 * s, -18 * s);
+  ctx.moveTo(0, -40 * s);               // Proue
+  ctx.lineTo(12 * s, -18 * s);          // Avant
+  ctx.lineTo(12 * s, 34 * s);           // Flancs droits
+  ctx.lineTo(8 * s, 40 * s);            // Poupe droite
+  ctx.lineTo(-8 * s, 40 * s);           // Poupe gauche
+  ctx.lineTo(-12 * s, 34 * s);          // Flancs droits
+  ctx.lineTo(-12 * s, -18 * s);         // Avant
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
+  ctx.fillStyle = '#970202';
+  ctx.beginPath();
+  ctx.arc(0, 0, 8 * s, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.restore();
 
   return ctx.getImageData(0, 0, size, size);
 }

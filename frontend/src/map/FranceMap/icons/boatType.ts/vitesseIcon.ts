@@ -1,5 +1,5 @@
-// Silhouette d'engin à grande vitesse (high speed craft)
-export function createVitesseIcon(color: string, size = 43): ImageData {
+// Silhouette d'engin à grande vitesse
+export function createVitesseIcon(color: string, size = 60): ImageData {
   const canvas = document.createElement('canvas');
   canvas.width = size;
   canvas.height = size;
@@ -8,30 +8,32 @@ export function createVitesseIcon(color: string, size = 43): ImageData {
   ctx.translate(size / 2, size / 2);
   ctx.fillStyle = color;
   ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = size * 0.02;
+  ctx.lineWidth = Math.max(1.5, size * 0.04);
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
 
   const s = size / 100;
 
-  // Coque très effilée, longue et fine (silhouette véloce)
   ctx.beginPath();
-  ctx.moveTo(0, -45 * s);
-  ctx.lineTo(3.5 * s, -20 * s);
-  ctx.lineTo(3.5 * s, 22 * s);
-  ctx.lineTo(0, 42 * s);
-  ctx.lineTo(-3.5 * s, 22 * s);
-  ctx.lineTo(-3.5 * s, -20 * s);
+  ctx.moveTo(0, -44 * s);               
+  ctx.lineTo(8.5 * s, -18 * s);        
+  ctx.lineTo(7.5 * s, 32 * s);         
+  ctx.lineTo(5 * s, 42 * s);           
+  ctx.lineTo(-5 * s, 42 * s);           
+  ctx.lineTo(-7.5 * s, 32 * s);         
+  ctx.lineTo(-8.5 * s, -18 * s);       
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
-
-  // Lignes de sillage à l'arrière pour suggérer la vitesse
   ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = size * 0.012;
+  ctx.lineWidth = Math.max(1.2, size * 0.03);
   ctx.beginPath();
-  ctx.moveTo(-2 * s, 30 * s);
-  ctx.lineTo(-9 * s, 42 * s);
-  ctx.moveTo(2 * s, 30 * s);
-  ctx.lineTo(9 * s, 42 * s);
+  ctx.moveTo(-4 * s, 36 * s);
+  ctx.lineTo(-12 * s, 46 * s);
+  ctx.moveTo(4 * s, 36 * s);
+  ctx.lineTo(12 * s, 46 * s);
+  ctx.moveTo(0, 40 * s);
+  ctx.lineTo(0, 48 * s);
   ctx.stroke();
 
   return ctx.getImageData(0, 0, size, size);

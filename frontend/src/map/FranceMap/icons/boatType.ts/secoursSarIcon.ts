@@ -1,34 +1,37 @@
-// Silhouette de navire de secours / SAR (recherche et sauvetage)
-export function createSecoursSarIcon(color: string, size = 43): ImageData {
+// Silhouette de navire de secours / SAR avec grande croix centrale
+export function createSecoursSarIcon(color: string, size = 60): ImageData {
   const canvas = document.createElement('canvas');
   canvas.width = size;
   canvas.height = size;
   const ctx = canvas.getContext('2d')!;
-
+  const s = size / 100;
+  ctx.save();
   ctx.translate(size / 2, size / 2);
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
   ctx.fillStyle = color;
   ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = size * 0.02;
+  ctx.lineWidth = Math.max(1.5, size * 0.04);
 
-  const s = size / 100;
-
-  // Petite coque robuste (canot de sauvetage)
   ctx.beginPath();
-  ctx.moveTo(0, -34 * s);
-  ctx.lineTo(7 * s, -16 * s);
-  ctx.lineTo(8 * s, 24 * s);
-  ctx.lineTo(-8 * s, 24 * s);
-  ctx.lineTo(-7 * s, -16 * s);
+  ctx.moveTo(0, -42 * s);               // Proue
+  ctx.lineTo(13 * s, -18 * s);          // Flanc avant
+  ctx.lineTo(12 * s, 30 * s);           // Flanc arrière
+  ctx.lineTo(8 * s, 38 * s);            // Poupe droite
+  ctx.lineTo(-8 * s, 38 * s);           // Poupe gauche
+  ctx.lineTo(-12 * s, 30 * s);          // Flanc arrière
+  ctx.lineTo(-13 * s, -18 * s);         // Flanc avant
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
-
-  // Croix de secours au centre
   ctx.fillStyle = '#ffffff';
   ctx.beginPath();
-  ctx.rect(-1.8 * s, -8 * s, 3.6 * s, 16 * s);
-  ctx.rect(-8 * s, -1.8 * s, 16 * s, 3.6 * s);
+  ctx.rect(-10 * s, -18 * s, 20 * s, 36 * s);
   ctx.fill();
+  ctx.fillStyle = '#ff0000';
+  ctx.fillRect(-3 * s, -12 * s, 6 * s, 24 * s);
+  ctx.fillRect(-10 * s, -3 * s, 20 * s, 6 * s);
+  ctx.restore();
 
   return ctx.getImageData(0, 0, size, size);
 }
