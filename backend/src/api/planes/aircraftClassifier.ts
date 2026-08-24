@@ -1,21 +1,3 @@
-/**
- * Classification "best effort" d'un aéronef à partir des données ADS-B.
- *
- * Sources utilisées (par ordre de fiabilité) :
- *  - `dbFlags` (bitfield) -> military / PIA / LADD, quand la source l'expose. adsb.fi et adsb.lol
- *    l'exposent pour les appareils qu'ils ont explicitement taggés militaires
- *    (cf. github.com/adsbfi/opendata, endpoint /v2/mil).
- *  - `category` (catégorie d'émetteur ADS-B, norme DO-260B) -> distingue nativement :
- *      A0-A7 : aéronefs à voilure fixe (A7 = giravion/hélicoptère)
- *      B1 : planeur, B2 : ballon, B4 : ULM/parapente, B6 : drone/UAV
- *      C0-C3 : véhicules au sol / obstacles
- *  - `t` (désignateur de type ICAO, ex: "A320", "H60") -> table de correspondance ci-dessous pour
- *    affiner (jet privé vs commercial, nombre de réacteurs, hélico/avion militaire connu, etc).
- *
- * Cette table n'est PAS exhaustive (il existe environ 2000 désignateurs ICAO officiels).
- * Complétez-la au besoin avec la base ICAO Doc 8643, ou avec la base "type-longnames" d'adsb.fi
- * (github.com/adsbfi/type-longnames) qui référence spécifiquement les types militaires.
- */
 
 export type AircraftKind =
   | 'commercial'

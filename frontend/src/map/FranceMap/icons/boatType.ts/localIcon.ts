@@ -11,7 +11,7 @@ export function createLocalIcon(color: string, size = 60): ImageData {
   ctx.translate(size / 2, size / 2);
 
   ctx.fillStyle = color;
-  ctx.strokeStyle = '#ffffff';
+  ctx.strokeStyle = '#000';
   ctx.lineWidth = size * 0.025;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';

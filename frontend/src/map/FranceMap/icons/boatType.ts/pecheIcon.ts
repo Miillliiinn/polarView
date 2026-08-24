@@ -7,7 +7,7 @@ export function createPecheIcon(color: string, size = 60): ImageData {
 
   ctx.translate(size / 2, size / 2);
   ctx.fillStyle = color;
-  ctx.strokeStyle = '#ffffff';
+  ctx.strokeStyle = '#fff';
   ctx.lineWidth = Math.max(1.5, size * 0.04); 
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';

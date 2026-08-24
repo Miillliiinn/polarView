@@ -11,7 +11,7 @@ export function createAntiPollutionIcon(color: string, size = 80): ImageData {
   ctx.lineJoin = 'round';
   const strokeWidth = Math.max(1.5, size * 0.035);
   ctx.lineWidth = strokeWidth;
-  ctx.strokeStyle = '#ffffff';
+  ctx.strokeStyle = '#000';
   ctx.fillStyle = color;
   ctx.beginPath();
   ctx.moveTo(-26 * s, -12 * s);

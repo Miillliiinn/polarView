@@ -12,7 +12,7 @@ export function createRemorqueurPortuaireIcon(color: string, size = 80): ImageDa
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   ctx.fillStyle = color;
-  ctx.strokeStyle = '#ffffff';
+  ctx.strokeStyle = '#0cf900';
   ctx.lineWidth = Math.max(1.5, size * 0.03);
   ctx.beginPath();
   ctx.moveTo(0, -28 * s);               // Proue très ronde

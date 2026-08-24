@@ -14,7 +14,7 @@ export function createPetrolierIcon(color: string, size = 70): ImageData {
   ctx.lineJoin = 'round';
 
   ctx.fillStyle = color;
-  ctx.strokeStyle = '#ffffff';
+  ctx.strokeStyle = '#000000ab';
   ctx.lineWidth = Math.max(1.8, size * 0.035);
 
   ctx.beginPath();

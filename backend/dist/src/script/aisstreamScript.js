@@ -182,7 +182,6 @@ let AisStreamAPI = AisStreamAPI_1 = class AisStreamAPI {
         };
         this.ships.set(mmsi, updatedShip);
         this.shipUpdates$.next(updatedShip);
-        this.logger.log(`Navire mis à jour : ${updatedShip.name || mmsi}`);
     }
     pruneStaleShips() {
         const now = Date.now();

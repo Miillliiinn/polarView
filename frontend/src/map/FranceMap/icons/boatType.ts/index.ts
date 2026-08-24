@@ -98,7 +98,7 @@ function boatIcons(map : maplibregl.Map, type : string)
     else if ( type === 'Autre')
          map.addImage(type, createAutreIcon('#fff'));
     else if ( type === 'Non spécifié')
-         map.addImage(type, createNonSpecifieIcon('#eeff0049'));
+         map.addImage(type, createNonSpecifieIcon('#ff0000b3'));
     return;
 }
 

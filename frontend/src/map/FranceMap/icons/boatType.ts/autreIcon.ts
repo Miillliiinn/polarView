@@ -13,7 +13,7 @@ export function createAutreIcon(color: string, size = 60): ImageData {
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   ctx.fillStyle = color;
-  ctx.strokeStyle = '#0a0b0a';
+  ctx.strokeStyle = '#000';
   ctx.lineWidth = Math.max(1.8, size * 0.035);
 
   ctx.beginPath();

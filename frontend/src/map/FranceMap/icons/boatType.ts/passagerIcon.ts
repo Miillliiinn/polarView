@@ -1,5 +1,5 @@
 // Silhouette de navire à passagers avec pictogramme de personnage entier (avec jambes)
-export function createPassagerIcon(color: string, size = 70): ImageData {
+export function createPassagerIcon(color: string, size = 60): ImageData {
   const canvas = document.createElement('canvas');
   canvas.width = size;
   canvas.height = size;
@@ -13,7 +13,7 @@ export function createPassagerIcon(color: string, size = 70): ImageData {
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   ctx.fillStyle = color;
-  ctx.strokeStyle = '#ffffff';
+  ctx.strokeStyle = '#00f7ff';
   ctx.lineWidth = Math.max(1.8, size * 0.035);
   ctx.beginPath();
   ctx.moveTo(0, -42 * s);               // Proue

@@ -12,7 +12,7 @@ export function createTransportMedicalIcon(color: string, size = 80): ImageData 
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   ctx.fillStyle = color;
-  ctx.strokeStyle = '#ffffff';
+  ctx.strokeStyle = '#000';
   ctx.lineWidth = Math.max(1.8, size * 0.035);
   ctx.beginPath();
   ctx.moveTo(0, -38 * s);               // Proue

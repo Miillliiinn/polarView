@@ -1,5 +1,5 @@
 // Silhouette de bateau de plaisance
-export function createPlaisanceIcon(color: string, size = 60): ImageData {
+export function createPlaisanceIcon(color: string, size = 70): ImageData {
   const canvas = document.createElement('canvas');
   canvas.width = size;
   canvas.height = size;
@@ -7,7 +7,7 @@ export function createPlaisanceIcon(color: string, size = 60): ImageData {
 
   ctx.translate(size / 2, size / 2);
   ctx.fillStyle = color;
-  ctx.strokeStyle = '#ffffff';
+  ctx.strokeStyle = '#000';
   ctx.lineWidth = Math.max(1.5, size * 0.04);
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';

@@ -4,22 +4,15 @@ export interface AdsbZone
 {
   lat: number;
   lon: number;
-  /** rayon en miles nautiques, 250 NM max côté adsb.fi/adsb.lol */
   dist: number;
 }
 
-/**
- * Zones par défaut couvrant la France métropolitaine et ses abords, dans l'esprit de la bbox
- * utilisée précédemment pour OpenSky (lamin 37.5/lamax 55.5/lomin -9.0/lomax 13.0).
- * adsb.fi et adsb.lol limitent le rayon à 250 NM (~463 km) par requête, d'où le découpage en
- * plusieurs points qui se chevauchent légèrement. À ajuster librement selon la zone qui vous
- * intéresse (moins de zones = moins de requêtes = cache rafraîchi plus vite).
- */
+
 export const DEFAULT_FRANCE_ZONES: AdsbZone[] = [
-  { lat: 47.2, lon: -1.6, dist: 220 }, // Nantes / façade atlantique
-  { lat: 48.85, lon: 2.35, dist: 250 }, // Paris / nord / Benelux
-  { lat: 43.6, lon: 1.44, dist: 250 }, // Toulouse / sud-ouest / nord Espagne
-  { lat: 45.0, lon: 6.5, dist: 220 }, // Lyon / est / Suisse / nord Italie
+  { lat: 47.2, lon: -1.6, dist: 220 }, 
+  { lat: 48.85, lon: 2.35, dist: 250 }, 
+  { lat: 43.6, lon: 1.44, dist: 250 },
+  { lat: 45.0, lon: 6.5, dist: 220 }, 
 ];
 
 function adsbfiUrl(zone: AdsbZone) {
@@ -46,10 +39,6 @@ async function fetchZoneFrom(url: string): Promise<any[]> {
   return data.ac || [];
 }
 
-/**
- * Récupère une zone en tentant adsb.fi en premier, puis adsb.lol en repli si adsb.fi échoue
- * (indisponibilité, 429, maintenance, etc).
- */
 async function fetchZoneWithFallback(zone: AdsbZone): Promise<any[]> {
   try {
     return await fetchZoneFrom(adsbfiUrl(zone));
@@ -68,12 +57,6 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-/**
- * Récupère et fusionne les aéronefs sur toutes les zones fournies, en dédoublonnant par `hex`
- * (une même cible peut apparaître dans deux zones qui se chevauchent).
- * Les requêtes sont espacées de 350ms pour respecter la limite publique d'environ 1 req/s
- * d'adsb.fi. Retourne [] en cas d'erreur globale (jamais d'exception qui remonte).
- */
 export async function fetchAdsbStates(zones: AdsbZone[] = DEFAULT_FRANCE_ZONES) {
   try {
     const byHex = new Map<string, any>();
@@ -84,7 +67,7 @@ export async function fetchAdsbStates(zones: AdsbZone[] = DEFAULT_FRANCE_ZONES) 
         if (!ac.hex || ac.lat == null || ac.lon == null) continue;
         byHex.set(ac.hex, ac);
       }
-      await sleep(2000); // adsb.fi limite à 1 req/s : on garde une marge pour éviter les 429
+      await sleep(2000);
     }
 
     console.log(`✈️  ADSB (adsb.fi / adsb.lol) request — ${byHex.size} appareils ✈️`);

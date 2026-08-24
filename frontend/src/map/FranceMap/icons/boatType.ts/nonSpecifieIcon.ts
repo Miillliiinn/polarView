@@ -10,7 +10,7 @@ export function createNonSpecifieIcon(color: string, size = 63): ImageData {
   ctx.save();
   ctx.translate(size / 2, size / 2);
   ctx.fillStyle = color;
-  ctx.strokeStyle = '#ffffff';
+  ctx.strokeStyle = '#000';
   ctx.lineWidth = Math.max(1.8, size * 0.035);
   ctx.beginPath();
   ctx.arc(0, 0, 28 * s, 0, Math.PI * 2);

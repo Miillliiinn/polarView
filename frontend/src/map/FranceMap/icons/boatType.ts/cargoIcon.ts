@@ -13,7 +13,7 @@ export function createCargoIcon(color: string, size = 70): ImageData {
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   ctx.fillStyle = color;
-  ctx.strokeStyle = '#ffffff';
+  ctx.strokeStyle = '#000000bb';
   ctx.lineWidth = Math.max(1.8, size * 0.035);
   ctx.beginPath();
   ctx.moveTo(0, -46 * s);               // Proue

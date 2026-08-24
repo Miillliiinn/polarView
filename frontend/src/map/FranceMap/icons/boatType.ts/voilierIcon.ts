@@ -7,7 +7,7 @@ export function createVoilierIcon(color: string, size = 63): ImageData {
 
   ctx.translate(size / 2, size / 2);
   ctx.fillStyle = color;
-  ctx.strokeStyle = '#ffffff';
+  ctx.strokeStyle = '#000';
   ctx.lineWidth = Math.max(1.5, size * 0.04);
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';

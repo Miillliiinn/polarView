@@ -52,9 +52,6 @@ export class AisStreamAPI implements OnModuleInit, OnModuleDestroy
   private ws: WebSocket | null = null;
 
   private readonly ships = new Map<number, ShipPosition>();
-  // Table statique séparée : les infos de type arrivent moins souvent et
-  // indépendamment des positions, on les garde à part pour pouvoir les
-  // fusionner dans les deux sens (position arrive avant ou après le type).
   private readonly shipTypes = new Map<number, number>();
   private readonly shipUpdates$ = new Subject<ShipPosition>();
 
@@ -184,7 +181,7 @@ export class AisStreamAPI implements OnModuleInit, OnModuleDestroy
     };
     this.ships.set(mmsi, updatedShip);
     this.shipUpdates$.next(updatedShip);
-    this.logger.log(`Navire mis à jour : ${updatedShip.name || mmsi}`);
+    //this.logger.log(`Navire mis à jour : ${updatedShip.name || mmsi}`);
   }
 
   private pruneStaleShips()
