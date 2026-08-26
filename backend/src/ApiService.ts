@@ -8,8 +8,7 @@ import { fetchAdsbStates, DEFAULT_FRANCE_ZONES } from './api/planes/adsb';
 import { mergeAdsbAndOpensky } from './api/planes/mergeAdsbOpensky'; 
 import { fetchSncfDepartures, fetchSncfGares, fetchSncfRailLines }  from './api/sncf';
 import { fetchMeteofranceVigilance } from './api/meteofranceVigilance'; 
-import { fetchPlaneSpotterPhoto } from './api/planeSpotter';
-import { CombinedAircraft } from './api/planes/mergeAdsbOpensky'; 
+import { fetchPlaneSpotterPhoto } from './api/planes/planeSpotter'; 
 
 @Injectable()
 export class ApiService {

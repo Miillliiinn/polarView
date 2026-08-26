@@ -6,10 +6,16 @@ import { globalCache } from '../../../../api/classCache';
 export function setupPlanesLayer(map: maplibregl.Map)
 {
   map.addImage('plane-ground', createPlaneIcon('#989898', 96));
-  map.addImage('plane-low', createPlaneIcon('#a199ff', 96));
-  map.addImage('plane-mid', createPlaneIcon('#7c70ff', 96));
-  map.addImage('plane-high', createPlaneIcon('#5b4dff', 96));
-  map.addImage('plane-cruise', createPlaneIcon('#1500ff', 96));
+  map.addImage('plane-low', createPlaneIcon('#ff9999', 96));
+  map.addImage('plane-mid', createPlaneIcon('#7072ff', 96));
+  map.addImage('plane-high', createPlaneIcon('#4db8ff', 96));
+  map.addImage('plane-cruise', createPlaneIcon('#00ff1e', 96));
+
+  // map.addImage('plane-ground', createPlaneIcon('#989898', 96));
+  // map.addImage('plane-low', createPlaneIcon('#a199ff', 96));
+  // map.addImage('plane-mid', createPlaneIcon('#7c70ff', 96));
+  // map.addImage('plane-high', createPlaneIcon('#5b4dff', 96));
+  // map.addImage('plane-cruise', createPlaneIcon('#1500ff', 96));
 
   map.addSource('planes', {
     type: 'geojson',

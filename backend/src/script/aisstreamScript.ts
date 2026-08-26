@@ -18,6 +18,8 @@ export interface ShipPosition {
 const RECONNECT_DELAY_MS = 5000;
 const STALE_SHIP_MAX_AGE_MS = 30 * 60 * 1000;
 const STALE_CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
+const WATCHDOG_NO_MESSAGE_TIMEOUT_MS = 60 * 1000;
+const WATCHDOG_CHECK_INTERVAL_MS = 15 * 1000;
 
 function getShipTypeLabel(type: number | null): string {
   if (type === null) return 'Inconnu';
@@ -57,6 +59,8 @@ export class AisStreamAPI implements OnModuleInit, OnModuleDestroy
 
   private reconnectTimeout: NodeJS.Timeout | null = null;
   private cleanupInterval: NodeJS.Timeout | null = null;
+  private watchdogInterval: NodeJS.Timeout | null = null;
+  private lastMessageAt: number = Date.now();
   private destroyed = false;
 
   constructor(private readonly configService: ConfigService) {}
@@ -66,6 +70,7 @@ export class AisStreamAPI implements OnModuleInit, OnModuleDestroy
     if (process.env.RUN_BOATS_API !== 'true') return;
     this.connect();
     this.cleanupInterval = setInterval(() => this.pruneStaleShips(), STALE_CLEANUP_INTERVAL_MS);
+    this.watchdogInterval = setInterval(() => this.checkWatchdog(), WATCHDOG_CHECK_INTERVAL_MS);
   }
 
   private connect()
@@ -82,6 +87,7 @@ export class AisStreamAPI implements OnModuleInit, OnModuleDestroy
 
     this.ws.on('open', () => {
       this.logger.log('AisStream connexion success');
+      this.lastMessageAt = Date.now();
 
       const subscription = {
         APIKey: apiKey,
@@ -93,6 +99,8 @@ export class AisStreamAPI implements OnModuleInit, OnModuleDestroy
     });
 
     this.ws.on('message', (rawData: any) => {
+      this.lastMessageAt = Date.now();
+
       let data: any;
 
       try {
@@ -134,6 +142,22 @@ export class AisStreamAPI implements OnModuleInit, OnModuleDestroy
       this.reconnectTimeout = null;
       this.connect();
     }, RECONNECT_DELAY_MS);
+  }
+
+  private checkWatchdog()
+  {
+    if (this.destroyed || !this.ws) return;
+
+    const silentFor = Date.now() - this.lastMessageAt;
+    if (silentFor > WATCHDOG_NO_MESSAGE_TIMEOUT_MS) {
+      this.logger.warn(
+        `Aucun message reçu depuis ${Math.round(silentFor / 1000)}s (silent failure suspectée). Forçage de la reconnexion.`,
+      );
+      this.ws.terminate();
+      this.ws = null;
+      this.lastMessageAt = Date.now();
+      this.scheduleReconnect();
+    }
   }
 
   private updateShipType(data: any)
@@ -217,15 +241,8 @@ export class AisStreamAPI implements OnModuleInit, OnModuleDestroy
     this.destroyed = true;
     if (this.reconnectTimeout) clearTimeout(this.reconnectTimeout);
     if (this.cleanupInterval) clearInterval(this.cleanupInterval);
+    if (this.watchdogInterval) clearInterval(this.watchdogInterval);
     this.ws?.close();
     this.shipUpdates$.complete();
   }
 }
-
-
-
-
-
-
-
-//[[[37.5, -9.0], [55.5, 13.0]]]

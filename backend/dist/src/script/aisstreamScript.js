@@ -21,6 +21,8 @@ const rxjs_1 = require("rxjs");
 const RECONNECT_DELAY_MS = 5000;
 const STALE_SHIP_MAX_AGE_MS = 30 * 60 * 1000;
 const STALE_CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
+const WATCHDOG_NO_MESSAGE_TIMEOUT_MS = 60 * 1000;
+const WATCHDOG_CHECK_INTERVAL_MS = 15 * 1000;
 function getShipTypeLabel(type) {
     if (type === null)
         return 'Inconnu';
@@ -77,6 +79,8 @@ let AisStreamAPI = AisStreamAPI_1 = class AisStreamAPI {
     shipUpdates$ = new rxjs_1.Subject();
     reconnectTimeout = null;
     cleanupInterval = null;
+    watchdogInterval = null;
+    lastMessageAt = Date.now();
     destroyed = false;
     constructor(configService) {
         this.configService = configService;
@@ -86,6 +90,7 @@ let AisStreamAPI = AisStreamAPI_1 = class AisStreamAPI {
             return;
         this.connect();
         this.cleanupInterval = setInterval(() => this.pruneStaleShips(), STALE_CLEANUP_INTERVAL_MS);
+        this.watchdogInterval = setInterval(() => this.checkWatchdog(), WATCHDOG_CHECK_INTERVAL_MS);
     }
     connect() {
         if (this.destroyed)
@@ -98,6 +103,7 @@ let AisStreamAPI = AisStreamAPI_1 = class AisStreamAPI {
         this.ws = new ws_1.default('wss://stream.aisstream.io/v0/stream');
         this.ws.on('open', () => {
             this.logger.log('AisStream connexion success');
+            this.lastMessageAt = Date.now();
             const subscription = {
                 APIKey: apiKey,
                 BoundingBoxes: [[[37.5, -9.0], [55.5, 13.0]]],
@@ -106,6 +112,7 @@ let AisStreamAPI = AisStreamAPI_1 = class AisStreamAPI {
             this.ws?.send(JSON.stringify(subscription));
         });
         this.ws.on('message', (rawData) => {
+            this.lastMessageAt = Date.now();
             let data;
             try {
                 data = JSON.parse(rawData.toString());
@@ -141,6 +148,18 @@ let AisStreamAPI = AisStreamAPI_1 = class AisStreamAPI {
             this.reconnectTimeout = null;
             this.connect();
         }, RECONNECT_DELAY_MS);
+    }
+    checkWatchdog() {
+        if (this.destroyed || !this.ws)
+            return;
+        const silentFor = Date.now() - this.lastMessageAt;
+        if (silentFor > WATCHDOG_NO_MESSAGE_TIMEOUT_MS) {
+            this.logger.warn(`Aucun message reçu depuis ${Math.round(silentFor / 1000)}s (silent failure suspectée). Forçage de la reconnexion.`);
+            this.ws.terminate();
+            this.ws = null;
+            this.lastMessageAt = Date.now();
+            this.scheduleReconnect();
+        }
     }
     updateShipType(data) {
         const mmsi = data.MetaData?.MMSI;
@@ -203,12 +222,22 @@ let AisStreamAPI = AisStreamAPI_1 = class AisStreamAPI {
     getAllShips() {
         return Array.from(this.ships.values());
     }
+    getStreamHealth() {
+        return {
+            connected: this.ws !== null && this.ws.readyState === ws_1.default.OPEN,
+            lastMessageAt: new Date(this.lastMessageAt),
+            silentForMs: Date.now() - this.lastMessageAt,
+            shipCount: this.ships.size,
+        };
+    }
     onModuleDestroy() {
         this.destroyed = true;
         if (this.reconnectTimeout)
             clearTimeout(this.reconnectTimeout);
         if (this.cleanupInterval)
             clearInterval(this.cleanupInterval);
+        if (this.watchdogInterval)
+            clearInterval(this.watchdogInterval);
         this.ws?.close();
         this.shipUpdates$.complete();
     }

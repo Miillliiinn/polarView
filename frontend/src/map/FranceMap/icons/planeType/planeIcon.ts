@@ -7,10 +7,10 @@ export function createPlaneIcon(color: string, size = 96): ImageData {
 
   ctx.translate(size / 2, size / 2);
   ctx.fillStyle = color;
-  ctx.strokeStyle = '#ffffff';
+  ctx.strokeStyle = '#040404';
   ctx.lineWidth = size * 0.02;
 
-  const s = size / 100;
+  const s = size / 130;
 
   ctx.beginPath();
   ctx.moveTo(0, -45 * s);

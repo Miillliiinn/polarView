@@ -21,25 +21,12 @@ export interface CombinedAircraft
   isMilitary: boolean | null;
   isHelicopter: boolean | null;
   lastSeenSeconds: number | null;
-  /** 'both' = corrélé avec succès entre adsb et opensky sur ce icao24 */
   source: 'adsb' | 'opensky' | 'both';
 }
 
-/**
- * Fusionne adsb (source riche : type, réacteurs, militaire...) et OpenSky
- * (source complémentaire : originCountry, et filet de sécurité position/vitesse
- * si adsb ne voit pas l'appareil).
- *
- * Corrélation : on indexe OpenSky par icao24 AVANT de parcourir adsb, pour
- * pouvoir aller chercher `originCountry` (et servir de repli sur les champs
- * de position/vitesse) pendant la boucle adsb — au lieu de l'ignorer comme
- * le faisait le `continue` précédent.
- */
 export function mergeAdsbAndOpensky(adsbCache: any[], openskyCache: any[]): CombinedAircraft[] {
   const byIcao = new Map<string, CombinedAircraft>();
 
-  // Index OpenSky par icao24, construit une seule fois, pour un lookup O(1)
-  // pendant la boucle adsb (au lieu d'un .find() en O(n) répété).
   const openskyByIcao = new Map<string, any>();
   for (const os of openskyCache || []) {
     if (!os.icao24) continue;
@@ -53,7 +40,6 @@ export function mergeAdsbAndOpensky(adsbCache: any[], openskyCache: any[]): Comb
 
     byIcao.set(key, {
       icao24: ac.icao24,
-      // adsb en priorité (plus fiable/frais), repli sur opensky si absent
       callsign: ac.callsign ?? os?.callsign ?? null,
       // OpenSky est la SEULE source à fournir ce champ : c'était le trou du bug
       originCountry: os?.country ?? null,

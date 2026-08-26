@@ -7,7 +7,6 @@ export interface AdsbZone
   dist: number;
 }
 
-
 export const DEFAULT_FRANCE_ZONES: AdsbZone[] = [
   { lat: 47.2, lon: -1.6, dist: 220 }, 
   { lat: 48.85, lon: 2.35, dist: 250 }, 
