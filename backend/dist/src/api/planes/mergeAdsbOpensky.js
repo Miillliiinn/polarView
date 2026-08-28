@@ -2,6 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.mergeAdsbAndOpensky = mergeAdsbAndOpensky;
 const aircraftClassifier_1 = require("./aircraftClassifier");
+function takeInformation(data, fieldName) {
+    if (data && data[fieldName] !== undefined) {
+        return data[fieldName];
+    }
+    return null;
+}
 function mergeAdsbAndOpensky(adsbCache, openskyCache, aircraftservice) {
     const byIcao = new Map();
     const openskyByIcao = new Map();
@@ -16,7 +22,14 @@ function mergeAdsbAndOpensky(adsbCache, openskyCache, aircraftservice) {
         const key = ac.icao24.toLowerCase();
         const os = openskyByIcao.get(key);
         const data = aircraftservice.getAircraftInDbByIcao(key);
-        console.log(data);
+        const engineDB = takeInformation(data, "engines");
+        const aircraftclassDB = takeInformation(data, "icaoAircraftClass");
+        const manufacturerIcaoDB = takeInformation(data, "manufacturerIcao");
+        const manufacturerNameDB = takeInformation(data, "manufacturerName");
+        const modelDB = takeInformation(data, "model");
+        const operatorDB = takeInformation(data, "operator");
+        const ownerDB = takeInformation(data, "owner");
+        const typecodeDB = takeInformation(data, "typecode");
         byIcao.set(key, {
             icao24: ac.icao24,
             callsign: ac.callsign ?? os?.callsign ?? null,
@@ -32,11 +45,18 @@ function mergeAdsbAndOpensky(adsbCache, openskyCache, aircraftservice) {
             squawk: ac.squawk ?? os?.squawk ?? null,
             typeCode: ac.typeCode ?? null,
             typeLabel: ac.typeLabel ?? null,
-            engines: ac.engines ?? null,
             kind: ac.kind ?? (os ? (0, aircraftClassifier_1.classifyOpenskyCategory)(os.category).kind : null),
             isMilitary: ac.isMilitary ?? null,
             isHelicopter: ac.isHelicopter ?? (os ? (0, aircraftClassifier_1.classifyOpenskyCategory)(os.category).isHelicopter : null),
             lastSeenSeconds: ac.lastSeenSeconds ?? null,
+            engines: ac.engines ?? null,
+            icaoAircraftClass: aircraftclassDB ?? null,
+            manufacturerIcao: manufacturerIcaoDB ?? null,
+            manufacturerName: manufacturerNameDB ?? null,
+            model: modelDB ?? null,
+            operator: operatorDB ?? null,
+            owner: ownerDB ?? null,
+            typecode: typecodeDB ?? null,
             source: os ? 'both' : 'adsb',
         });
     }
@@ -47,6 +67,15 @@ function mergeAdsbAndOpensky(adsbCache, openskyCache, aircraftservice) {
         if (byIcao.has(key))
             continue;
         const { kind, isHelicopter } = (0, aircraftClassifier_1.classifyOpenskyCategory)(os.category);
+        const data = aircraftservice.getAircraftInDbByIcao(key);
+        const engineDB = takeInformation(data, "engines");
+        const aircraftclassDB = takeInformation(data, "icaoAircraftClass");
+        const manufacturerIcaoDB = takeInformation(data, "manufacturerIcao");
+        const manufacturerNameDB = takeInformation(data, "manufacturerName");
+        const modelDB = takeInformation(data, "model");
+        const operatorDB = takeInformation(data, "operator");
+        const ownerDB = takeInformation(data, "owner");
+        const typecodeDB = takeInformation(data, "typecode");
         byIcao.set(key, {
             icao24: os.icao24,
             callsign: os.callsign ?? null,
@@ -62,11 +91,18 @@ function mergeAdsbAndOpensky(adsbCache, openskyCache, aircraftservice) {
             squawk: os.squawk ?? null,
             typeCode: null,
             typeLabel: null,
-            engines: null,
             kind,
             isMilitary: null,
             isHelicopter,
             lastSeenSeconds: null,
+            engines: engineDB ?? null,
+            icaoAircraftClass: aircraftclassDB ?? null,
+            manufacturerIcao: manufacturerIcaoDB ?? null,
+            manufacturerName: manufacturerNameDB ?? null,
+            model: modelDB ?? null,
+            operator: operatorDB ?? null,
+            owner: ownerDB ?? null,
+            typecode: typecodeDB ?? null,
             source: 'opensky',
         });
     }

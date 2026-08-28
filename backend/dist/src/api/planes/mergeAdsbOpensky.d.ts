@@ -14,11 +14,18 @@ export interface CombinedAircraft {
     squawk: string | null;
     typeCode: string | null;
     typeLabel: string | null;
-    engines: number | null;
     kind: string | null;
     isMilitary: boolean | null;
     isHelicopter: boolean | null;
     lastSeenSeconds: number | null;
+    engines: number | null;
+    icaoAircraftClass: string | null;
+    manufacturerIcao: string | null;
+    manufacturerName: string | null;
+    model: string | null;
+    operator: string | null;
+    owner: string | null;
+    typecode: number | null;
     source: 'adsb' | 'opensky' | 'both';
 }
 export declare function mergeAdsbAndOpensky(adsbCache: any[], openskyCache: any[], aircraftservice: AircraftService): CombinedAircraft[];

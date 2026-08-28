@@ -17,12 +17,28 @@ export interface CombinedAircraft
   squawk: string | null;
   typeCode: string | null;
   typeLabel: string | null;
-  engines: number | null;
   kind: string | null;
   isMilitary: boolean | null;
   isHelicopter: boolean | null;
   lastSeenSeconds: number | null;
+  engines: number | null;
+  icaoAircraftClass: string | null;
+  manufacturerIcao: string | null;
+  manufacturerName: string | null;
+  model: string | null;
+  operator: string | null;
+  owner: string | null;
+  typecode: number | null;
   source: 'adsb' | 'opensky' | 'both';
+}
+
+function takeInformation(data: any, fieldName: string)
+{
+  if (data && data[fieldName] !== undefined)
+  {
+    return data[fieldName];
+  }
+  return null;
 }
 
 export function mergeAdsbAndOpensky(adsbCache: any[], openskyCache: any[], aircraftservice: AircraftService): CombinedAircraft[]
@@ -41,8 +57,16 @@ export function mergeAdsbAndOpensky(adsbCache: any[], openskyCache: any[], aircr
     if (!ac.icao24) continue;
     const key = ac.icao24.toLowerCase();
     const os = openskyByIcao.get(key);
+
     const data = aircraftservice.getAircraftInDbByIcao(key);
-    console.log(data);
+
+    const aircraftclassDB = takeInformation(data, "icaoAircraftClass");
+    const manufacturerIcaoDB = takeInformation(data, "manufacturerIcao");
+    const manufacturerNameDB = takeInformation(data, "manufacturerName");
+    const modelDB = takeInformation(data, "model");
+    const operatorDB = takeInformation(data, "operator");
+    const ownerDB = takeInformation(data, "owner");
+    const typecodeDB = takeInformation(data, "typecode");
 
     byIcao.set(key, {
       icao24: ac.icao24,
@@ -59,11 +83,18 @@ export function mergeAdsbAndOpensky(adsbCache: any[], openskyCache: any[], aircr
       squawk: ac.squawk ?? os?.squawk ?? null,
       typeCode: ac.typeCode ?? null, 
       typeLabel: ac.typeLabel ?? null,
-      engines: ac.engines ?? null,
       kind: ac.kind ?? (os ? classifyOpenskyCategory(os.category).kind : null),
       isMilitary: ac.isMilitary ?? null, 
       isHelicopter: ac.isHelicopter ?? (os ? classifyOpenskyCategory(os.category).isHelicopter : null),
       lastSeenSeconds: ac.lastSeenSeconds ?? null,
+      engines: ac.engines ?? null,
+      icaoAircraftClass: aircraftclassDB ?? null,
+      manufacturerIcao: manufacturerIcaoDB ?? null,
+      manufacturerName: manufacturerNameDB ?? null,
+      model: modelDB ?? null,
+      operator: operatorDB ?? null,
+      owner: ownerDB ?? null,
+      typecode: typecodeDB ?? null,
       source: os ? 'both' : 'adsb',
     });
   }
@@ -75,6 +106,17 @@ export function mergeAdsbAndOpensky(adsbCache: any[], openskyCache: any[], aircr
     if (byIcao.has(key)) continue; 
 
     const { kind, isHelicopter } = classifyOpenskyCategory(os.category);
+
+    const data = aircraftservice.getAircraftInDbByIcao(key);
+
+    const engineDB = takeInformation(data, "engines");
+    const aircraftclassDB = takeInformation(data, "icaoAircraftClass");
+    const manufacturerIcaoDB = takeInformation(data, "manufacturerIcao");
+    const manufacturerNameDB = takeInformation(data, "manufacturerName");
+    const modelDB = takeInformation(data, "model");
+    const operatorDB = takeInformation(data, "operator");
+    const ownerDB = takeInformation(data, "owner");
+    const typecodeDB = takeInformation(data, "typecode");
 
     byIcao.set(key, {
       icao24: os.icao24,
@@ -91,11 +133,18 @@ export function mergeAdsbAndOpensky(adsbCache: any[], openskyCache: any[], aircr
       squawk: os.squawk ?? null,
       typeCode: null,
       typeLabel: null,
-      engines: null,
       kind,
       isMilitary: null,
       isHelicopter,
       lastSeenSeconds: null,
+      engines: engineDB ?? null,
+      icaoAircraftClass: aircraftclassDB ?? null,
+      manufacturerIcao: manufacturerIcaoDB ?? null,
+      manufacturerName: manufacturerNameDB ?? null,
+      model: modelDB ?? null,
+      operator: operatorDB ?? null,
+      owner: ownerDB ?? null,
+      typecode: typecodeDB ?? null,
       source: 'opensky',
     });
   }
