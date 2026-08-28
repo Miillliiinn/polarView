@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.mergeAdsbAndOpensky = mergeAdsbAndOpensky;
 const aircraftClassifier_1 = require("./aircraftClassifier");
-function mergeAdsbAndOpensky(adsbCache, openskyCache) {
+function mergeAdsbAndOpensky(adsbCache, openskyCache, aircraftservice) {
     const byIcao = new Map();
     const openskyByIcao = new Map();
     for (const os of openskyCache || []) {
@@ -15,6 +15,8 @@ function mergeAdsbAndOpensky(adsbCache, openskyCache) {
             continue;
         const key = ac.icao24.toLowerCase();
         const os = openskyByIcao.get(key);
+        const data = aircraftservice.getAircraftInDbByIcao(key);
+        console.log(data);
         byIcao.set(key, {
             icao24: ac.icao24,
             callsign: ac.callsign ?? os?.callsign ?? null,

@@ -1,3 +1,4 @@
+import { AircraftService } from "../../data/aircraft_service";
 export interface CombinedAircraft {
     icao24: string;
     callsign: string | null;
@@ -20,4 +21,4 @@ export interface CombinedAircraft {
     lastSeenSeconds: number | null;
     source: 'adsb' | 'opensky' | 'both';
 }
-export declare function mergeAdsbAndOpensky(adsbCache: any[], openskyCache: any[]): CombinedAircraft[];
+export declare function mergeAdsbAndOpensky(adsbCache: any[], openskyCache: any[], aircraftservice: AircraftService): CombinedAircraft[];

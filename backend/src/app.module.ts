@@ -12,6 +12,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { CallGareAPI } from './script/gareScript';
 import { CallRailAPI } from './script/railScript';
 import { CallAdsbAPI } from './script/adsbScript';
+import { AircraftService } from './data/aircraft_service';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { CallAdsbAPI } from './script/adsbScript';
     CallGoogleAPI,
     PrismaService,
     AisStreamAPI,
+    AircraftService,
   ],
 })
 export class AppModule {}

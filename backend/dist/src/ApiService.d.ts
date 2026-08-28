@@ -1,9 +1,10 @@
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from "../prisma/prisma.service";
-import { CombinedAircraft } from './api/planes/mergeAdsbOpensky';
+import { AircraftService } from './data/aircraft_service';
 export declare class ApiService {
     private configService;
     private prisma;
+    private readonly aircraftservice;
     private openskyTokenManager;
     private OpenskyCache;
     private AdsbCache;
@@ -11,7 +12,7 @@ export declare class ApiService {
     private gareCache;
     private railCache;
     private MeteofranceCache;
-    constructor(configService: ConfigService, prisma: PrismaService);
+    constructor(configService: ConfigService, prisma: PrismaService, aircraftservice: AircraftService);
     getGoogleAPIFromDatabase(): Promise<{
         id: string;
         youtubeVideoId: string;
@@ -52,7 +53,7 @@ export declare class ApiService {
         isHelicopter: boolean;
         lastSeenSeconds: any;
     }[]>;
-    getCombinedAircraftCache(): CombinedAircraft[];
+    getCombinedAircraftCache(): import("./api/planes/mergeAdsbOpensky").CombinedAircraft[];
     setSncfCache(newData: any): void;
     getSncfCache(): any;
     getSncfAPI(): Promise<any[]>;

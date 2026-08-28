@@ -9,6 +9,7 @@ import { mergeAdsbAndOpensky } from './api/planes/mergeAdsbOpensky';
 import { fetchSncfDepartures, fetchSncfGares, fetchSncfRailLines }  from './api/sncf';
 import { fetchMeteofranceVigilance } from './api/meteofranceVigilance'; 
 import { fetchPlaneSpotterPhoto } from './api/planes/planeSpotter'; 
+import { AircraftService } from './data/aircraft_service';
 
 @Injectable()
 export class ApiService {
@@ -21,7 +22,7 @@ export class ApiService {
   private railCache: any;
   private MeteofranceCache: any = [];
 
-  constructor(private configService: ConfigService, private prisma: PrismaService, ) 
+  constructor(private configService: ConfigService, private prisma: PrismaService, private readonly aircraftservice: AircraftService) 
   {
     this.openskyTokenManager = new OpenskyTokenManager(
       this.configService.getOrThrow<string>('OPENSKY_CLIENTID'),
@@ -72,7 +73,7 @@ export class ApiService {
   // priorité aux données adsb.fi/adsb.lol (plus riches), complétées par OpenSky pour les avions
   // que adsb.fi/adsb.lol ne voit pas.
   getCombinedAircraftCache() {
-    return mergeAdsbAndOpensky(this.AdsbCache, this.OpenskyCache);
+    return mergeAdsbAndOpensky(this.AdsbCache, this.OpenskyCache, this.aircraftservice);
   }
 
   // --- SNCF ---

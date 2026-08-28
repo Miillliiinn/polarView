@@ -222,14 +222,6 @@ let AisStreamAPI = AisStreamAPI_1 = class AisStreamAPI {
     getAllShips() {
         return Array.from(this.ships.values());
     }
-    getStreamHealth() {
-        return {
-            connected: this.ws !== null && this.ws.readyState === ws_1.default.OPEN,
-            lastMessageAt: new Date(this.lastMessageAt),
-            silentForMs: Date.now() - this.lastMessageAt,
-            shipCount: this.ships.size,
-        };
-    }
     onModuleDestroy() {
         this.destroyed = true;
         if (this.reconnectTimeout)

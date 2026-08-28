@@ -34,11 +34,5 @@ export declare class AisStreamAPI implements OnModuleInit, OnModuleDestroy {
     private pruneStaleShips;
     getShipUpdates(): Observable<ShipPosition>;
     getAllShips(): ShipPosition[];
-    getStreamHealth(): {
-        connected: boolean;
-        lastMessageAt: Date;
-        silentForMs: number;
-        shipCount: number;
-    };
     onModuleDestroy(): void;
 }

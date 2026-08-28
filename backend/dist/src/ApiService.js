@@ -19,10 +19,12 @@ const adsb_1 = require("./api/planes/adsb");
 const mergeAdsbOpensky_1 = require("./api/planes/mergeAdsbOpensky");
 const sncf_1 = require("./api/sncf");
 const meteofranceVigilance_1 = require("./api/meteofranceVigilance");
-const planeSpotter_1 = require("./api/planeSpotter");
+const planeSpotter_1 = require("./api/planes/planeSpotter");
+const aircraft_service_1 = require("./data/aircraft_service");
 let ApiService = class ApiService {
     configService;
     prisma;
+    aircraftservice;
     openskyTokenManager;
     OpenskyCache = [];
     AdsbCache = [];
@@ -30,9 +32,10 @@ let ApiService = class ApiService {
     gareCache;
     railCache;
     MeteofranceCache = [];
-    constructor(configService, prisma) {
+    constructor(configService, prisma, aircraftservice) {
         this.configService = configService;
         this.prisma = prisma;
+        this.aircraftservice = aircraftservice;
         this.openskyTokenManager = new opensky_1.OpenskyTokenManager(this.configService.getOrThrow('OPENSKY_CLIENTID'), this.configService.getOrThrow('OPENSKY_CLIENTSECRET'));
     }
     async getGoogleAPIFromDatabase() {
@@ -61,7 +64,7 @@ let ApiService = class ApiService {
         return (0, adsb_1.fetchAdsbStates)(adsb_1.DEFAULT_FRANCE_ZONES);
     }
     getCombinedAircraftCache() {
-        return (0, mergeAdsbOpensky_1.mergeAdsbAndOpensky)(this.AdsbCache, this.OpenskyCache);
+        return (0, mergeAdsbOpensky_1.mergeAdsbAndOpensky)(this.AdsbCache, this.OpenskyCache, this.aircraftservice);
     }
     setSncfCache(newData) { this.SncfCache = newData; }
     getSncfCache() { return this.SncfCache; }
@@ -117,6 +120,6 @@ let ApiService = class ApiService {
 exports.ApiService = ApiService;
 exports.ApiService = ApiService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [config_1.ConfigService, prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [config_1.ConfigService, prisma_service_1.PrismaService, aircraft_service_1.AircraftService])
 ], ApiService);
 //# sourceMappingURL=ApiService.js.map
