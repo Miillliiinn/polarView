@@ -68,6 +68,13 @@ export function setupPlanesLayer(map: maplibregl.Map)
     const isHelicopter = cache.find((f) => f.icao24 === icao24)?.isHelicopter;
     const lastSeen = cache.find((f) => f.icao24 === icao24)?.lastSeenSeconds;
     const source = cache.find((f) => f.icao24 === icao24)?.source;
+    const icaoAircraftClass = cache.find((f) => f.icao24 === icao24)?.icaoAircraftClass
+    const manufacturerIcao = cache.find((f) => f.icao24 === icao24)?.manufacturerIcao
+    const manufacturerName = cache.find((f) => f.icao24 === icao24)?.manufacturerName
+    const model = cache.find((f) => f.icao24 === icao24)?.model
+    const operator = cache.find((f) => f.icao24 === icao24)?.operator
+    const owner = cache.find((f) => f.icao24 === icao24)?.owner
+    const typecode = cache.find((f) => f.icao24 === icao24)?.typecode
     const heading = feature.properties?.heading || null;
     const coordinates = (feature.geometry as any).coordinates;
     const vel = cache.find((f) => f.icao24 === icao24)?.velocity;
@@ -81,7 +88,8 @@ export function setupPlanesLayer(map: maplibregl.Map)
       .addTo(map);
 
     if (!icao24) return;
-    try {
+    try
+    {
       const res = await api.get(`/planes/${icao24}/picture`);
       const photo = res.data;
       popup.setHTML(`
@@ -99,6 +107,14 @@ export function setupPlanesLayer(map: maplibregl.Map)
         isHelicopter: <strong>${isHelicopter}</strong><br/>
         lastSeen: <strong>${lastSeen}</strong><br/>
         source: <strong>${source}</strong><br />
+        icaoAircraftClass : <strong>${icaoAircraftClass}</strong><br />
+        manufacturerIcao : <strong>${manufacturerIcao}</strong><br />
+        manufacturerName : <strong>${manufacturerName}</strong><br />
+        model : <strong>${model}</strong><br />
+        operator : <strong>${operator}</strong><br />
+        owner : <strong>${owner}</strong><br />
+        typecode : <strong>${typecode}</strong><br />
+
         <br>-----</br>
 
           Callsign: <strong>${callsign}</strong><br/>

@@ -9,7 +9,7 @@ import { setupPlanesLayer, togglePlaneLayer } from './layers/planes/planesLayer'
 import { setupTrainsLayer } from './layers/trains/trainsLayer';
 import { setupRailLayer, toggleRailLayer } from './layers/trains/trainsLayer';
 import { toggleGareLayer, setupGareLayer } from './layers/trains/gareLayer';
-import { setupBoatsLayer, toggleBoatsLayer } from './layers/boats/boatsLayer'; // TODO: vérifier ce chemin
+import { setupBoatsLayer, toggleBoatsLayer } from './layers/boats/boatsLayer';
 import { usePlanesRealtimeSync } from './hooks/usePlanesRealtimeSync';
 
 export default function FranceMap() {
@@ -25,7 +25,7 @@ export default function FranceMap() {
 
     const mapInstance = new maplibregl.Map({
       container: mapContainer.current!,
-      style: 'https://tiles.openfreemap.org/styles/liberty', //liberty dark bright fiord positron
+      style: 'https://tiles.openfreemap.org/styles/fiord', //liberty dark bright fiord positron
       bounds: FRANCE_BOUNDS,
       fitBoundsOptions: { padding: 100 },
       maxBounds: [
