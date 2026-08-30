@@ -4,7 +4,7 @@ import { globalCache } from "../classCache.ts";
 
 const planesAPI = async () => {
     const res = await api.get('/planes/all');
-    console.log(res.data);
+    //console.log(res.data);
     return res.data;
 }
 

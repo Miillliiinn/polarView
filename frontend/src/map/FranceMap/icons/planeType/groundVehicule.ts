@@ -1,0 +1,80 @@
+// Silhouette de véhicule / voiture (Vue du dessus)
+export function createCarIcon(color: string, size: number, angleDeg: number = 0): ImageData {
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d')!;
+
+  ctx.clearRect(0, 0, size, size);
+  ctx.save();
+  ctx.translate(size / 2, size / 2);
+  ctx.rotate((angleDeg * Math.PI) / 180);
+
+  ctx.fillStyle = color;
+  ctx.strokeStyle = '#040404';
+  ctx.lineWidth = Math.max(1, size * 0.02);
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+
+  const s = size / 125;
+
+  ctx.fillStyle = '#040404';
+  ctx.fillRect(-22 * s, -34 * s, 6 * s, 16 * s);
+  ctx.fillRect(16 * s, -34 * s, 6 * s, 16 * s);
+  ctx.fillRect(-22 * s, 20 * s, 6 * s, 16 * s);
+  ctx.fillRect(16 * s, 20 * s, 6 * s, 16 * s);
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(0, -48 * s);
+  ctx.bezierCurveTo(12 * s, -48 * s, 17 * s, -44 * s, 18 * s, -36 * s);
+  ctx.lineTo(18 * s, -24 * s);
+  ctx.lineTo(21 * s, -20 * s);
+  ctx.lineTo(18 * s, -16 * s);
+  ctx.lineTo(18 * s, 36 * s);
+  ctx.bezierCurveTo(17 * s, 46 * s, 12 * s, 48 * s, 0, 48 * s);
+  ctx.bezierCurveTo(-12 * s, 48 * s, -17 * s, 46 * s, -18 * s, 36 * s);
+  ctx.lineTo(-18 * s, -16 * s);
+  ctx.lineTo(-21 * s, -20 * s);
+  ctx.lineTo(-18 * s, -24 * s);
+  ctx.lineTo(-18 * s, -36 * s);
+  ctx.bezierCurveTo(-17 * s, -44 * s, -12 * s, -48 * s, 0, -48 * s);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.moveTo(-13 * s, -18 * s);
+  ctx.bezierCurveTo(-8 * s, -22 * s, 8 * s, -22 * s, 13 * s, -18 * s);
+  ctx.lineTo(14 * s, -8 * s);
+  ctx.lineTo(-14 * s, -8 * s);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(-14 * s, -6 * s);
+  ctx.lineTo(-13.5 * s, 12 * s);
+  ctx.lineTo(-11 * s, 12 * s);
+  ctx.lineTo(-12 * s, -6 * s);
+  ctx.moveTo(14 * s, -6 * s);
+  ctx.lineTo(13.5 * s, 12 * s);
+  ctx.lineTo(11 * s, 12 * s);
+  ctx.lineTo(12 * s, -6 * s);
+  ctx.fill();
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(-12 * s, 16 * s);
+  ctx.lineTo(12 * s, 16 * s);
+  ctx.lineTo(10.5 * s, 25 * s);
+  ctx.bezierCurveTo(5 * s, 27 * s, -5 * s, 27 * s, -10.5 * s, 25 * s);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(-15 * s, -47 * s, 4 * s, 3 * s);
+  ctx.fillRect(11 * s, -47 * s, 4 * s, 3 * s);
+  ctx.fillStyle = '#040404';
+  ctx.fillRect(-15 * s, 45 * s, 5 * s, 2.5 * s);
+  ctx.fillRect(10 * s, 45 * s, 5 * s, 2.5 * s);
+  ctx.restore();
+  return ctx.getImageData(0, 0, size, size);
+}

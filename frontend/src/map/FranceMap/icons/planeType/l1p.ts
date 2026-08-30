@@ -1,0 +1,84 @@
+// Silhouette L1P détaillée - 60
+export function createL1PIcon(color: string, size: number, angleDeg: number = 0): ImageData {
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d')!;
+
+  ctx.clearRect(0, 0, size, size);
+  ctx.save();
+  ctx.translate(size / 2, size / 2);
+  ctx.rotate((angleDeg * Math.PI) / 180);
+
+  ctx.fillStyle = color;
+  ctx.strokeStyle = '#040404';
+  ctx.lineWidth = Math.max(1, size * 0.027);
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+
+  const s = size / 150;
+  ctx.beginPath();
+  ctx.moveTo(0, -56 * s);
+  ctx.bezierCurveTo(4 * s, -56 * s, 6.5 * s, -50 * s, 6.5 * s, -38 * s);
+  ctx.lineTo(7 * s, -14 * s);
+  ctx.lineTo(56 * s, -10 * s);   
+  ctx.lineTo(57.5 * s, -4 * s);  
+  ctx.lineTo(56 * s, 3 * s);    
+  ctx.lineTo(7 * s, 4 * s);     
+  ctx.lineTo(4.5 * s, 40 * s);
+  ctx.lineTo(24 * s, 48 * s);   
+  ctx.lineTo(23 * s, 55 * s);   
+  ctx.lineTo(2 * s, 54 * s);   
+  ctx.lineTo(0, 58 * s);
+  ctx.lineTo(-2 * s, 54 * s);
+  ctx.lineTo(-23 * s, 55 * s);
+  ctx.lineTo(-24 * s, 48 * s);
+  ctx.lineTo(-4.5 * s, 40 * s);
+  ctx.lineTo(-7 * s, 4 * s);
+  ctx.lineTo(-56 * s, 3 * s);
+  ctx.lineTo(-57.5 * s, -4 * s);
+  ctx.lineTo(-56 * s, -10 * s);
+  ctx.lineTo(-7 * s, -14 * s);
+  ctx.lineTo(-6.5 * s, -38 * s);
+  ctx.bezierCurveTo(-6.5 * s, -50 * s, -4 * s, -56 * s, 0, -56 * s);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.fillStyle = '#ffffff';
+  ctx.moveTo(-5.5 * s, -22 * s);
+  ctx.bezierCurveTo(-3 * s, -25 * s, 3 * s, -25 * s, 5.5 * s, -22 * s);
+  ctx.lineTo(6 * s, -12 * s);
+  ctx.lineTo(-6 * s, -12 * s);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(-6 * s, -10 * s);
+  ctx.lineTo(-5.5 * s, 6 * s);
+  ctx.moveTo(6 * s, -10 * s);
+  ctx.lineTo(5.5 * s, 6 * s);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(12 * s, 1 * s);  ctx.lineTo(54 * s, -1.5 * s);
+  ctx.moveTo(-12 * s, 1 * s); ctx.lineTo(-54 * s, -1.5 * s);
+  ctx.moveTo(32 * s, 0);   ctx.lineTo(32 * s, -6 * s);
+  ctx.moveTo(-32 * s, 0);  ctx.lineTo(-32 * s, -6 * s);
+  ctx.moveTo(6 * s, 52.5 * s);  ctx.lineTo(22 * s, 51.5 * s);
+  ctx.moveTo(-6 * s, 52.5 * s); ctx.lineTo(-22 * s, 51.5 * s);
+  ctx.stroke();
+  ctx.fillStyle = '#040404';
+  ctx.fillRect(-1 * s, -42 * s, 2 * s, 5 * s);
+  ctx.fillRect(15 * s, -1 * s, 3 * s, 7 * s);
+  ctx.fillRect(-18 * s, -1 * s, 3 * s, 7 * s);
+  ctx.beginPath();
+  ctx.fillStyle = color;
+  ctx.ellipse(10 * s, -56.5 * s, 10 * s, 2.2 * s, 0, 0, Math.PI * 2);
+  ctx.ellipse(-10 * s, -56.5 * s, 10 * s, 2.2 * s, 0, 0, Math.PI * 2);
+  ctx.arc(0, -56.5 * s, 3 * s, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.restore();
+  return ctx.getImageData(0, 0, size, size);
+}

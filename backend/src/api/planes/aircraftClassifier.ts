@@ -131,13 +131,6 @@ const TYPE_TABLE: Record<string, TypeInfo> = {
   K35R: { engines: 4, kindHint: 'military', label: 'Boeing KC-135 (ravitailleur)' },
 };
 
-/**
- * Traduit un code `category` du state vector OpenSky (index 17, 0-20, norme DO-260B) en
- * AircraftKind, pour rester cohérent avec la classification adsb.fi/adsb.lol.
- * Moins précis que `classifyAircraft` : OpenSky ne fournit ni désignateur de type ICAO (`t`) ni
- * flag militaire (`dbFlags`). Seules distinctions fiables : hélicoptère, planeur, ballon, drone,
- * véhicule au sol, et une approximation commercial (gros porteur) / aviation générale (léger).
- */
 export function classifyOpenskyCategory(
   category: number | null | undefined,
 ): { kind: AircraftKind; isHelicopter: boolean } {
@@ -170,9 +163,6 @@ export interface ClassificationResult {
   typeLabel: string | null;
 }
 
-/**
- * `raw` : un objet aéronef tel que renvoyé par adsb.fi / adsb.lol (format compatible ADSBExchange v2).
- */
 export function classifyAircraft(raw: any): ClassificationResult {
   const dbFlags: number = raw?.dbFlags ?? 0;
   const category: string = (raw?.category ?? '').toString().toUpperCase();

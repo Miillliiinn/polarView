@@ -1,4 +1,4 @@
-// Silhouette d'hélicoptère biturbine - 55
+// Silhouette d'hélicoptère biturbine - 45
 export function createH2TIcon(color: string, size: number, angleDeg: number = 110): ImageData
 {
     const canvas = document.createElement('canvas');

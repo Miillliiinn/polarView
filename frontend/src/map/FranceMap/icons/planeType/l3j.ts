@@ -1,4 +1,4 @@
-// Silhouette L3J - 53
+// Silhouette L3J - 60
 export function createL3JIcon(color: string, size: number, angleDeg: number = 0): ImageData {
   const canvas = document.createElement('canvas');
   canvas.width = size;

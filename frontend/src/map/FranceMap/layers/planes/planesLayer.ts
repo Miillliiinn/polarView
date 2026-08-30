@@ -7,14 +7,26 @@ import { createH1PIcon } from '../../icons/planeType/h1p';
 import { createH2TIcon } from '../../icons/planeType/h2t';
 import { createL3JIcon } from '../../icons/planeType/l3j'; 
 import { createL2JIcon } from '../../icons/planeType/l2j';
+import { createL1PIcon } from '../../icons/planeType/l1p';
+import { createL1TIcon } from '../../icons/planeType/l1t';
+import { createCarIcon } from '../../icons/planeType/groundVehicule';
+import { createUAVIcon } from '../../icons/planeType/uav';
+import { createBalloonIcon } from '../../icons/planeType/balloon';
+import { createMilitaryHelicopterIcon } from '../../icons/planeType/MilitaryH';
+import { createGliderIcon } from '../../icons/planeType/glider';
+import { createA400MIcon } from '../../icons/planeType/MilitaryP';
 
 export function setupPlanesLayer(map: maplibregl.Map)
 {
   //map.addImage('plane-ground', createPlaneIcon('#989898', 96));
   // map.addImage('plane-low', createH2TIcon('#ff9999', 55));
-  map.addImage('plane-mid', createL2JIcon('#53ffc0', 75));
-  map.addImage('plane-high', createL3JIcon('#7ebbf7', 53)); //4db8ff
-  map.addImage('plane-cruise', createA380Icon('#00ff1e', 85)); //00ff1e
+  map.addImage('plane-mid', createUAVIcon('#53ffc0', 75));
+  map.addImage('plane-high', createA400MIcon('#0fb9f1', 85)); //4db8ff
+  map.addImage('plane-cruise', createA380Icon('#7cff5e', 85)); //00ff1e
+
+
+  /* unknown, military,
+     privateJet, commercial, generalAviation  */ 
 
   // map.addImage('plane-ground', createPlaneIcon('#989898', 96));
   // map.addImage('plane-low', createPlaneIcon('#a199ff', 96));

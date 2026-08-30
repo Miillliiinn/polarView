@@ -1,4 +1,4 @@
-// Silhouette d'Airbus A320 - version effilée
+// Silhouette d'Airbus A320 - 75
 export function createL2JIcon(color: string, size: number): ImageData {
   const canvas = document.createElement('canvas');
   canvas.width = size;
