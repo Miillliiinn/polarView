@@ -2,6 +2,7 @@ import maplibregl from 'maplibre-gl';
 import api from '../../../../api/apiBridge';
 import { createPlaneIcon } from '../../icons/planeType/planeIcon'; 
 import { globalCache } from '../../../../api/classCache';
+import { createA380Icon } from '../../icons/planeType/l4j';
 
 export function setupPlanesLayer(map: maplibregl.Map)
 {
@@ -9,7 +10,7 @@ export function setupPlanesLayer(map: maplibregl.Map)
   map.addImage('plane-low', createPlaneIcon('#ff9999', 96));
   map.addImage('plane-mid', createPlaneIcon('#7072ff', 96));
   map.addImage('plane-high', createPlaneIcon('#4db8ff', 96));
-  map.addImage('plane-cruise', createPlaneIcon('#00ff1e', 96));
+  map.addImage('plane-cruise', createA380Icon('#00ff1e', 85)); //00ff1e
 
   // map.addImage('plane-ground', createPlaneIcon('#989898', 96));
   // map.addImage('plane-low', createPlaneIcon('#a199ff', 96));

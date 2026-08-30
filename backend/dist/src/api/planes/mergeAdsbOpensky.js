@@ -22,7 +22,6 @@ function mergeAdsbAndOpensky(adsbCache, openskyCache, aircraftservice) {
         const key = ac.icao24.toLowerCase();
         const os = openskyByIcao.get(key);
         const data = aircraftservice.getAircraftInDbByIcao(key);
-        const engineDB = takeInformation(data, "engines");
         const aircraftclassDB = takeInformation(data, "icaoAircraftClass");
         const manufacturerIcaoDB = takeInformation(data, "manufacturerIcao");
         const manufacturerNameDB = takeInformation(data, "manufacturerName");
