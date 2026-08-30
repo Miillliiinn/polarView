@@ -1,4 +1,4 @@
-// Silhouette d'Airbus A380 
+// Silhouette d'Airbus A380 - 85
 export function createA380Icon(color: string, size: number): ImageData {
   const canvas = document.createElement('canvas');
   canvas.width = size;
@@ -8,7 +8,7 @@ export function createA380Icon(color: string, size: number): ImageData {
   ctx.translate(size / 2, size / 2);
   ctx.fillStyle = color;
   ctx.strokeStyle = '#040404';
-  ctx.lineWidth = size * 0.025;
+  ctx.lineWidth = Math.max(1, size * 0.018);
   ctx.lineJoin = 'round';
 
   const s = size / 130;

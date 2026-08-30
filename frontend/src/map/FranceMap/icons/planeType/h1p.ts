@@ -1,4 +1,4 @@
-// Silhouette d'hélicoptère monomoteur à piston (H1P)
+// Silhouette d'hélicoptère monomoteur à piston - 55
 export function createH1PIcon(color: string, size: number, angleDeg: number = 110): ImageData {
   const canvas = document.createElement('canvas');
   canvas.width = size;
@@ -66,14 +66,13 @@ export function createH1PIcon(color: string, size: number, angleDeg: number = 11
   ctx.fill();
   ctx.stroke();
   ctx.beginPath();
-  ctx.rect(-1.8 * s, -66 * s, 3.6 * s, 62.5 * s);
+  ctx.rect(-1.8 * s, -66 * s, 5 * s, 62.5 * s);
   ctx.fill();
   ctx.stroke();
   ctx.beginPath();
-  ctx.rect(-1.8 * s, 3.5 * s, 3.6 * s, 62.5 * s);
+  ctx.rect(-1.8 * s, 3.5 * s, 5 * s, 62.5 * s);
   ctx.fill();
   ctx.stroke();
   ctx.restore();
-
   return ctx.getImageData(0, 0, size, size);
 }
