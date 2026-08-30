@@ -3,14 +3,16 @@ import api from '../../../../api/apiBridge';
 import { createPlaneIcon } from '../../icons/planeType/planeIcon'; 
 import { globalCache } from '../../../../api/classCache';
 import { createA380Icon } from '../../icons/planeType/l4j';
+import { createH1PIcon } from '../../icons/planeType/h1p';
+import { createH2TIcon } from '../../icons/planeType/h2t';
 
 export function setupPlanesLayer(map: maplibregl.Map)
 {
-  map.addImage('plane-ground', createPlaneIcon('#989898', 96));
-  map.addImage('plane-low', createPlaneIcon('#ff9999', 96));
-  map.addImage('plane-mid', createPlaneIcon('#7072ff', 96));
-  map.addImage('plane-high', createPlaneIcon('#4db8ff', 96));
-  map.addImage('plane-cruise', createA380Icon('#00ff1e', 85)); //00ff1e
+  //map.addImage('plane-ground', createPlaneIcon('#989898', 96));
+  //map.addImage('plane-low', createPlaneIcon('#ff9999', 96));
+  map.addImage('plane-mid', createH1PIcon('#53ffc0', 96));
+  map.addImage('plane-high', createH2TIcon('#f7e51e', 100)); //4db8ff
+  //map.addImage('plane-cruise', createA380Icon('#00ff1e', 85)); //00ff1e
 
   // map.addImage('plane-ground', createPlaneIcon('#989898', 96));
   // map.addImage('plane-low', createPlaneIcon('#a199ff', 96));
