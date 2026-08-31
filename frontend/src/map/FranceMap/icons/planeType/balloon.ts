@@ -1,4 +1,4 @@
-// Icône de Montgolfière (Hot Air Balloon) haute fidélité
+// Icône de Montgolfière - 60
 export function createBalloonIcon(primaryColor: string = '#ef4444', secondaryColor: string = '#f59e0b', size: number = 55, angleDeg: number = 0
 ): ImageData {
   const canvas = document.createElement('canvas');

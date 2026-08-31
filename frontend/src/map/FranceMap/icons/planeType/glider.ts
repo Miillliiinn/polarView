@@ -1,4 +1,4 @@
-// Icône de Planeur (Glider) haute fidélité avec empennage en T
+// Icône de Planeur - 50
 export function createGliderIcon(
   color: string = '#f8fafc', 
   size: number = 130, 

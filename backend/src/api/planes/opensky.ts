@@ -39,10 +39,6 @@ export class OpenskyTokenManager {
   }
 }
 
-/**
- * Récupère les avions actuellement suivis par OpenSky dans la zone France/Europe.
- * Retourne [] en cas d'erreur.
- */
 export async function fetchOpenskyStates(tokenManager: OpenskyTokenManager) {
   try {
     const token = await tokenManager.getAccessToken();
@@ -62,7 +58,7 @@ export async function fetchOpenskyStates(tokenManager: OpenskyTokenManager) {
     const state = data.states || [];
 
     console.log("✈️  OpenSky Api request ✈️");
-
+    //console.log(apiResult.headers);
     return state
       .filter((f: any) => f[5] !== null && f[6] !== null)
       .map((f: any) => ({
