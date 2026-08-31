@@ -226,7 +226,7 @@ map.on('click', 'planes-layer', async (e) => {
   const kind = planeData?.kind ?? 'N/A';
   const isMilitary = planeData?.isMilitary ?? 'N/A';
   const isHelicopter = planeData?.isHelicopter ?? 'N/A';
-  const lastSeen = planeData?.lastSeenSeconds ?? 'N/A';
+  //const lastSeen = planeData?.lastSeenSeconds ?? 'N/A';
   const source = planeData?.source ?? 'N/A';
   const icaoAircraftClass = planeData?.icaoAircraftClass ?? 'N/A';
   const manufacturerIcao = planeData?.manufacturerIcao ?? 'N/A';
@@ -250,7 +250,6 @@ map.on('click', 'planes-layer', async (e) => {
     kind: <strong>${kind}</strong><br/>
     isMilitary: <strong>${isMilitary}</strong><br/>
     isHelicopter: <strong>${isHelicopter}</strong><br/>
-    lastSeen: <strong>${lastSeen}</strong><br/>
     source: <strong>${source}</strong><br />
     icaoAircraftClass : <strong>${icaoAircraftClass}</strong><br />
     manufacturerIcao : <strong>${manufacturerIcao}</strong><br />

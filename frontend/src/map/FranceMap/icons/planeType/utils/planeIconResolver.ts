@@ -26,6 +26,7 @@ export function resolvePlaneIconType(p: PlaneClassificationProps): PlaneIconType
     return 'H1P';
   }
 
+  if (icaoClass === 'L4J') return 'L4J';
   if (kind === 'uav') return 'uav';
   if (kind === 'balloon') return 'balloon';
   if (kind === 'glider') return 'glider';
@@ -46,7 +47,6 @@ export function resolvePlaneIconType(p: PlaneClassificationProps): PlaneIconType
       case 'L1T': return 'L1T';
       case 'L2J': return 'L2J';
       case 'L3J': return 'L3J';
-      case 'L4J': return 'L4J';
       case 'L2T': return 'L2J';
       case 'L2P': return 'L2J';
       default: break;
