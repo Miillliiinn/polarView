@@ -14,9 +14,9 @@ export declare class ApiService {
     private MeteofranceCache;
     constructor(configService: ConfigService, prisma: PrismaService, aircraftservice: AircraftService);
     getGoogleAPIFromDatabase(): Promise<{
+        title: string;
         id: string;
         youtubeVideoId: string;
-        title: string;
         thumbnail: string | null;
         city: string | null;
         updatedAt: Date;

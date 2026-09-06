@@ -5,6 +5,7 @@ import { Subject, Observable } from 'rxjs';
 
 export interface ShipPosition {
   mmsi: number;
+  imo: number | null;
   name: string;
   latitude: number;
   longitude: number;
@@ -55,6 +56,7 @@ export class AisStreamAPI implements OnModuleInit, OnModuleDestroy
 
   private readonly ships = new Map<number, ShipPosition>();
   private readonly shipTypes = new Map<number, number>();
+  private readonly shipImos = new Map<number, number>();
   private readonly shipUpdates$ = new Subject<ShipPosition>();
 
   private reconnectTimeout: NodeJS.Timeout | null = null;
@@ -164,15 +166,22 @@ export class AisStreamAPI implements OnModuleInit, OnModuleDestroy
   {
     const mmsi = data.MetaData?.MMSI;
     const type = data.Message?.ShipStaticData?.Type;
-    if (!mmsi || type === undefined) return;
+    const imoRaw = data.Message?.ShipStaticData?.ImoNumber;
+    // AISStream renvoie 0 quand l'IMO n'est pas disponible -> on le traite comme "absent"
+    const imo = typeof imoRaw === 'number' && imoRaw > 0 ? imoRaw : null;
 
-    this.shipTypes.set(mmsi, type);
+    if (!mmsi || (type === undefined && imo === null)) return;
+
+    if (type !== undefined) this.shipTypes.set(mmsi, type);
+    if (imo !== null) this.shipImos.set(mmsi, imo);
+
     const existing = this.ships.get(mmsi);
     if (existing) {
       const updated: ShipPosition = {
         ...existing,
-        shipType: type,
-        shipTypeLabel: getShipTypeLabel(type),
+        shipType: type !== undefined ? type : existing.shipType,
+        shipTypeLabel: getShipTypeLabel(type !== undefined ? type : existing.shipType),
+        imo: imo !== null ? imo : existing.imo,
       };
       this.ships.set(mmsi, updated);
       this.shipUpdates$.next(updated);
@@ -191,9 +200,11 @@ export class AisStreamAPI implements OnModuleInit, OnModuleDestroy
     if (latitude === undefined || longitude === undefined) return;
 
     const shipType = this.shipTypes.get(mmsi) ?? null;
+    const imo = this.shipImos.get(mmsi) ?? null;
 
     const updatedShip: ShipPosition = {
       mmsi,
+      imo,
       name: data.MetaData?.ShipName?.trim() || 'Inconnu',
       latitude,
       longitude,
@@ -217,6 +228,7 @@ export class AisStreamAPI implements OnModuleInit, OnModuleDestroy
       {
         this.ships.delete(mmsi);
         this.shipTypes.delete(mmsi);
+        this.shipImos.delete(mmsi);
         removed++;
       }
     }

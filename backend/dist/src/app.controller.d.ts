@@ -6,9 +6,9 @@ export declare class AppController {
     private readonly appService;
     constructor(appService: ApiService);
     getWebcams(): Promise<{
+        title: string;
         id: string;
         youtubeVideoId: string;
-        title: string;
         thumbnail: string | null;
         city: string | null;
         updatedAt: Date;

@@ -4,6 +4,7 @@ import { globalCache } from "../classCache";
 export interface ShipPosition
 {
   mmsi: number;
+  imo: number | null;
   name: string;
   latitude: number;
   longitude: number;

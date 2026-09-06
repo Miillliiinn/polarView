@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { Observable } from 'rxjs';
 export interface ShipPosition {
     mmsi: number;
+    imo: number | null;
     name: string;
     latitude: number;
     longitude: number;
@@ -18,6 +19,7 @@ export declare class AisStreamAPI implements OnModuleInit, OnModuleDestroy {
     private ws;
     private readonly ships;
     private readonly shipTypes;
+    private readonly shipImos;
     private readonly shipUpdates$;
     private reconnectTimeout;
     private cleanupInterval;

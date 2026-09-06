@@ -1,48 +1,90 @@
-export async function fetchWikimediaCommonsAPI(id: string): Promise<any | null>
+interface ShipPhotoResult
 {
-    try
-    {
-        const categoryTitle = `Category:IMO ${id.trim()}`;
-        const searchUrl = `https://commons.wikimedia.org/w/api.php?action=query&list=categorymembers&cmtitle=${encodeURIComponent(categoryTitle)}&cmtype=file&cmlimit=10&format=json&origin=*`;
+  url: string;
+  thumbUrl: string;
+  title: string;
+  sourceUrl: string;
+  width: number;
+  height: number;
+}
 
-        const searchResponse = await fetch(searchUrl);
-        if (!searchResponse.ok)
-            return null;
+const COMMONS_API = "https://commons.wikimedia.org/w/api.php";
 
-        const searchData = await searchResponse.json();
-        const members = searchData?.query?.categorymembers ?? [];
+async function getCategoryMembers(
+  categoryTitle: string,
+  cmtype: "file" | "subcat"
+): Promise<any[]> {
+  const url = new URL(COMMONS_API);
+  url.search = new URLSearchParams({
+    action: "query",
+    list: "categorymembers",
+    cmtitle: categoryTitle,
+    cmtype,
+    cmlimit: "10",
+    format: "json",
+    origin: "*",
+  }).toString();
 
-        if (members.length === 0)
-            return null;
+  const res = await fetch(url.toString());
+  if (!res.ok) return [];
 
-        const fileTitle: string = members[0].title;
+  const data = await res.json();
+  return data?.query?.categorymembers ?? [];
+}
 
-        const infoUrl = `https://commons.wikimedia.org/w/api.php?action=query&titles=${encodeURIComponent(fileTitle)}&prop=imageinfo&iiprop=url|size&iiurlwidth=800&format=json&origin=*`;
+async function getImageInfo(fileTitle: string): Promise<ShipPhotoResult | null> {
+  const url = new URL(COMMONS_API);
+  url.search = new URLSearchParams({
+    action: "query",
+    titles: fileTitle,
+    prop: "imageinfo",
+    iiprop: "url|size",
+    iiurlwidth: "800",
+    format: "json",
+    origin: "*",
+  }).toString();
 
-        const infoResponse = await fetch(infoUrl);
-        if (!infoResponse.ok)
-            return null;
+  const res = await fetch(url.toString());
+  if (!res.ok) return null;
 
-        const infoData = await infoResponse.json();
-        const pages = infoData?.query?.pages ?? {};
-        const page: any = Object.values(pages)[0];
-        const imageInfo = page?.imageinfo?.[0];
+  const data = await res.json();
+  const pages = data?.query?.pages ?? {};
+  const page: any = Object.values(pages)[0];
+  const imageInfo = page?.imageinfo?.[0];
 
-        if (!imageInfo)
-            return null;
+  if (!imageInfo) return null;
 
-        return {
-            url: imageInfo.url,
-            thumbUrl: imageInfo.thumburl ?? imageInfo.url,
-            title: fileTitle,
-            sourceUrl: imageInfo.descriptionurl,
-            width: imageInfo.width,
-            height: imageInfo.height,
-        };
+  return {
+    url: imageInfo.url,
+    thumbUrl: imageInfo.thumburl ?? imageInfo.url,
+    title: fileTitle,
+    sourceUrl: imageInfo.descriptionurl,
+    width: imageInfo.width,
+    height: imageInfo.height,
+  };
+}
+
+export async function fetchWikimediaCommonsAPI(imo: string): Promise<ShipPhotoResult | null> {
+  try
+  {
+    const categoryTitle = `Category:IMO ${imo.trim()}`;
+
+    const directFiles = await getCategoryMembers(categoryTitle, "file");
+    if (directFiles.length > 0) {
+      return await getImageInfo(directFiles[0].title);
     }
-    catch (e)
-    {
-        console.error("Error 'fetchShipSpottingAPI' :", e);
-        return null;
-    }
+
+    const subcats = await getCategoryMembers(categoryTitle, "subcat");
+    if (subcats.length === 0) return null;
+
+    const subcatFiles = await getCategoryMembers(subcats[0].title, "file");
+    if (subcatFiles.length === 0) return null;
+
+    return await getImageInfo(subcatFiles[0].title);
+  }
+  catch (e)
+  {
+    console.error(`Error 'fetchWikimediaCommonsAPI(${imo})':`, e);
+    return null;
+  }
 }

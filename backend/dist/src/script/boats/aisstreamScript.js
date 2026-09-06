@@ -76,6 +76,7 @@ let AisStreamAPI = AisStreamAPI_1 = class AisStreamAPI {
     ws = null;
     ships = new Map();
     shipTypes = new Map();
+    shipImos = new Map();
     shipUpdates$ = new rxjs_1.Subject();
     reconnectTimeout = null;
     cleanupInterval = null;
@@ -164,15 +165,21 @@ let AisStreamAPI = AisStreamAPI_1 = class AisStreamAPI {
     updateShipType(data) {
         const mmsi = data.MetaData?.MMSI;
         const type = data.Message?.ShipStaticData?.Type;
-        if (!mmsi || type === undefined)
+        const imoRaw = data.Message?.ShipStaticData?.ImoNumber;
+        const imo = typeof imoRaw === 'number' && imoRaw > 0 ? imoRaw : null;
+        if (!mmsi || (type === undefined && imo === null))
             return;
-        this.shipTypes.set(mmsi, type);
+        if (type !== undefined)
+            this.shipTypes.set(mmsi, type);
+        if (imo !== null)
+            this.shipImos.set(mmsi, imo);
         const existing = this.ships.get(mmsi);
         if (existing) {
             const updated = {
                 ...existing,
-                shipType: type,
-                shipTypeLabel: getShipTypeLabel(type),
+                shipType: type !== undefined ? type : existing.shipType,
+                shipTypeLabel: getShipTypeLabel(type !== undefined ? type : existing.shipType),
+                imo: imo !== null ? imo : existing.imo,
             };
             this.ships.set(mmsi, updated);
             this.shipUpdates$.next(updated);
@@ -188,8 +195,10 @@ let AisStreamAPI = AisStreamAPI_1 = class AisStreamAPI {
         if (latitude === undefined || longitude === undefined)
             return;
         const shipType = this.shipTypes.get(mmsi) ?? null;
+        const imo = this.shipImos.get(mmsi) ?? null;
         const updatedShip = {
             mmsi,
+            imo,
             name: data.MetaData?.ShipName?.trim() || 'Inconnu',
             latitude,
             longitude,
@@ -209,6 +218,7 @@ let AisStreamAPI = AisStreamAPI_1 = class AisStreamAPI {
             if (now - ship.lastUpdate.getTime() > STALE_SHIP_MAX_AGE_MS) {
                 this.ships.delete(mmsi);
                 this.shipTypes.delete(mmsi);
+                this.shipImos.delete(mmsi);
                 removed++;
             }
         }
