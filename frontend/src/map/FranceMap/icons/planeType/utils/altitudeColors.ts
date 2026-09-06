@@ -26,8 +26,8 @@ const PURPLE_BLUE_GRADIENT = [
   '#5a4beb', 
   '#434fde',
   '#304fd0', 
-  '#224bc4', 
-  '#1a43ba' 
+  '#193fb2', 
+  '#072683e0' 
 ];
 
 const GREEN_ASCENDING_GRADIENT = [
@@ -69,7 +69,7 @@ const RED_ASCENDING_GRADIENT = [
   '#e4001e',
   '#d4001c',
   '#b30017',
-  '#70000d'
+  '#7f0715'
 ];
 
 const PINK_ASCENDING_GRADIENT = [

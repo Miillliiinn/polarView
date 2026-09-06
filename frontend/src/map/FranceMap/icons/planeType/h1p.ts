@@ -58,7 +58,7 @@ export function createH1PIcon(color: string, size: number, angleDeg: number = 11
   ctx.rotate((angleDeg * Math.PI) / 180);
   ctx.beginPath();
   ctx.arc(0, 0, 66 * s, 0, Math.PI * 2);
-  ctx.fillStyle = '#04040419';
+  ctx.fillStyle = '#04040450';
   ctx.fill();
   ctx.beginPath();
   ctx.arc(0, 0, 3.5 * s, 0, Math.PI * 2);

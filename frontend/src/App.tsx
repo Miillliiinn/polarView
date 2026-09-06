@@ -61,7 +61,8 @@ const NAV_LINKS = [
   { to: '/meteo', label: 'Météo', end: false, icon: IconCloud },
 ];
 
-function AppContent() {
+function AppContent()
+{
   const location = useLocation();
   const isHome = location.pathname === '/';
 
@@ -96,7 +97,7 @@ function AppContent() {
           <div className="nav-inner">
             <span className="nav-brand">
               <span className="nav-brand-dot" />
-              Tracking&nbsp;France
+              TRACKER VIEW&nbsp;
             </span>
             <div className="nav-links">
               {NAV_LINKS.map(({ to, label, end, icon: Icon }) => (
@@ -124,19 +125,12 @@ function AppContent() {
         {/* Présentation du projet */}
         {showMapChrome && (
           <header className="project-intro">
-            <p className="eyebrow">Suivi temps réel &middot; territoire français</p>
+            <p className="eyebrow">Suivi temps réel &middot; territoire français / Europe de l'ouest</p>
             <h1>Une seule carte pour tout ce qui bouge en France.</h1>
             <p className="intro-lead">
               Trains, avions et navires suivis en direct sur fond de carte OpenFreeMap,
               croisés avec les prévisions Météo-France.
             </p>
-            <ul className="source-tags">
-              <li>OPENFREEMAP</li>
-              <li>SNCF</li>
-              <li>OPENSKY</li>
-              <li>AISSTREAM</li>
-              <li>MÉTÉO-FRANCE</li>
-            </ul>
           </header>
         )}
 
@@ -163,11 +157,10 @@ function AppContent() {
               className="close-expanded-btn"
               onClick={() => toggleExpand(false)}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="22" y1="2" x2="4" y2="22"></line>
+                <line x1="4" y1="2" x2="22" y2="22"></line>
               </svg>
-              Réduire la carte
             </button>
           )}
 
@@ -216,3 +209,15 @@ function App() {
 }
 
 export default App;
+
+/*
+            <ul className="source-tags">
+              <li>OPENFREEMAP</li>
+              <li>SNCF</li>
+              <li>OPENSKY</li>
+              <li>AISSTREAM</li>
+              <li>MÉTÉO-FRANCE</li>
+              <li>WIKIMEDIA COMMONS</li>
+              <li>ADSB.FI &middot; ADSB.LOL</li>
+            </ul>
+*/

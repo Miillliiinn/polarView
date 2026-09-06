@@ -76,7 +76,7 @@ function setupBoatsClickPopup(map: maplibregl.Map)
         const speed = props.speed ?? 'N/A';
         const heading = props.heading ?? 'N/A';
         const shipTypeLabel = props.shipTypeLabel ?? 'N/A';
-        const lastUpdate = props.lastUpdate ?? 'N/A';
+        //const lastUpdate = props.lastUpdate ?? 'N/A';
 
         const buildContent = (photoHtml: string) => `
             Nom: <strong>${name}</strong><br/>
@@ -85,16 +85,15 @@ function setupBoatsClickPopup(map: maplibregl.Map)
             Type: <strong>${shipTypeLabel}</strong><br/>
             Vitesse: <strong>${speed} nds</strong><br/>
             Cap: <strong>${heading}°</strong><br/>
-            Dernière MAJ: <strong>${lastUpdate}</strong><br/>
             <div id="ship-photo-container">${photoHtml}</div>
-        `;
+        `; //Dernière MAJ: <strong>${lastUpdate}</strong><br/>
 
         const popup = new maplibregl.Popup()
             .setLngLat(coordinates)
-            .setHTML(buildContent(imo ? '<em>Chargement de la photo...</em>' : '<em>Pas d\'IMO disponible pour ce navire</em>'))
+            .setHTML(buildContent(imo ? '<em>Chargement de la photo...</em>' : '<em></em>')) //Pas d\'IMO disponible pour ce navire
             .addTo(map);
 
-        if (!imo) return; // pas d'IMO -> pas de requête possible
+        if (!imo) return;
 
         try
         {

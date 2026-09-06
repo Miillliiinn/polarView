@@ -65,35 +65,13 @@ map.on('click', 'planes-layer', async (e) => {
   const typecode = planeData?.typecode ?? 'N/A';
   const vel = planeData?.velocity;
 
+  const mod = typeLabel ?? model ?? "plane";
+
   const buildContent = (photoHtml: string) => `
-    registration: <strong>${registration}</strong><br/>
-    longitude: <strong>${longitude}</strong><br/>
-    latitude: <strong>${latitude}</strong><br/>
-    onGround: <strong>${onGround}</strong><br/>
-    verticalRate: <strong>${verticalRate}</strong><br/>
-    squawk: <strong>${squawk}</strong><br/>
-    typeCode: <strong>${typeCode}</strong><br/>
-    typeLabel: <strong>${typeLabel}</strong><br/>
-    engine: <strong>${engine}</strong><br/>
-    kind: <strong>${kind}</strong><br/>
-    isMilitary: <strong>${isMilitary}</strong><br/>
-    isHelicopter: <strong>${isHelicopter}</strong><br/>
-    source: <strong>${source}</strong><br />
-    icaoAircraftClass : <strong>${icaoAircraftClass}</strong><br />
-    manufacturerIcao : <strong>${manufacturerIcao}</strong><br />
-    manufacturerName : <strong>${manufacturerName}</strong><br />
-    manufacturerName : <strong>${manufacturerName}</strong><br />
-    model : <strong>${model}</strong><br />
-    operator : <strong>${operator}</strong><br />
-    owner : <strong>${owner}</strong><br />
-    typecode : <strong>${typecode}</strong><br />
-
-    <br>-----</br>
-
+    Model: <strong>${mod}</strong><br/>
+    Catégorie: <strong>${kind}</strong><br/>
     Callsign: <strong>${callsign}</strong><br/>
-    Country: <strong>${originCountry}</strong></br>
     Altitude: <strong>${altitude} m</strong><br/>
-    Cap: <strong>${heading ?? '?'} °</strong></br>
     Vitesse: <strong>${vel != null ? (vel * 3.6).toFixed(1) : '?'} km/h</strong></br>
     <div id="photo-container">${photoHtml}</div>
   `;
@@ -143,3 +121,36 @@ export function togglePlaneLayer(map: maplibregl.Map, visible: boolean)
   if (!map.getLayer('planes-layer')) return;
   map.setLayoutProperty('planes-layer', 'visibility', visible ? 'visible' : 'none');
 }
+
+/*
+    registration: <strong>${registration}</strong><br/>
+    longitude: <strong>${longitude}</strong><br/>
+    latitude: <strong>${latitude}</strong><br/>
+    onGround: <strong>${onGround}</strong><br/>
+    verticalRate: <strong>${verticalRate}</strong><br/>
+    squawk: <strong>${squawk}</strong><br/>
+    typeCode: <strong>${typeCode}</strong><br/>
+    typeLabel: <strong>${typeLabel}</strong><br/>
+    engine: <strong>${engine}</strong><br/>
+    kind: <strong>${kind}</strong><br/>
+    isMilitary: <strong>${isMilitary}</strong><br/>
+    isHelicopter: <strong>${isHelicopter}</strong><br/>
+    source: <strong>${source}</strong><br />
+    icaoAircraftClass : <strong>${icaoAircraftClass}</strong><br />
+    manufacturerIcao : <strong>${manufacturerIcao}</strong><br />
+    manufacturerName : <strong>${manufacturerName}</strong><br />
+    manufacturerName : <strong>${manufacturerName}</strong><br />
+    model : <strong>${model}</strong><br />
+    operator : <strong>${operator}</strong><br />
+    owner : <strong>${owner}</strong><br />
+    typecode : <strong>${typecode}</strong><br />
+
+    <br>-----</br>
+
+    Callsign: <strong>${callsign}</strong><br/>
+    Country: <strong>${originCountry}</strong></br>
+    Altitude: <strong>${altitude} m</strong><br/>
+    Cap: <strong>${heading ?? '?'} °</strong></br>
+    Vitesse: <strong>${vel != null ? (vel * 3.6).toFixed(1) : '?'} km/h</strong></br>
+    <div id="photo-container">${photoHtml}</div>
+*/

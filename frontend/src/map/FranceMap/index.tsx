@@ -107,7 +107,7 @@ export default function FranceMap() {
           onClick={handlePlanesData}
         >
           <span className="map-toggle-btn__dot" aria-hidden="true" />
-          {visiblePlanes ? 'Masquer les avions' : 'Afficher les avions'}
+          {visiblePlanes ? 'Avions' : 'Avions'}
         </button>
 {/*------------------------------------------------------------------------------------*/}
         <button
@@ -117,7 +117,7 @@ export default function FranceMap() {
           onClick={handleTrainsData}
         >
           <span className="map-toggle-btn__dot" aria-hidden="true" />
-          {visibleTrains ? 'Masquer les trains' : 'Afficher les trains'}
+          {visibleTrains ? 'Trains' : 'Trains'}
         </button>
 {/*------------------------------------------------------------------------------------*/}
         <button
@@ -127,7 +127,7 @@ export default function FranceMap() {
           onClick={handleToggleVigilance}
         >
           <span className="map-toggle-btn__dot" aria-hidden="true" />
-          {vigilanceVisible ? 'Masquer vigilance' : 'Afficher vigilance'}
+          {vigilanceVisible ? 'Vigilance' : 'Vigilance'}
         </button>
 {/*------------------------------------------------------------------------------------*/}
         <button
@@ -137,7 +137,7 @@ export default function FranceMap() {
           onClick={handleBoatsData}
         >
           <span className="map-toggle-btn__dot" aria-hidden="true" />
-          {visibleBoats ? 'Masquer les bateaux' : 'Afficher les bateaux'}
+          {visibleBoats ? 'Bateaux' : 'Bateaux'}
         </button>
       </div>
     </div>
