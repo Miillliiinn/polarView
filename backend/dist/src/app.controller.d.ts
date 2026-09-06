@@ -1,6 +1,6 @@
 import { MessageEvent } from '@nestjs/common';
 import { ApiService } from './ApiService';
-import { AisStreamAPI, ShipPosition } from './script/aisstreamScript';
+import { AisStreamAPI, ShipPosition } from './script/boats/aisstreamScript';
 import { Observable } from 'rxjs';
 export declare class AppController {
     private readonly appService;
@@ -14,21 +14,14 @@ export declare class AppController {
         updatedAt: Date;
     }[]>;
     getPlanes(): Promise<any>;
-    getPlanesPicture(icao24: string): Promise<{
-        id: string;
-        link: string | null;
-        photographer: string | null;
-        thumbnailSrc: string | null;
-        thumbnailWidth: number | null;
-        thumbnailHeight: number | null;
-        createdAt: Date;
-    } | null>;
+    getPlanesPicture(icao24: string): Promise<any>;
     getAdsb(): any;
     getAllPlanes(): import("./api/planes/mergeAdsbOpensky").CombinedAircraft[];
     getTrains(): Promise<any>;
     getGare(): Promise<any>;
     getRail(): Promise<any>;
     getWeather(): Promise<any>;
+    getShipsPicture(imo: string): Promise<any>;
 }
 export declare class AisStreamController {
     private readonly aisService;

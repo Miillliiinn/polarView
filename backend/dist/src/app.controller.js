@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AisStreamController = exports.AppController = void 0;
 const common_1 = require("@nestjs/common");
 const ApiService_1 = require("./ApiService");
-const aisstreamScript_1 = require("./script/aisstreamScript");
+const aisstreamScript_1 = require("./script/boats/aisstreamScript");
 const rxjs_1 = require("rxjs");
 let AppController = class AppController {
     appService;
@@ -49,6 +49,9 @@ let AppController = class AppController {
     }
     async getWeather() {
         return await this.appService.getMeteofranceCache();
+    }
+    async getShipsPicture(imo) {
+        return await this.appService.getWikimediaCommonsAPI(imo);
     }
 };
 exports.AppController = AppController;
@@ -107,6 +110,13 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], AppController.prototype, "getWeather", null);
+__decorate([
+    (0, common_1.Get)('ships/:IMO/picture'),
+    __param(0, (0, common_1.Param)('IMO')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AppController.prototype, "getShipsPicture", null);
 exports.AppController = AppController = __decorate([
     (0, common_1.Controller)(),
     __metadata("design:paramtypes", [ApiService_1.ApiService])

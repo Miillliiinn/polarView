@@ -37,9 +37,7 @@ export class AircraftService implements OnModuleInit, OnModuleDestroy
 
   private ensureDbIsExtracted()
   {
-    const needsExtraction =
-      !fs.existsSync(DB_PATH) ||
-      fs.statSync(DB_PATH).size < MIN_VALID_SIZE_BYTES;
+    const needsExtraction = !fs.existsSync(DB_PATH) || fs.statSync(DB_PATH).size < MIN_VALID_SIZE_BYTES;
 
     if (!needsExtraction) {
       console.log('[SQLite] Base déjà présente et valide dans /tmp, extraction ignorée.');

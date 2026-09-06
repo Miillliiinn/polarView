@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Sse, MessageEvent } from '@nestjs/common';
 import { ApiService } from './ApiService';
-import { AisStreamAPI, ShipPosition } from './script/aisstreamScript';
+import { AisStreamAPI, ShipPosition } from './script/boats/aisstreamScript';
 import { Observable, concat, from, map } from 'rxjs';
 
 @Controller()
@@ -20,7 +20,8 @@ export class AppController
   }
 
   @Get('planes/:icao24/picture')
-  async getPlanesPicture(@Param('icao24') icao24 : string) {
+  async getPlanesPicture(@Param('icao24') icao24 : string)
+  {
     return await this.appService.getPlaneSpotterApi(icao24);
   }
 
@@ -39,24 +40,31 @@ export class AppController
     return await this.appService.getSncfCache();
   }
 
-@Get('trains/gare')
-async getGare() {
-  return this.appService.getGareCache();
-}
+  @Get('trains/gare')
+  async getGare() {
+    return this.appService.getGareCache();
+  }
 
-@Get('trains/rail')
-async getRail() {
-  return this.appService.getRailCache();
-}
+  @Get('trains/rail')
+  async getRail() {
+    return this.appService.getRailCache();
+  }
 // ---------------------------------------------------------------------
   @Get('weather')
   async getWeather() {
     return await this.appService.getMeteofranceCache();
   }
+// ---------------------------------------------------------------------
+  @Get('ships/:IMO/picture')
+  async getShipsPicture(@Param('IMO') imo : string)
+  {
+    return await this.appService.getWikimediaCommonsAPI(imo);
+  }
 }
 
 @Controller()
-export class AisStreamController {
+export class AisStreamController
+{
   constructor(private readonly aisService: AisStreamAPI) {}
 
   @Get('ships')

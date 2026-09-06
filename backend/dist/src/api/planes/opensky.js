@@ -52,7 +52,6 @@ async function fetchOpenskyStates(tokenManager) {
         const data = await apiResult.json();
         const state = data.states || [];
         console.log("✈️  OpenSky Api request ✈️");
-        console.log(apiResult.headers);
         return state
             .filter((f) => f[5] !== null && f[6] !== null)
             .map((f) => ({

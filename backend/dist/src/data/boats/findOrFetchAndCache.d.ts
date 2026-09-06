@@ -1,0 +1,1 @@
+export declare function findOrFetchAndCache<TExternal>(delegate: any, id: string, fetchExternal: (id: string) => Promise<TExternal | null>, mapToRecord: (photo: TExternal) => Record<string, any>, hasPhoto: (record: any) => boolean): Promise<any>;

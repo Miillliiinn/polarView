@@ -26,7 +26,20 @@ model Planes {
   thumbnailSrc String ?
   thumbnailWidth Int ?
   thumbnailHeight Int ?
-
+  
   createdAt     DateTime @default(now())
   @@map("planes")
+}
+
+model Ships {
+  id String @id
+  url String ?
+  thumbUrl String ?
+  title String ?
+  sourceUrl String ?
+  width Int ?
+  height Int ?
+
+  createdAt     DateTime @default(now())
+  @@map("ships")
 }

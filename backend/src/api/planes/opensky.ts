@@ -1,10 +1,6 @@
 const TOKEN_URL = 'https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token';
 const STATES_URL = 'https://opensky-network.org/api/states/all?lamin=37.5&lamax=55.5&lomin=-9.0&lomax=13.0';
 
-/**
- * Encapsule le token OAuth2 OpenSky (récupération + cache mémoire + refresh).
- * Instancier une seule fois (ex: en champ privé du service) pour profiter du cache.
- */
 export class OpenskyTokenManager {
   private accessToken: string | null = null;
   private tokenExpiry = 0;

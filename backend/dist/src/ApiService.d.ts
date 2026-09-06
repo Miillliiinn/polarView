@@ -66,13 +66,6 @@ export declare class ApiService {
     setMeteofranceCache(newdata: any): void;
     getMeteofranceCache(): any;
     getMeteofranceAPI(): Promise<any>;
-    getPlaneSpotterApi(icao24: string): Promise<{
-        id: string;
-        link: string | null;
-        photographer: string | null;
-        thumbnailSrc: string | null;
-        thumbnailWidth: number | null;
-        thumbnailHeight: number | null;
-        createdAt: Date;
-    } | null>;
+    getPlaneSpotterApi(icao24: string): Promise<any>;
+    getWikimediaCommonsAPI(imo: string): Promise<any>;
 }

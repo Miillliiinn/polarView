@@ -2,14 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'prisma/prisma.service';
 
-import { fetchYoutubeWebcams } from './api/youtubeWebcam'; 
+import { fetchYoutubeWebcams } from './api/webcam/youtubeWebcam'; 
 import { OpenskyTokenManager, fetchOpenskyStates } from './api/planes/opensky'; 
 import { fetchAdsbStates, DEFAULT_FRANCE_ZONES } from './api/planes/adsb'; 
 import { mergeAdsbAndOpensky } from './api/planes/mergeAdsbOpensky'; 
-import { fetchSncfDepartures, fetchSncfGares, fetchSncfRailLines }  from './api/sncf';
-import { fetchMeteofranceVigilance } from './api/meteofranceVigilance'; 
+import { fetchSncfDepartures, fetchSncfGares, fetchSncfRailLines }  from './api/trains/sncf';
+import { fetchMeteofranceVigilance } from './api/weather/meteofranceVigilance'; 
 import { fetchPlaneSpotterPhoto } from './api/planes/planeSpotter'; 
 import { AircraftService } from './data/aircraft_service';
+import { fetchWikimediaCommonsAPI } from './api/boats/wikimediaCommonsAPI';
+import { findOrFetchAndCache } from './data/boats/findOrFetchAndCache';
 
 @Injectable()
 export class ApiService {
@@ -105,35 +107,40 @@ export class ApiService {
 
   // --- PlaneSpotters (DB + API) ---
 
-  async getPlaneSpotterApi(icao24: string) {
-    const existInDatabase = await this.prisma.planes.findUnique({
-      where: { id: icao24 },
-    });
-
-    if (existInDatabase) {
-      return existInDatabase;
-    }
-
-    const photo = await fetchPlaneSpotterPhoto(icao24);
-    if (!photo) {
-      return null;
-    }
-
-    try {
-      return await this.prisma.planes.create({
-        data: {
-          id: icao24,
-          link: photo.link ?? null,
-          photographer: photo.photographer ?? null,
-          thumbnailSrc: photo.thumbnail_large?.src ?? photo.thumbnail?.src ?? null,
-          thumbnailWidth: photo.thumbnail_large?.size?.width ?? photo.thumbnail?.size?.width ?? null,
-          thumbnailHeight: photo.thumbnail_large?.size?.height ?? photo.thumbnail?.size?.height ?? null,
-        },
-      });
-    }
-    catch (e) {
-      console.error(`Erreur 'getPlaneSpotterApi(${icao24})' (sauvegarde DB) : `, e);
-      return null;
-    }
+  async getPlaneSpotterApi(icao24: string)
+  {
+    return findOrFetchAndCache(
+      this.prisma.planes,
+      icao24,
+      fetchPlaneSpotterPhoto,
+      (photo) => ({
+        link: photo.link ?? null,
+        photographer: photo.photographer ?? null,
+        thumbnailSrc: photo.thumbnail_large?.src ?? photo.thumbnail?.src ?? null,
+        thumbnailWidth: photo.thumbnail_large?.size?.width ?? photo.thumbnail?.size?.width ?? null,
+        thumbnailHeight: photo.thumbnail_large?.size?.height ?? photo.thumbnail?.size?.height ?? null,
+      }),
+      (record) => !!record.thumbnailSrc
+    );
+  }
+ 
+  // --- Wikimedia Commons (DB + API) ---
+ 
+  async getWikimediaCommonsAPI(imo: string)
+  {
+    return findOrFetchAndCache(
+      this.prisma.ships,
+      imo,
+      fetchWikimediaCommonsAPI,
+      (photo) => ({
+        url: photo.url ?? null,
+        thumbUrl: photo.thumbUrl ?? null,
+        title: photo.title ?? null,
+        sourceUrl: photo.sourceUrl ?? null,
+        width: photo.width ?? null,
+        height: photo.height ?? null,
+      }),
+      (record) => !!record.url
+    );
   }
 }
