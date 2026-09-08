@@ -45,17 +45,17 @@ const GREEN_ASCENDING_GRADIENT = [
 ];
 
 const YELLOW_ASCENDING_GRADIENT = [
-  '#ff9900',
-  '#ffa200',
-  '#ffaa00',
-  '#ffb300',
-  '#ffbb00',
+  '#ffff55',//ffff55
+  '#ffee00',//ffee00
+  '#ffdd00',//ffdd00
+  '#ffd400',//ffd400
+  '#ffcc00',//ffcc00
   '#ffc400',
-  '#ffcc00',
-  '#ffd400',
-  '#ffdd00',
-  '#ffee00',
-  '#ffff55'
+  '#ffbb00',
+  '#ffb300',
+  '#ffaa00',
+  '#ffa200',
+  '#ff9900'
 ];
 
 const RED_ASCENDING_GRADIENT = [
@@ -69,7 +69,7 @@ const RED_ASCENDING_GRADIENT = [
   '#e4001e',
   '#d4001c',
   '#b30017',
-  '#7f0715'
+  '#a40016'
 ];
 
 const PINK_ASCENDING_GRADIENT = [
@@ -86,16 +86,53 @@ const PINK_ASCENDING_GRADIENT = [
   '#b30059'
 ];
 
+
+const GREEN_TO_BLUE_GRADIENT = [
+  '#b3ffb3',
+  '#99ffe6',
+  '#80ffec',
+  '#66ffff',
+  '#4dffff',
+  '#33ebff',
+  '#1ad6ff',
+  '#00c2ff',
+  '#00adff',
+  '#0099ff',
+  '#0084ff'
+];
+
+const EARTH_BROWN_GRADIENT = [
+  '#a48875', // Couleur de départ demandée
+  '#987d6b',
+  '#8c7261',
+  '#806757',
+  '#745c4d',
+  '#685143',
+  '#5c4639',
+  '#503b2f',
+  '#443025',
+  '#38251b',
+  '#2c1a11'  // Marron sombre profond
+];
+
 const GRADIENTS: Record<PlaneIconType, string[]> = {
   L1P: YELLOW_ASCENDING_GRADIENT,
+  L2P: EARTH_BROWN_GRADIENT,
   L1T: ['#a2ffd8', '#8ef8ce', '#7df0cf', '#70e2c1', '#62d4b4', '#58c6a7', '#4fb89b', '#48ac90', '#419d84', '#35826d', '#225345'],
+  L1TM: RED_ASCENDING_GRADIENT,
   L2J: PURPLE_BLUE_GRADIENT,
+  L2JM: RED_ASCENDING_GRADIENT,
+  L2T: GREEN_TO_BLUE_GRADIENT,
   commercial: PURPLE_BLUE_GRADIENT,
   L3J: GREEN_ASCENDING_GRADIENT,
+  L3JM: RED_ASCENDING_GRADIENT,
   privateJet: GREEN_ASCENDING_GRADIENT,
   L4J: YELLOW_ASCENDING_GRADIENT,
+  L4JM: RED_ASCENDING_GRADIENT,
   H1P: ['#ffd4ad', '#ffc794', '#ffb97d', '#ffac65', '#ff9f4d', '#fa933b', '#f5872a', '#e67d25', '#d67320', '#b86018', '#7a3e0d'],
   H2T: ['#ffc7ad', '#ffb894', '#ffa87d', '#ff9a65', '#ff8b4d', '#fa7e3b', '#f5702a', '#e66725', '#d65e20', '#b84e18', '#7a310d'],
+  H3T: EARTH_BROWN_GRADIENT,
+  JETM: RED_ASCENDING_GRADIENT,
   militaryHelicopter: RED_ASCENDING_GRADIENT,
   militaryTransport: RED_ASCENDING_GRADIENT,
   uav: ['#a8ffff', '#8cfff9', '#70fff3', '#5bece1', '#46e6d8', '#3dd5c9', '#35c7ba', '#2fb8ac', '#2aa89d', '#218a81', '#12544e'],

@@ -66,13 +66,11 @@ function AppContent()
   const location = useLocation();
   const isHome = location.pathname === '/';
 
-  // État pour la carte agrandie
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Fonction pour basculer la taille sans recharger la carte
   const toggleExpand = (expanded: boolean) => {
     setIsExpanded(expanded);
-    // Notifie la bibliothèque de cartes (OpenFreeMap / MapLibre) que le conteneur a changé de taille
     setTimeout(() => {
       window.dispatchEvent(new Event('resize'));
     }, 50);
@@ -125,12 +123,9 @@ function AppContent()
         {/* Présentation du projet */}
         {showMapChrome && (
           <header className="project-intro">
-            <p className="eyebrow">Suivi temps réel &middot; territoire français / Europe de l'ouest</p>
-            <h1>Une seule carte pour tout ce qui bouge en France.</h1>
-            <p className="intro-lead">
-              Trains, avions et navires suivis en direct sur fond de carte OpenFreeMap,
-              croisés avec les prévisions Météo-France.
-            </p>
+            <h3 className="eyebrow">Plateforme de suivi temps réel · France & Europe de l'Ouest</h3>
+            <h2>Unifiez le suivi de l'ensemble des flux de transport sur une interface unique.</h2>
+            <p className="intro-lead">Trains, avions et navires suivis en direct sur une cartographie unifiée.</p>
           </header>
         )}
 

@@ -3,12 +3,15 @@ import { type PlaneIconType } from './planeIconResolver';
 import { ALTITUDE_STOPS, getAltitudeColor } from './altitudeColors';
 
 import { createA380Icon } from '../l4j';
+import { createL4JMIcon } from '../l4jm';
 import { createH1PIcon } from '../h1p';
 import { createH2TIcon } from '../h2t';
 import { createL3JIcon } from '../l3j';
 import { createL2JIcon } from '../l2j';
 import { createL1PIcon } from '../l1p';
+import { createL2PIcon } from '../l2p';
 import { createL1TIcon } from '../l1t';
+import { createL2TIcon } from '../l2t';
 import { createCarIcon } from '../groundVehicule';
 import { createUAVIcon } from '../uav';
 import { createBalloonIcon } from '../balloon';
@@ -16,6 +19,7 @@ import { createMilitaryHelicopterIcon } from '../MilitaryH';
 import { createGliderIcon } from '../glider';
 import { createA400MIcon } from '../MilitaryP';
 import { createPlaneIcon } from '../planeIcon';
+import { createFighterJetIcon } from '../fighter';
 
 type IconFactory = (color: string, size: number) => ImageData;
 
@@ -37,12 +41,20 @@ const createBalloonIconAdapter: IconFactory = (color, size) =>
 
 const ICON_FACTORIES: Record<PlaneIconType, IconFactory> = {
   L1P: createL1PIcon,
+  L2P: createL2PIcon,
   L1T: createL1TIcon,
+  L1TM: createL1TIcon,
   L2J: createL2JIcon,
+  L2JM: createL2JIcon,
+  L2T: createL2TIcon,
   L3J: createL3JIcon,
+  L3JM: createL3JIcon,
   L4J: createA380Icon,
+  L4JM: createL4JMIcon,
   H1P: createH1PIcon,
   H2T: createH2TIcon,
+  H3T: createH2TIcon,
+  JETM: createFighterJetIcon,
   militaryHelicopter: createMilitaryHelicopterIcon,
   militaryTransport: createA400MIcon,
   uav: createUAVIcon,
@@ -62,11 +74,19 @@ const ICON_SIZE_BY_TYPE: Partial<Record<PlaneIconType, number>> = {
   groundVehicle: 45,
   H1P: 50,
   H2T: 50,
+  H3T: 50,
   L1P: 60,
+  L2P: 65,
   L1T: 60,
+  L1TM: 60,
+  L2T: 70,
   L2J: 70,
+  L2JM: 70,
   L3J: 50,
+  L3JM: 50,
   L4J: 85,
+  L4JM: 85,
+  JETM: 65,
   commercial: 70,
   privateJet: 50,
   uav: 50,

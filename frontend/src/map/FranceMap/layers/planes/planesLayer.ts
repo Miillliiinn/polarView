@@ -70,8 +70,11 @@ map.on('click', 'planes-layer', async (e) => {
   const buildContent = (photoHtml: string) => `
     Model: <strong>${mod}</strong><br/>
     Catégorie: <strong>${kind}</strong><br/>
+    Icao: <strong>${icao24}</strong><br />
+    Icao Class : <strong>${icaoAircraftClass}</strong><br />
     Callsign: <strong>${callsign}</strong><br/>
     Altitude: <strong>${altitude} m</strong><br/>
+    source: <strong>${source}</strong><br />
     Vitesse: <strong>${vel != null ? (vel * 3.6).toFixed(1) : '?'} km/h</strong></br>
     <div id="photo-container">${photoHtml}</div>
   `;

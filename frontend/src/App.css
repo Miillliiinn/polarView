@@ -165,7 +165,7 @@
 /* Section Présentation */
 .project-intro {
   text-align: center;
-  max-width: 720px;
+  max-width: 900px;
   margin: 0 auto;
 }
 
@@ -286,11 +286,11 @@
   gap: 8px;
   padding: 10px 20px;
   border-radius: 30px;
-  background: rgba(15, 29, 56, 0.85);
+  background: #0f1d38; /*0f1d38*/
   color: #ffffff;
   font-size: 0.9rem;
   font-weight: 500;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid #93c283; /* ------------------------------------------------- */
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   opacity: 0;
@@ -300,7 +300,7 @@
 }
 
 .map-wrapper.preview:hover .map-overlay {
-  background: rgba(6, 14, 28, 0.45);
+  background: #060e1c7e;
 }
 
 .map-wrapper.preview:hover .expand-badge {
@@ -311,13 +311,13 @@
 /* Bouton pour réduire la carte */
 .close-expanded-btn {
   position: absolute;
-  top: 20px;
-  right: 70px;
+  top: 9px;
+  right: 50px;
   z-index: 1000;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(15, 29, 56, 0.85);
+  background: #ff000037; /*0f1d38d9*/
   color: #e8e6df;
   border: 1px solid rgba(255, 255, 255, 0.15);
   padding: 10px 18px;
@@ -335,15 +335,12 @@
   color: #ffffff;
 }
 
-/* --------------------------------------------------------------------------
-   Signature : cadre "verrouillage radar" — les quatre coins et le repère
-   texte évoquent un écran de contrôle, en écho direct au sujet (tracking).
-   -------------------------------------------------------------------------- */
+/* -- pour le vert autour de la map -- */
 .map-frame-corner {
   position: absolute;
-  width: 22px;
-  height: 22px;
-  border: 2px solid var(--accent-radar-bright);
+  width: 597.7px;
+  height: 267.7px;
+  border: 1px solid var(--accent-radar-bright);
   opacity: 0.55;
   z-index: 6;
   pointer-events: none;
@@ -355,10 +352,10 @@
   height: 28px;
 }
 
-.map-frame-corner.tl { top: 14px; left: 14px; border-right: none; border-bottom: none; border-top-left-radius: 4px; }
-.map-frame-corner.tr { top: 14px; right: 14px; border-left: none; border-bottom: none; border-top-right-radius: 4px; }
-.map-frame-corner.bl { bottom: 14px; left: 14px; border-right: none; border-top: none; border-bottom-left-radius: 4px; }
-.map-frame-corner.br { bottom: 14px; right: 14px; border-left: none; border-top: none; border-bottom-right-radius: 4px; }
+.map-frame-corner.tl { top: 1px; left: 1px; border-right: none; border-bottom: none; border-top-left-radius: 15px; }
+.map-frame-corner.tr { top: 1px; right: 1px; border-left: none; border-bottom: none; border-top-right-radius: 15px; }
+.map-frame-corner.bl { bottom: 1px; left: 1px; border-right: none; border-top: none; border-bottom-left-radius: 15px; }
+.map-frame-corner.br { bottom: 1px; right: 1px; border-left: none; border-top: none; border-bottom-right-radius: 15px; }
 
 .map-wrapper.preview:hover .map-frame-corner {
   opacity: 0.95;
@@ -385,7 +382,7 @@
    Contenu des sous-pages (avions / trains / bateaux / météo)
    ========================================================================== */
 .app-content {
-  max-width: 1200px;
+  max-width: 1500px;
   margin: 0 auto;
   padding: 32px 24px 56px;
 }

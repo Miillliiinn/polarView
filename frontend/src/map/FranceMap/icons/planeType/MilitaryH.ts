@@ -118,9 +118,9 @@ export function createMilitaryHelicopterIcon(
   // Flou de mouvement (Disque d'air balayé)
   ctx.beginPath();
   ctx.arc(0, rotorY, 52 * s, 0, Math.PI * 2);
-  ctx.fillStyle = 'rgba(15, 23, 42, 0.06)';
+  ctx.fillStyle = '#a9000039';
   ctx.fill();
-  ctx.strokeStyle = 'rgba(15, 23, 42, 0.12)';
+  ctx.strokeStyle = '#a9000039';
   ctx.lineWidth = Math.max(0.5, size * 0.004);
   ctx.stroke();
 

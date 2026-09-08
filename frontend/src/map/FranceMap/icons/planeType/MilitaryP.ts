@@ -30,22 +30,9 @@ export function createA400MIcon(color: string, size: number): ImageData {
   let contrastBoost = 1.5;
   let detailLevel: 'high' | 'medium' | 'low' | 'micro' = 'high';
 
-  if (size < 24) {
-    contrastBoost = 3.5;
-    detailLevel = 'micro';
-  } else if (size < 40) {
-    contrastBoost = 2.5;
-    detailLevel = 'low';
-  } else if (size < 70) {
-    contrastBoost = 2;
-    detailLevel = 'low';
-  } else if (size < 100) {
-    contrastBoost = 1.6;
-    detailLevel = 'medium';
-  } else {
-    contrastBoost = 1.2;
-    detailLevel = 'high';
-  }
+  contrastBoost = 1.6;
+  detailLevel = 'medium';
+
   const camoDark = shadeColor(color, -28 * contrastBoost);
   const camoLight = shadeColor(color, 18 * contrastBoost);
   const camoOutline = shadeColor(color, -50 * contrastBoost);
@@ -117,62 +104,31 @@ export function createA400MIcon(color: string, size: number): ImageData {
     }
   }
 
-if (detailLevel === 'micro')
-{
-  drawCamoPatch(-2, -40, [[-4, -3], [3, -5], [6, 0], [3, 5], [-3, 4], [-6, 1]], camoDark);
-  drawCamoPatch(10, -5, [[-8, -6], [6, -8], [14, -2], [8, 6], [-6, 5], [-12, -1]], camoDark);
-  drawCamoPatch(-30, -8, [[-9, -5], [5, -7], [10, -1], [4, 5], [-7, 4]], camoDark);
-  drawCamoPatch(30, -6, [[-9, -4], [6, -7], [11, 0], [5, 6], [-8, 3]], camoDark);
-  drawCamoPatch(2, 20, [[-5, -8], [5, -9], [8, 1], [3, 8], [-6, 6]], camoDark);
-  drawCamoPatch(-45, 0, [[-6, -4], [5, -5], [7, 0], [3, 5], [-5, 3]], camoDark);
-  drawCamoPatch(45, 0, [[-6, -4], [5, -5], [7, 0], [3, 5], [-5, 3]], camoDark);
-
-  drawCamoPatch(-15, -20, [[-4, -3], [4, -3], [5, 2], [-1, 4], [-5, 1]], camoLight);
-  drawCamoPatch(18, 5, [[-4, -3], [4, -3], [5, 2], [-1, 4], [-5, 1]], camoLight);
-  drawCamoPatch(-5, 35, [[-4, -3], [4, -3], [5, 2], [-1, 4], [-5, 1]], camoLight);
-  drawCamoPatch(-38, -12, [[-3, -2], [3, -2], [4, 2], [-1, 3], [-4, 1]], camoLight);
-  drawCamoPatch(38, -12, [[-3, -2], [3, -2], [4, 2], [-1, 3], [-4, 1]], camoLight);
-}
-else if (detailLevel === 'low')
-{
-
-  drawCamoPatch(0, -25, [[-10, -8], [9, -12], [16, 2], [8, 12], [-9, 10], [-14, 0]], camoDark);
-  drawCamoPatch(0, 22, [[-9, -10], [9, -11], [12, 2], [5, 11], [-10, 8]], camoDark);
-  drawCamoPatch(-30, -6, [[-10, -6], [8, -8], [10, 2], [-9, 6]], camoLight);
-  drawCamoPatch(30, -6, [[-10, -6], [8, -8], [10, 2], [-9, 6]], camoLight);
-
-}
-else if (detailLevel === 'medium')
-{
+  if (detailLevel === 'medium')
+  {
+  // Taches foncées (camoDark)
     drawCamoPatch(-1, -43, [[-6, -10], [2, -14], [9, -7], [8, 1], [2, 9], [-5, 8], [-10, -1]], camoDark, 1.5);
     drawCamoPatch(9, -3, [[-12, -10], [3, -13], [16, -7], [19, 0], [11, 10], [-3, 9], [-14, 3]], camoDark, 1.45);
-    drawCamoPatch(28, -10, [[-10, -6], [3, -9], [13, -4], [12, 5], [3, 8], [-9, 5], [-11, -1]], camoDark, 1.4);
-    drawCamoPatch(-30, -8, [[-12, -5], [-2, -9], [11, -6], [13, 3], [4, 8], [-8, 6], [-10, 0]], camoDark, 1.45);
+    drawCamoPatch(28, -5, [[-10, -6], [3, -9], [13, -4], [12, 5], [3, 8], [-9, 5], [-11, -1]], camoDark, 1.4);
+    drawCamoPatch(-30, -3, [[-12, -5], [-2, -9], [11, -6], [13, 3], [4, 8], [-8, 6], [-10, 0]], camoDark, 1.45);
     drawCamoPatch(1, 25, [[-9, -12], [4, -13], [11, -3], [8, 7], [-2, 12], [-9, 4], [-11, -3]], camoDark, 1.35);
-    drawCamoPatch(46, -12, [[-7, -4], [2, -6], [8, -2], [6, 5], [-2, 6], [-8, 2]], camoDark, 1.15);
-    drawCamoPatch(-49, 2, [[-5, -3], [3, -4], [6, 0], [4, 4], [-3, 5], [-6, 1]], camoDark, 1.05);
+    drawCamoPatch(46, 10, [[-7, -4], [2, -6], [8, -2], [6, 5], [-2, 6], [-8, 2]], camoDark, 1.15);
+    drawCamoPatch(-49, 12, [[-5, -3], [3, -4], [6, 0], [4, 4], [-3, 5], [-6, 1]], camoDark, 1.05);
+    drawCamoPatch(18, -12, [[-8, -5], [2, -8], [10, -3], [9, 4], [1, 6], [-7, 4]], camoDark, 1.25);
+    drawCamoPatch(-20, -14, [[-8, -4], [1, -7], [9, -2], [7, 5], [-1, 7], [-8, 2]], camoDark, 1.2);
+    drawCamoPatch(0, 48, [[-5, -4], [3, -5], [6, 0], [4, 5], [-3, 4]], camoDark, 1.1);
+
+    // Taches claires (camoLight)
     drawCamoPatch(-18, -24, [[-7, -6], [4, -7], [9, 0], [4, 8], [-5, 5], [-9, -2]], camoLight, 1.35);
     drawCamoPatch(23, 5, [[-8, -5], [3, -8], [10, -2], [7, 7], [-2, 9], [-9, 3]], camoLight, 1.4);
     drawCamoPatch(-2, 41, [[-7, -6], [4, -6], [9, 1], [3, 8], [-5, 6], [-9, -1]], camoLight, 1.25);
-    drawCamoPatch(-41, -15, [[-6, -4], [3, -5], [7, 0], [4, 6], [-4, 4], [-7, -1]], camoLight, 1.15);
-    drawCamoPatch(41, -4, [[-6, -5], [3, -4], [7, 2], [3, 6], [-4, 4], [-6, -1]], camoLight, 1.15);
+    drawCamoPatch(-41, 5, [[-6, -4], [3, -5], [7, 0], [4, 6], [-4, 4], [-7, -1]], camoLight, 1.15);
+    drawCamoPatch(41, 12, [[-6, -5], [3, -4], [7, 2], [3, 6], [-4, 4], [-6, -1]], camoLight, 1.15);
     drawCamoPatch(15, -20, [[-4, -3], [3, -4], [5, 0], [3, 4], [-3, 3]], camoLight, 1);
-}
-else
-{
-  drawCamoPatch(-2, -40, [[-4, -3], [3, -5], [6, 0], [3, 5], [-3, 4], [-6, 1]], camoDark);
-  drawCamoPatch(10, -5, [[-8, -6], [6, -8], [14, -2], [8, 6], [-6, 5], [-12, -1]], camoDark);
-  drawCamoPatch(-30, -8, [[-9, -5], [5, -7], [10, -1], [4, 5], [-7, 4]], camoDark);
-  drawCamoPatch(30, -6, [[-9, -4], [6, -7], [11, 0], [5, 6], [-8, 3]], camoDark);
-  drawCamoPatch(2, 20, [[-5, -8], [5, -9], [8, 1], [3, 8], [-6, 6]], camoDark);
-  drawCamoPatch(-45, 0, [[-6, -4], [5, -5], [7, 0], [3, 5], [-5, 3]], camoDark);
-  drawCamoPatch(45, 0, [[-6, -4], [5, -5], [7, 0], [3, 5], [-5, 3]], camoDark);
-  drawCamoPatch(-15, -20, [[-4, -3], [4, -3], [5, 2], [-1, 4], [-5, 1]], camoLight);
-  drawCamoPatch(18, 5, [[-4, -3], [4, -3], [5, 2], [-1, 4], [-5, 1]], camoLight);
-  drawCamoPatch(-5, 35, [[-4, -3], [4, -3], [5, 2], [-1, 4], [-5, 1]], camoLight);
-  drawCamoPatch(-38, -12, [[-3, -2], [3, -2], [4, 2], [-1, 3], [-4, 1]], camoLight);
-  drawCamoPatch(38, -12, [[-3, -2], [3, -2], [4, 2], [-1, 3], [-4, 1]], camoLight);
-}
+    drawCamoPatch(35, -2, [[-7, -5], [2, -6], [8, -1], [5, 5], [-3, 5]], camoLight, 1.2);
+    drawCamoPatch(-36, -4, [[-6, -4], [3, -6], [7, -1], [4, 4], [-4, 4]], camoLight, 1.2);
+    drawCamoPatch(0, -10, [[-5, -5], [2, -6], [6, 1], [3, 6], [-4, 4]], camoLight, 1.15);
+  }
 
   ctx.restore();
 
@@ -200,20 +156,11 @@ else
 
   ctx.save();
   ctx.clip(tailPath);
-  if (detailLevel === 'micro')
-  {
-    ctx.fillStyle = camoDark;
-    ctx.fillRect(-16 * s, 40 * s, 32 * s, 15 * s);
-  }
-  else if (detailLevel === 'low')
-  {
-    drawCamoPatch(0, 42, [[-8, -6], [7, -7], [10, 1], [4, 8], [-8, 5]], camoDark, 1.5);
-  }
-  else
-  {
-    drawCamoPatch(-6, 40, [[-6, -4], [5, -5], [7, 1], [3, 6], [-6, 4]], camoDark, 1.2);
-    drawCamoPatch(6, 45, [[-5, -4], [5, -4], [6, 3], [-1, 4], [-5, 1]], camoLight, 1.2);
-  }
+
+  
+  drawCamoPatch(-6, 40, [[-6, -4], [5, -5], [7, 1], [3, 6], [-6, 4]], camoDark, 1.2);
+  drawCamoPatch(6, 45, [[-5, -4], [5, -4], [6, 3], [-1, 4], [-5, 1]], camoLight, 1.2);
+  
   ctx.restore();
 
   ctx.lineWidth = Math.max(1, size * 0.016);
