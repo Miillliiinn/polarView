@@ -44,6 +44,20 @@ const GREEN_ASCENDING_GRADIENT = [
   '#39ff14'
 ];
 
+const GREEN_DESCENDING_GRADIENT = [
+  '#39ff14',
+  '#1ee84e',
+  '#13ce5d',
+  '#0fc060',
+  '#0cb362',
+  '#0aa562',
+  '#089862',
+  '#078b5c',
+  '#068057',
+  '#057450',
+  '#04694a'
+];
+
 const YELLOW_ASCENDING_GRADIENT = [
   '#ffff55',//ffff55
   '#ffee00',//ffee00
