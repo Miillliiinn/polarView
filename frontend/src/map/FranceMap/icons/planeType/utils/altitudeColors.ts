@@ -116,7 +116,7 @@ const GREEN_TO_BLUE_GRADIENT = [
 ];
 
 const EARTH_BROWN_GRADIENT = [
-  '#a48875', // Couleur de départ demandée
+  '#a48875', 
   '#987d6b',
   '#8c7261',
   '#806757',
@@ -126,7 +126,7 @@ const EARTH_BROWN_GRADIENT = [
   '#503b2f',
   '#443025',
   '#38251b',
-  '#2c1a11'  // Marron sombre profond
+  '#2c1a11' 
 ];
 
 const GRADIENTS: Record<PlaneIconType, string[]> = {
