@@ -72,6 +72,38 @@ const IconSignal = () => (
   </svg>
 );
 
+const IconSatellite = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M13 7 9 3 3 9l4 4" />
+    <path d="M17 11l4 4-6 6-4-4" />
+    <path d="M8 12l4 4" />
+    <path d="M16 4l1.5 1.5M20 8l1.5 1.5" />
+  </svg>
+);
+
+const IconWave = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M2 12c2-3 4-3 6 0s4 3 6 0 4-3 6 0" />
+    <path d="M2 17c2-3 4-3 6 0s4 3 6 0 4-3 6 0" />
+  </svg>
+);
+
+const IconGauge = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18z" />
+    <path d="M12 12 16 8" />
+    <path d="M12 8v1M6 12h1M17 12h1" />
+  </svg>
+);
+
+const IconWind = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 8h11a2.5 2.5 0 1 0-2.2-3.6" />
+    <path d="M3 12h15a2.5 2.5 0 1 1-2.2 3.6" />
+    <path d="M3 16h8a2 2 0 1 1-1.6 3.2" />
+  </svg>
+);
+
 const NAV_LINKS = [
   { to: '/', label: 'France', end: true, icon: IconFrance },
   { to: '/avions', label: 'Avions', end: false, icon: IconPlane },
@@ -113,6 +145,47 @@ function usePing() {
   }, []);
   return ping;
 }
+
+function useRandomWalk(min: number, max: number, step: number, intervalMs = 2500) {
+  const [value, setValue] = useState(() => Math.floor((min + max) / 2));
+  useEffect(() => {
+    const id = setInterval(() => {
+      setValue((v) => {
+        const delta = (Math.random() * 2 - 1) * step;
+        return Math.min(max, Math.max(min, Math.round(v + delta)));
+      });
+    }, intervalMs);
+    return () => clearInterval(id);
+  }, [min, max, step, intervalMs]);
+  return value;
+}
+
+function usePacketCounter() {
+  const [count, setCount] = useState(184200);
+  useEffect(() => {
+    const id = setInterval(() => {
+      setCount((c) => c + Math.floor(Math.random() * 40) + 5);
+    }, 1200);
+    return () => clearInterval(id);
+  }, []);
+  return count;
+}
+
+function useMouseSpotlight(active: boolean) {
+  useEffect(() => {
+    if (!active) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`);
+      document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [active]);
+}
+
+const formatPackets = (n: number) => n.toLocaleString('fr-FR');
 
 const formatTime = (date: Date) =>
   date.toLocaleTimeString('fr-FR', { hour12: false });
@@ -170,18 +243,92 @@ function ControlDeck() {
           </div>
         </div>
 
-        <div className="deck-item">
+        {/* <div className="deck-item">
           <div className="deck-text">
             <span className="deck-label">Canal Visualisé</span>
             <span className="deck-value highlight">{active?.label ?? 'France'}</span>
           </div>
-        </div>
+        </div> */}
 
         <div className="deck-item status-item">
           <span className="status-dot" />
           <div className="deck-text">
-            <span className="deck-label">Réseau Opérationnel</span>
-            <span className="deck-value mono badge-status">LIVE MONITORING</span>
+            <span className="deck-label">Réseau </span>
+            <span className="deck-value mono badge-status">LIVE</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* --- Panneau de diagnostic système (sous la carte) --- */
+
+function SystemReadout() {
+  const signal = useRandomWalk(82, 99, 4);
+  const coverage = useRandomWalk(88, 97, 3);
+  const packets = usePacketCounter();
+  const windSpeed = useRandomWalk(8, 34, 5, 4000);
+  const pressure = useRandomWalk(1008, 1024, 2, 5000);
+  const satellites = useRandomWalk(11, 18, 2, 6000);
+
+  return (
+    <div className="system-readout">
+      <div className="readout-header">
+        <span className="readout-title">DIAGNOSTIC SYSTÈME</span>
+        <span className="readout-sub">MISE À JOUR CONTINUE</span>
+      </div>
+
+      <div className="readout-grid">
+        <div className="readout-tile">
+          <span className="readout-icon"><IconSatellite /></span>
+          <div className="readout-text">
+            <span className="readout-label">Satellites Liés</span>
+            <span className="readout-value">{satellites}</span>
+          </div>
+        </div>
+
+        <div className="readout-tile">
+          <span className="readout-icon"><IconGauge /></span>
+          <div className="readout-text">
+            <span className="readout-label">Intégrité Signal</span>
+            <span className="readout-value">{signal}%</span>
+          </div>
+          <div className="readout-bar">
+            <div className="readout-bar-fill" style={{ width: `${signal}%` }} />
+          </div>
+        </div>
+
+        <div className="readout-tile">
+          <span className="readout-icon"><IconWave /></span>
+          <div className="readout-text">
+            <span className="readout-label">Couverture Radar</span>
+            <span className="readout-value">{coverage}%</span>
+          </div>
+          <div className="readout-bar">
+            <div className="readout-bar-fill amber" style={{ width: `${coverage}%` }} />
+          </div>
+        </div>
+
+        <div className="readout-tile">
+          <div className="readout-text">
+            <span className="readout-label">Paquets Analysés</span>
+            <span className="readout-value mono">{formatPackets(packets)}</span>
+          </div>
+        </div>
+
+        <div className="readout-tile">
+          <span className="readout-icon"><IconWind /></span>
+          <div className="readout-text">
+            <span className="readout-label">Vent Secteur</span>
+            <span className="readout-value">{windSpeed} km/h</span>
+          </div>
+        </div>
+
+        <div className="readout-tile">
+          <div className="readout-text">
+            <span className="readout-label">Pression Atmo.</span>
+            <span className="readout-value">{pressure} hPa</span>
           </div>
         </div>
       </div>
@@ -192,7 +339,7 @@ function ControlDeck() {
 function AppContent() {
   const location = useLocation();
   const isHome = location.pathname === '/';
-
+  
   const [isExpanded, setIsExpanded] = useState(false);
 
   const toggleExpand = (expanded: boolean) => {
@@ -210,9 +357,15 @@ function AppContent() {
   }, [isHome]);
 
   const showMapChrome = isHome && !isExpanded;
-
+  useMouseSpotlight(!isExpanded);
   return (
-      <div className={`app-shell ${!isExpanded ? 'ambient-active' : ''}`}>
+    <div className={`app-shell ${!isExpanded ? 'ambient-active' : ''}`}>
+      {!isExpanded && (
+        <span className="cursor-spotlight" aria-hidden="true">
+          <span className="crosshair crosshair-h" />
+          <span className="crosshair crosshair-v" />
+        </span>
+      )}
       <nav className={`site-nav ${isExpanded ? 'is-nav-hidden' : ''}`}>
         <div className="nav-inner">
           <div className="nav-brand">
@@ -258,7 +411,7 @@ function AppContent() {
                   <line x1="21" y1="3" x2="14" y2="10"></line>
                   <line x1="3" y1="21" x2="10" y2="14"></line>
                 </svg>
-                Plein Écran Tactical View
+                Plein Écran
               </span>
             </div>
           )}
@@ -283,7 +436,7 @@ function AppContent() {
           <span className="map-frame-corner br" aria-hidden="true" />
 
           {/* Bandeaux d'information radar */}
-          <span className="map-readout" aria-hidden="true">GRID 48.8566° N, 2.3522° E &middot; FLUX EN DIRECT</span>
+          <span className="map-readout" aria-hidden="true">Europe Ouest &middot; LIVE</span>
           <span className="map-sec-code" aria-hidden="true">ZONE ALPHA-1</span>
 
           <div className={`map-container-inner ${!isExpanded ? 'disabled-events' : ''}`}>
@@ -291,6 +444,9 @@ function AppContent() {
           </div>
 
         </div>
+
+        {showMapChrome && <SystemReadout />}
+
       </div>
 
       <div className="app-content">
