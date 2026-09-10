@@ -3,37 +3,22 @@ import api from '../../../../api/apiBridge';
 import { globalCache } from '../../../../api/classCache';
 import { registerAllPlaneIcons } from '../../icons/planeType/utils/iconRegistry';
 
-export function setupPlanesLayer(map: maplibregl.Map)
-{
-  registerAllPlaneIcons(map);
+// Garde en mémoire, par instance de map, si les listeners "planes-layer"
+// ont déjà été attachés. Comme map.on('click', 'planes-layer', ...) est
+// une délégation basée sur l'id du layer (et non sur l'objet layer),
+// les listeners survivent à un setStyle() / recréation du layer.
+// Il ne faut donc les attacher qu'UNE SEULE FOIS par instance de map.
+const listenersAttached = new WeakSet<maplibregl.Map>();
 
-  map.addSource('planes', {
-    type: 'geojson',
-    data: { type: 'FeatureCollection', features: [] }
-  });
+function onPlaneClick(map: maplibregl.Map) {
+  return async (e: maplibregl.MapMouseEvent & { features?: maplibregl.MapGeoJSONFeature[] }) => {
+    const feature = e.features?.[0];
+    if (!feature) return;
 
-  map.addLayer({
-    id: 'planes-layer',
-    type: 'symbol',
-    source: 'planes',
-    layout: {
-      'icon-image': ['coalesce', ['get', 'iconKey'], 'plane-generic-mid'],
-      'icon-size': 0.5,
-      'icon-rotate': ['coalesce', ['get', 'heading'], 0],
-      'icon-rotation-alignment': 'map',
-      'icon-allow-overlap': true,
-      visibility: 'none'
-    }
-  });
+    const icao24 = feature.properties?.icao24;
+    if (!icao24) return;
 
-map.on('click', 'planes-layer', async (e) => {
-  const feature = e.features?.[0];
-  if (!feature) return;
-
-  const icao24 = feature.properties?.icao24;
-  if (!icao24) return;
-
-  const cache = globalCache.getOpCache() || [];
+      const cache = globalCache.getOpCache() || [];
   const planeData = cache.find((f) => f.icao24 === icao24);
 
   const callsign = feature.properties?.callsign || planeData?.callsign || 'Vol inconnu';
@@ -67,40 +52,43 @@ map.on('click', 'planes-layer', async (e) => {
 
   const mod = typeLabel ?? model ?? "plane";
 
-  const buildContent = (photoHtml: string) => `
-    Model: <strong>${mod}</strong><br/>
-    Catégorie: <strong>${kind}</strong><br/>
-    Icao: <strong>${icao24}</strong><br />
-    Icao Class : <strong>${icaoAircraftClass}</strong><br />
-    Callsign: <strong>${callsign}</strong><br/>
-    Altitude: <strong>${altitude} m</strong><br/>
-    source: <strong>${source}</strong><br />
-    Vitesse: <strong>${vel != null ? (vel * 3.6).toFixed(1) : '?'} km/h</strong></br>
-    <div id="photo-container">${photoHtml}</div>
-  `;
+    const buildContent = (photoHtml: string) => `
+      Model: <strong>${mod}</strong><br/>
+      Catégorie: <strong>${kind}</strong><br/>
+      Icao: <strong>${icao24}</strong><br />
+      Icao Class : <strong>${icaoAircraftClass}</strong><br />
+      Callsign: <strong>${callsign}</strong><br/>
+      Altitude: <strong>${altitude} m</strong><br/>
+      source: <strong>${source}</strong><br />
+      Vitesse: <strong>${vel != null ? (vel * 3.6).toFixed(1) : '?'} km/h</strong></br>
+      <div id="photo-container">${photoHtml}</div>
+    `;
 
-  const popup = new maplibregl.Popup()
-    .setLngLat(coordinates)
-    .setHTML(buildContent('<em>Chargement de la photo...</em>'))
-    .addTo(map);
+    // Ferme un éventuel popup encore ouvert avant d'en ouvrir un nouveau
+    // (sécurité supplémentaire si jamais un doublon de listener subsiste).
+    const existing = (map as any)._planesActivePopup as maplibregl.Popup | undefined;
+    if (existing) existing.remove();
 
-  try
-  {
-    const res = await api.get(`/planes/${icao24}/picture`);
-    const photo = res.data;
+    const popup = new maplibregl.Popup()
+      .setLngLat(coordinates)
+      .setHTML(buildContent('<em>Chargement de la photo...</em>'))
+      .addTo(map);
 
-    if (popup.isOpen())
-    {
-      const container = popup.getElement().querySelector('#photo-container');
-      if (container) {
-        container.innerHTML = photo?.thumbnailSrc
-          ? `<img src="${photo.thumbnailSrc}" width="210" style="border-radius:4px;margin-top:4px;" /><br/><small><small>🖼️ ${photo.photographer || 'Inconnu'}</small></small>`
-          : `<em>Aucune photo disponible</em>`;
+    (map as any)._planesActivePopup = popup;
+
+    try {
+      const res = await api.get(`/planes/${icao24}/picture`);
+      const photo = res.data;
+
+      if (popup.isOpen()) {
+        const container = popup.getElement().querySelector('#photo-container');
+        if (container) {
+          container.innerHTML = photo?.thumbnailSrc
+            ? `<img src="${photo.thumbnailSrc}" width="210" style="border-radius:4px;margin-top:4px;" /><br/><small><small>🖼️ ${photo.photographer || 'Inconnu'}</small></small>`
+            : `<em>Aucune photo disponible</em>`;
         }
       }
-    }
-    catch (err)
-    {
+    } catch (err) {
       console.error('Erreur récupération photo avion :', err);
       if (popup.isOpen()) {
         const container = popup.getElement().querySelector('#photo-container');
@@ -109,7 +97,13 @@ map.on('click', 'planes-layer', async (e) => {
         }
       }
     }
-  });
+  };
+}
+
+function attachPlaneListeners(map: maplibregl.Map) {
+  if (listenersAttached.has(map)) return; // déjà attachés, on ne fait rien
+
+  map.on('click', 'planes-layer', onPlaneClick(map));
 
   map.on('mouseenter', 'planes-layer', () => {
     map.getCanvas().style.cursor = 'pointer';
@@ -117,10 +111,47 @@ map.on('click', 'planes-layer', async (e) => {
   map.on('mouseleave', 'planes-layer', () => {
     map.getCanvas().style.cursor = '';
   });
+
+  listenersAttached.add(map);
 }
 
-export function togglePlaneLayer(map: maplibregl.Map, visible: boolean)
-{
+/**
+ * Recrée la source + le layer 'planes'.
+ * À appeler à chaque changement de style (map.setStyle), car le style
+ * détruit toutes les sources/layers custom.
+ * Les listeners d'événements, eux, ne sont attachés qu'une fois (voir
+ * attachPlaneListeners), pour éviter l'accumulation de handlers/popups.
+ */
+export function setupPlanesLayer(map: maplibregl.Map) {
+  registerAllPlaneIcons(map);
+
+  if (!map.getSource('planes')) {
+    map.addSource('planes', {
+      type: 'geojson',
+      data: { type: 'FeatureCollection', features: [] }
+    });
+  }
+
+  if (!map.getLayer('planes-layer')) {
+    map.addLayer({
+      id: 'planes-layer',
+      type: 'symbol',
+      source: 'planes',
+      layout: {
+        'icon-image': ['coalesce', ['get', 'iconKey'], 'plane-generic-mid'],
+        'icon-size': 0.5,
+        'icon-rotate': ['coalesce', ['get', 'heading'], 0],
+        'icon-rotation-alignment': 'map',
+        'icon-allow-overlap': true,
+        visibility: 'none'
+      }
+    });
+  }
+
+  attachPlaneListeners(map);
+}
+
+export function togglePlaneLayer(map: maplibregl.Map, visible: boolean) {
   if (!map.getLayer('planes-layer')) return;
   map.setLayoutProperty('planes-layer', 'visibility', visible ? 'visible' : 'none');
 }
@@ -156,4 +187,5 @@ export function togglePlaneLayer(map: maplibregl.Map, visible: boolean)
     Cap: <strong>${heading ?? '?'} °</strong></br>
     Vitesse: <strong>${vel != null ? (vel * 3.6).toFixed(1) : '?'} km/h</strong></br>
     <div id="photo-container">${photoHtml}</div>
+
 */

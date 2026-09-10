@@ -12,26 +12,79 @@ import { toggleGareLayer, setupGareLayer } from './layers/trains/gareLayer';
 import { setupBoatsLayer, toggleBoatsLayer } from './layers/boats/boatsLayer';
 import { usePlanesRealtimeSync } from './hooks/usePlanesRealtimeSync';
 
+/* --- Icône burger --- */
+const IconBurger = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="4" y1="7" x2="20" y2="7" />
+    <line x1="4" y1="12" x2="20" y2="12" />
+    <line x1="4" y1="17" x2="20" y2="17" />
+  </svg>
+);
+
+/* --- Styles OpenFreeMap disponibles --- */
+const MAP_STYLES = [
+  { id: 'liberty', label: 'Liberty', url: 'https://tiles.openfreemap.org/styles/liberty' },
+  { id: 'dark', label: 'Dark', url: 'https://tiles.openfreemap.org/styles/dark' },
+  { id: 'bright', label: 'Bright', url: 'https://tiles.openfreemap.org/styles/bright' },
+  { id: 'fiord', label: 'Fiord', url: 'https://tiles.openfreemap.org/styles/fiord' },
+  { id: 'positron', label: 'Positron', url: 'https://tiles.openfreemap.org/styles/positron' },
+];
+
 export default function FranceMap() {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
+
   const [vigilanceVisible, setVigilanceVisible] = useState(false);
   const [visibleTrains, setVisibleTrains] = useState(false);
   const [visiblePlanes, setVisiblePlanes] = useState(false);
   const [visibleBoats, setVisibleBoats] = useState(false);
+
+  const [currentStyleId, setCurrentStyleId] = useState('liberty');
+  const [styleMenuOpen, setStyleMenuOpen] = useState(false);
+  const styleMenuRef = useRef<HTMLDivElement>(null);
+
+  // Refs miroir des états, pour éviter les closures obsolètes dans les listeners MapLibre
+  const stateRef = useRef({ vigilanceVisible, visibleTrains, visiblePlanes, visibleBoats });
+  useEffect(() => {
+    stateRef.current = { vigilanceVisible, visibleTrains, visiblePlanes, visibleBoats };
+  }, [vigilanceVisible, visibleTrains, visiblePlanes, visibleBoats]);
+
+  // Fonctions de nettoyage des couches à effet de bord (polling / websocket)
+  const cleanupRefs = useRef<{ vigilance: (() => void) | null; boats: (() => void) | null }>({
+    vigilance: null,
+    boats: null,
+  });
+
+  // (Ré)installe toutes les couches personnalisées et restaure leur visibilité actuelle.
+  // Appelé au premier chargement ET après chaque changement de style (setStyle les efface).
+  const initLayers = (mapInstance: maplibregl.Map) => {
+    cleanupRefs.current.vigilance = setupVigilanceLayer(mapInstance);
+    setupRailLayer(mapInstance);
+    setupTrainsLayer(mapInstance);
+    setupGareLayer(mapInstance);
+    cleanupRefs.current.boats = setupBoatsLayer(mapInstance);
+    setupPlanesLayer(mapInstance);
+
+    const s = stateRef.current;
+    toggleVigilanceLayer(mapInstance, s.vigilanceVisible);
+    toggleRailLayer(mapInstance, s.visibleTrains);
+    toggleGareLayer(mapInstance, s.visibleTrains);
+    toggleBoatsLayer(mapInstance, s.visibleBoats);
+    togglePlaneLayer(mapInstance, s.visiblePlanes);
+  };
 
   useEffect(() => {
     if (map.current) return;
 
     const mapInstance = new maplibregl.Map({
       container: mapContainer.current!,
-      style: 'https://tiles.openfreemap.org/styles/dark', //liberty dark bright fiord positron
+      style: MAP_STYLES.find((s) => s.id === currentStyleId)!.url,
       bounds: FRANCE_BOUNDS,
       fitBoundsOptions: { padding: 100 },
       maxBounds: [
         [FRANCE_BOUNDS[0][0] - 2, FRANCE_BOUNDS[0][1] - 2],
-        [FRANCE_BOUNDS[1][0] + 2, FRANCE_BOUNDS[1][1] + 2]
-      ]
+        [FRANCE_BOUNDS[1][0] + 2, FRANCE_BOUNDS[1][1] + 2],
+      ],
     });
     map.current = mapInstance;
 
@@ -41,29 +94,55 @@ export default function FranceMap() {
       console.error('[FranceMap] Erreur MapLibre:', e);
     });
 
-    let cleanupVigilance: (() => void) | null = null;
-    let cleanupBoats: (() => void) | null = null;
-
     mapInstance.on('load', () => {
       if (!map.current) return;
-
-      cleanupVigilance = setupVigilanceLayer(mapInstance);
-      setupRailLayer(mapInstance);
-      setupTrainsLayer(mapInstance);
-      setupGareLayer(mapInstance);
-      cleanupBoats = setupBoatsLayer(mapInstance);
-      setupPlanesLayer(mapInstance);
+      initLayers(mapInstance);
     });
 
     return () => {
-      cleanupVigilance?.();
-      cleanupBoats?.();
+      cleanupRefs.current.vigilance?.();
+      cleanupRefs.current.boats?.();
       mapInstance.remove();
       map.current = null;
     };
   }, []);
 
   usePlanesRealtimeSync(map);
+
+  // Ferme le menu de style si on clique en dehors
+  useEffect(() => {
+    if (!styleMenuOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (styleMenuRef.current && !styleMenuRef.current.contains(e.target as Node)) {
+        setStyleMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [styleMenuOpen]);
+
+  const handleStyleChange = (styleId: string) => {
+    setStyleMenuOpen(false);
+    if (!map.current || styleId === currentStyleId) return;
+
+    const styleOption = MAP_STYLES.find((s) => s.id === styleId);
+    if (!styleOption) return;
+
+    // Coupe le polling/websocket des couches actuelles avant de changer de style
+    cleanupRefs.current.vigilance?.();
+    cleanupRefs.current.boats?.();
+
+    const mapInstance = map.current;
+
+    // 'style.load' se déclenche une fois le nouveau style entièrement chargé
+    // (léger : setStyle ne recharge que les tuiles du nouveau style, pas la page)
+    mapInstance.once('style.load', () => {
+      initLayers(mapInstance);
+    });
+
+    mapInstance.setStyle(styleOption.url);
+    setCurrentStyleId(styleId);
+  };
 
   const handleToggleVigilance = () => {
     if (!map.current) return;
@@ -80,7 +159,7 @@ export default function FranceMap() {
     setVisibleTrains(newVisibility);
   };
 
-    const handleBoatsData = () => {
+  const handleBoatsData = () => {
     if (!map.current) return;
     const newVisibility = !visibleBoats;
     toggleBoatsLayer(map.current, newVisibility);
@@ -99,7 +178,6 @@ export default function FranceMap() {
       <div ref={mapContainer} className="map-container" />
 
       <div className="map-controls">
-{/*------------------------------------------------------------------------------------*/}
         <button
           type="button"
           className="map-toggle-btn map-toggle-btn--plane"
@@ -107,9 +185,9 @@ export default function FranceMap() {
           onClick={handlePlanesData}
         >
           <span className="map-toggle-btn__dot" aria-hidden="true" />
-          {visiblePlanes ? 'Avions' : 'Avions'}
+          Avions
         </button>
-{/*------------------------------------------------------------------------------------*/}
+
         <button
           type="button"
           className="map-toggle-btn map-toggle-btn--rail"
@@ -117,9 +195,9 @@ export default function FranceMap() {
           onClick={handleTrainsData}
         >
           <span className="map-toggle-btn__dot" aria-hidden="true" />
-          {visibleTrains ? 'Trains' : 'Trains'}
+          Trains
         </button>
-{/*------------------------------------------------------------------------------------*/}
+
         <button
           type="button"
           className="map-toggle-btn map-toggle-btn--vigilance"
@@ -127,9 +205,9 @@ export default function FranceMap() {
           onClick={handleToggleVigilance}
         >
           <span className="map-toggle-btn__dot" aria-hidden="true" />
-          {vigilanceVisible ? 'Vigilance' : 'Vigilance'}
+          Vigilance
         </button>
-{/*------------------------------------------------------------------------------------*/}
+
         <button
           type="button"
           className="map-toggle-btn map-toggle-btn--boat"
@@ -137,8 +215,39 @@ export default function FranceMap() {
           onClick={handleBoatsData}
         >
           <span className="map-toggle-btn__dot" aria-hidden="true" />
-          {visibleBoats ? 'Bateaux' : 'Bateaux'}
+          Bateaux
         </button>
+      </div>
+
+      {/* Sélecteur de calque de carte */}
+      <div className="map-style-switcher" ref={styleMenuRef}>
+        <button
+          type="button"
+          className="map-style-btn"
+          onClick={() => setStyleMenuOpen((v) => !v)}
+          aria-haspopup="menu"
+          aria-expanded={styleMenuOpen}
+          title="Changer le fond de carte"
+        >
+          <IconBurger />
+        </button>
+
+        {styleMenuOpen && (
+          <div className="map-style-menu" role="menu">
+            {MAP_STYLES.map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                role="menuitem"
+                className="map-style-menu-item"
+                data-active={s.id === currentStyleId}
+                onClick={() => handleStyleChange(s.id)}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

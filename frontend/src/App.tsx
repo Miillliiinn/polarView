@@ -437,7 +437,6 @@ function AppContent() {
 
           {/* Bandeaux d'information radar */}
           <span className="map-readout" aria-hidden="true">Europe Ouest &middot; LIVE</span>
-          <span className="map-sec-code" aria-hidden="true">ZONE ALPHA-1</span>
 
           <div className={`map-container-inner ${!isExpanded ? 'disabled-events' : ''}`}>
             <FranceMap />

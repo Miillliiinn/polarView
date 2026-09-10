@@ -39,7 +39,7 @@ export function resolvePlaneIconType(p: PlaneClassificationProps): PlaneIconType
 
   if (p.isMilitary || kind === 'military')
   {
-    if (icaoClass === 'H1P' || icaoClass === 'H2T' || icaoClass === 'H3T')
+    if (icaoClass === 'H1P' || icaoClass === 'H1T' || icaoClass === 'H2T' || icaoClass === 'H3T')
       return 'militaryHelicopter';
     if (icaoClass === 'L3J')
       return 'L3JM';
