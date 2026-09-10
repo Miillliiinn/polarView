@@ -630,12 +630,12 @@ body {
   z-index: 0;
   pointer-events: none;
   background-image:
-    radial-gradient(ellipse 900px 500px at 50% -10%, rgba(134, 239, 172, 0.06), transparent 65%),
+    radial-gradient(ellipse 900px 500px at 50% -10%, #86efac0f, transparent 65%),
     repeating-linear-gradient(
       to bottom,
-      #ffffff10 0px,
-      #ffffff09 1px,
-      transparent 1px,
+      #ffffff19 0px,
+      #ffffff19 1px,
+      transparent 2px,
       transparent 3px
     );
   animation: halo-breathe 14s ease-in-out infinite;
@@ -654,9 +654,9 @@ body {
   z-index: 1;
   pointer-events: none;
   background-image:
-    linear-gradient(115deg, transparent 20%, #86efad10 50%, transparent 80%),
-    linear-gradient(65deg, transparent 30%, #f59e0b09 50%, transparent 75%);
-  background-size: 200% 200%;
+    linear-gradient(115deg, transparent 20%, #86efad39 70%, transparent 80%),
+    linear-gradient(65deg, transparent 30%, #f59e0b39 70%, transparent 75%);
+  background-size: 100% 100%;
   animation: lines-drift 22s ease-in-out infinite;
 }
 
