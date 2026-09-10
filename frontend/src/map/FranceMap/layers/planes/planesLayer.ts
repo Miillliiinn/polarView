@@ -18,39 +18,21 @@ function onPlaneClick(map: maplibregl.Map) {
     const icao24 = feature.properties?.icao24;
     if (!icao24) return;
 
-      const cache = globalCache.getOpCache() || [];
-  const planeData = cache.find((f) => f.icao24 === icao24);
+    const cache = globalCache.getOpCache() || [];
+    const planeData = cache.find((f) => f.icao24 === icao24);
 
-  const callsign = feature.properties?.callsign || planeData?.callsign || 'Vol inconnu';
-  const altitude = feature.properties?.altitude ?? planeData?.altitude ?? '?';
-  const heading = feature.properties?.heading ?? planeData?.heading ?? null;
-  const coordinates = (feature.geometry as any).coordinates;
+    const callsign = feature.properties?.callsign || planeData?.callsign || 'Vol inconnu';
+    const altitude = feature.properties?.altitude ?? planeData?.altitude ?? '?';
+    const coordinates = (feature.geometry as any).coordinates;
 
-  const originCountry = planeData?.originCountry ?? 'Inconnu';
-  const registration = planeData?.registration ?? 'N/A';
-  const longitude = planeData?.longitude ?? coordinates[0];
-  const latitude = planeData?.latitude ?? coordinates[1];
-  const onGround = planeData?.onGround ?? 'N/A';
-  const verticalRate = planeData?.verticalRate ?? 'N/A';
-  const squawk = planeData?.squawk ?? 'N/A';
-  const typeCode = planeData?.typeCode ?? 'N/A';
-  const typeLabel = planeData?.typeLabel ?? 'N/A';
-  const engine = planeData?.engines ?? 'N/A';
-  const kind = planeData?.kind ?? 'N/A';
-  const isMilitary = planeData?.isMilitary ?? 'N/A';
-  const isHelicopter = planeData?.isHelicopter ?? 'N/A';
-  //const lastSeen = planeData?.lastSeenSeconds ?? 'N/A';
-  const source = planeData?.source ?? 'N/A';
-  const icaoAircraftClass = planeData?.icaoAircraftClass ?? 'N/A';
-  const manufacturerIcao = planeData?.manufacturerIcao ?? 'N/A';
-  const manufacturerName = planeData?.manufacturerName ?? 'N/A';
-  const model = planeData?.model ?? 'N/A';
-  const operator = planeData?.operator ?? 'N/A';
-  const owner = planeData?.owner ?? 'N/A';
-  const typecode = planeData?.typecode ?? 'N/A';
-  const vel = planeData?.velocity;
+    const kind = planeData?.kind ?? 'N/A';
+    const source = planeData?.source ?? 'N/A';
+    const icaoAircraftClass = planeData?.icaoAircraftClass ?? 'N/A';
+    const typeLabel = planeData?.typeLabel ?? 'N/A';
+    const model = planeData?.model ?? 'N/A';
+    const vel = planeData?.velocity;
 
-  const mod = typeLabel ?? model ?? "plane";
+    const mod = typeLabel ?? model ?? 'plane';
 
     const buildContent = (photoHtml: string) => `
       Model: <strong>${mod}</strong><br/>
@@ -76,19 +58,23 @@ function onPlaneClick(map: maplibregl.Map) {
 
     (map as any)._planesActivePopup = popup;
 
-    try {
+    try
+    {
       const res = await api.get(`/planes/${icao24}/picture`);
       const photo = res.data;
 
       if (popup.isOpen()) {
         const container = popup.getElement().querySelector('#photo-container');
-        if (container) {
+        if (container)
+        {
           container.innerHTML = photo?.thumbnailSrc
-            ? `<img src="${photo.thumbnailSrc}" width="210" style="border-radius:4px;margin-top:4px;" /><br/><small><small>🖼️ ${photo.photographer || 'Inconnu'}</small></small>`
+            ? `<img src="${photo.thumbnailSrc}" width="210" class="popup-photo-img" style="border-radius:4px;margin-top:4px;cursor:zoom-in;" /><br/><small><small>🖼️ ${photo.photographer || 'Inconnu'}</small></small>`
             : `<em>Aucune photo disponible</em>`;
         }
       }
-    } catch (err) {
+    }
+    catch (err)
+    {
       console.error('Erreur récupération photo avion :', err);
       if (popup.isOpen()) {
         const container = popup.getElement().querySelector('#photo-container');

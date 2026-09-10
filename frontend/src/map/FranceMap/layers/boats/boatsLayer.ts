@@ -116,7 +116,7 @@ function setupBoatsClickPopup(map: maplibregl.Map)
         const container = popup.getElement().querySelector('#ship-photo-container');
         if (container) {
           container.innerHTML = photo?.thumbUrl
-            ? `<img src="${photo.thumbUrl}" width="210" style="border-radius:4px;margin-top:4px;" /><br/><small><small>🖼️ <a href="${photo.sourceUrl}" target="_blank" rel="noopener">source</a></small></small>`
+            ? `<img src="${photo.thumbUrl}" width="210" class="popup-photo-img" style="border-radius:4px;margin-top:4px;cursor:zoom-in;" /><br/><small><small>🖼️ <a href="${photo.sourceUrl}" target="_blank" rel="noopener">source</a></small></small>`
             : `<em>Aucune photo disponible</em>`;
         }
       }

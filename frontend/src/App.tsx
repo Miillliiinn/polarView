@@ -250,13 +250,14 @@ function ControlDeck() {
           </div>
         </div> */}
 
-        <div className="deck-item status-item">
+        {/* <div className="deck-item status-item">
           <span className="status-dot" />
           <div className="deck-text">
             <span className="deck-label">Réseau </span>
             <span className="deck-value mono badge-status">LIVE</span>
           </div>
-        </div>
+        </div> */}
+
       </div>
     </div>
   );

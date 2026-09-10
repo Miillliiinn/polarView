@@ -11,6 +11,7 @@ import { setupRailLayer, toggleRailLayer } from './layers/trains/trainsLayer';
 import { toggleGareLayer, setupGareLayer } from './layers/trains/gareLayer';
 import { setupBoatsLayer, toggleBoatsLayer } from './layers/boats/boatsLayer';
 import { usePlanesRealtimeSync } from './hooks/usePlanesRealtimeSync';
+import { setupPhotoLightbox } from './utils/popUpImage';
 
 /* --- Icône burger --- */
 const IconBurger = () => (
@@ -176,6 +177,7 @@ export default function FranceMap() {
   useEffect(() => {
     if (map.current) return;
 
+    setupPhotoLightbox();
     createMap();
 
     return () => {

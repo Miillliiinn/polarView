@@ -219,13 +219,13 @@ body {
   letter-spacing: 0.04em;
 }
 
-.deck-value.highlight {
+/* /* .deck-value.highlight {
   color: var(--accent-radar-bright);
-}
+} */
 
 .text-amber {
   color: var(--accent-amber);
-}
+} 
 
 .badge-status {
   color: var(--accent-radar-bright);
