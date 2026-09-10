@@ -23,23 +23,33 @@ const IconBurger = () => (
 
 /* --- Styles OpenFreeMap disponibles --- */
 const MAP_STYLES = [
-  { id: 'liberty', label: 'Liberty', url: 'https://tiles.openfreemap.org/styles/liberty' },
+  { id: 'liberty', label: '3D', url: 'https://tiles.openfreemap.org/styles/liberty' },
   { id: 'dark', label: 'Dark', url: 'https://tiles.openfreemap.org/styles/dark' },
-  { id: 'bright', label: 'Bright', url: 'https://tiles.openfreemap.org/styles/bright' },
-  { id: 'fiord', label: 'Fiord', url: 'https://tiles.openfreemap.org/styles/fiord' },
-  { id: 'positron', label: 'Positron', url: 'https://tiles.openfreemap.org/styles/positron' },
+  { id: 'bright', label: 'Marin', url: 'https://tiles.openfreemap.org/styles/bright' },
+  { id: 'fiord', label: 'Blue', url: 'https://tiles.openfreemap.org/styles/fiord' },
+  { id: 'positron', label: 'White', url: 'https://tiles.openfreemap.org/styles/positron' },
 ];
+
+// Délai après une perte de contexte WebGL avant de considérer que le
+// navigateur ne la restaurera pas tout seul (cas fréquent en ouvrant les
+// DevTools / le mode responsive sur certains GPU/drivers, notamment en
+// environnement virtualisé où le rendu WebGL est logiciel). Passé ce délai,
+// on recrée la carte de zéro plutôt que de laisser un fond bleu figé.
+// Volontairement court : en plein travail de mise au point responsive,
+// on veut retrouver la carte quasi instantanément.
+const CONTEXT_RESTORE_TIMEOUT_MS = 800;
 
 export default function FranceMap() {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
+  const contextLostTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [vigilanceVisible, setVigilanceVisible] = useState(false);
   const [visibleTrains, setVisibleTrains] = useState(false);
   const [visiblePlanes, setVisiblePlanes] = useState(false);
   const [visibleBoats, setVisibleBoats] = useState(false);
 
-  const [currentStyleId, setCurrentStyleId] = useState('liberty');
+  const [currentStyleId, setCurrentStyleId] = useState('dark');
   const [styleMenuOpen, setStyleMenuOpen] = useState(false);
   const styleMenuRef = useRef<HTMLDivElement>(null);
 
@@ -49,6 +59,13 @@ export default function FranceMap() {
     stateRef.current = { vigilanceVisible, visibleTrains, visiblePlanes, visibleBoats };
   }, [vigilanceVisible, visibleTrains, visiblePlanes, visibleBoats]);
 
+  // currentStyleId dans une ref pour pouvoir le lire depuis createMap()
+  // (utilisée aussi lors d'une recréation suite à perte de contexte)
+  const currentStyleIdRef = useRef(currentStyleId);
+  useEffect(() => {
+    currentStyleIdRef.current = currentStyleId;
+  }, [currentStyleId]);
+
   // Fonctions de nettoyage des couches à effet de bord (polling / websocket)
   const cleanupRefs = useRef<{ vigilance: (() => void) | null; boats: (() => void) | null }>({
     vigilance: null,
@@ -56,7 +73,8 @@ export default function FranceMap() {
   });
 
   // (Ré)installe toutes les couches personnalisées et restaure leur visibilité actuelle.
-  // Appelé au premier chargement ET après chaque changement de style (setStyle les efface).
+  // Appelé au premier chargement, après chaque changement de style (setStyle les efface),
+  // ET après une restauration de contexte WebGL (qui efface tout aussi).
   const initLayers = (mapInstance: maplibregl.Map) => {
     cleanupRefs.current.vigilance = setupVigilanceLayer(mapInstance);
     setupRailLayer(mapInstance);
@@ -73,22 +91,33 @@ export default function FranceMap() {
     togglePlaneLayer(mapInstance, s.visiblePlanes);
   };
 
-  useEffect(() => {
-    if (map.current) return;
+  // Crée (ou recrée) l'instance MapLibre et branche tous ses listeners.
+  const createMap = () => {
+    if (!mapContainer.current) return;
 
     const mapInstance = new maplibregl.Map({
-      container: mapContainer.current!,
-      style: MAP_STYLES.find((s) => s.id === currentStyleId)!.url,
+      container: mapContainer.current,
+      style: MAP_STYLES.find((s) => s.id === currentStyleIdRef.current)!.url,
       bounds: FRANCE_BOUNDS,
       fitBoundsOptions: { padding: 100 },
       maxBounds: [
         [FRANCE_BOUNDS[0][0] - 2, FRANCE_BOUNDS[0][1] - 2],
         [FRANCE_BOUNDS[1][0] + 2, FRANCE_BOUNDS[1][1] + 2],
       ],
+      // trackResize (true par défaut) fait déjà tourner un ResizeObserver
+      // interne sur le container. On le laisse explicite pour lisibilité.
+      trackResize: true,
+      // On désactive le contrôle d'attribution par défaut (toujours ouvert
+      // sur desktop) pour le remplacer par une version compacte ci-dessous.
+      attributionControl: false,
     });
     map.current = mapInstance;
 
     mapInstance.addControl(new maplibregl.NavigationControl(), 'top-right');
+    // Crédits OpenFreeMap/OSM repliés par défaut (juste l'icône "i"),
+    // cliquables pour dérouler le détail — requis par la licence des tuiles,
+    // mais on évite qu'il reste ouvert en permanence à l'écran.
+    mapInstance.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
 
     mapInstance.on('error', (e) => {
       console.error('[FranceMap] Erreur MapLibre:', e);
@@ -99,17 +128,68 @@ export default function FranceMap() {
       initLayers(mapInstance);
     });
 
+    // --- Filet de sécurité resize : en plus du trackResize interne de
+    // MapLibre, on observe nous-mêmes le container. Utile en mode
+    // responsive (device toolbar) où la taille peut changer très
+    // rapidement/plusieurs fois de suite pendant qu'on redimensionne. ---
+    const resizeObserver = new ResizeObserver(() => {
+      mapInstance.resize();
+    });
+    resizeObserver.observe(mapContainer.current);
+    (mapInstance as any)._franceMapResizeObserver = resizeObserver;
+
+    // --- Gestion de la perte de contexte WebGL (ouverture DevTools / mode
+    // responsive sur certains GPU-drivers, environnements virtualisés, etc.) ---
+    mapInstance.on('webglcontextlost', () => {
+      console.warn(
+        '[FranceMap] Contexte WebGL perdu (souvent déclenché par DevTools / mode responsive). ' +
+        'Attente d\'une restauration automatique...'
+      );
+
+      if (contextLostTimeoutRef.current) clearTimeout(contextLostTimeoutRef.current);
+      contextLostTimeoutRef.current = setTimeout(() => {
+        console.warn(
+          `[FranceMap] Contexte WebGL non restauré après ${CONTEXT_RESTORE_TIMEOUT_MS}ms, recréation de la carte.`
+        );
+        contextLostTimeoutRef.current = null;
+
+        resizeObserver.disconnect();
+        cleanupRefs.current.vigilance?.();
+        cleanupRefs.current.boats?.();
+        mapInstance.remove();
+        map.current = null;
+        createMap();
+      }, CONTEXT_RESTORE_TIMEOUT_MS);
+    });
+
+    mapInstance.on('webglcontextrestored', () => {
+      if (contextLostTimeoutRef.current) {
+        clearTimeout(contextLostTimeoutRef.current);
+        contextLostTimeoutRef.current = null;
+      }
+      console.info('[FranceMap] Contexte WebGL restauré, réinitialisation des couches.');
+      initLayers(mapInstance);
+      mapInstance.resize();
+    });
+  };
+
+  useEffect(() => {
+    if (map.current) return;
+
+    createMap();
+
     return () => {
+      if (contextLostTimeoutRef.current) clearTimeout(contextLostTimeoutRef.current);
+      (map.current as any)?._franceMapResizeObserver?.disconnect();
       cleanupRefs.current.vigilance?.();
       cleanupRefs.current.boats?.();
-      mapInstance.remove();
+      map.current?.remove();
       map.current = null;
     };
   }, []);
 
   usePlanesRealtimeSync(map);
 
-  // Ferme le menu de style si on clique en dehors
   useEffect(() => {
     if (!styleMenuOpen) return;
     const handleClickOutside = (e: MouseEvent) => {

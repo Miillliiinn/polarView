@@ -22,6 +22,54 @@
 }
 
 /* ---------------------------------------------------------- */
+/* Attribution OpenFreeMap/OSM : forcer le mode replié dès le  */
+/* premier rendu (MapLibre affiche sinon le bandeau complet    */
+/* pendant quelques secondes au tout premier passage en mode   */
+/* compact, avant de se replier tout seul).                    */
+/* ---------------------------------------------------------- */
+
+.maplibregl-ctrl-attrib.maplibregl-compact {
+  width: 0 !important;
+  height: 0 !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  overflow: hidden !important;
+  transition: width 0.2s ease, height 0.2s ease;
+}
+
+.maplibregl-ctrl-attrib.maplibregl-compact .maplibregl-ctrl-attrib-button {
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.maplibregl-ctrl-attrib.maplibregl-compact .maplibregl-ctrl-attrib-inner {
+  display: none !important;
+}
+
+/* On ignore volontairement la classe .maplibregl-compact-show que MapLibre
+   réaccroche en continu à chaque événement "sourcedata" (déclenché sans
+   arrêt ici par les flux temps réel avions/bateaux) : sans ça, le minuteur
+   de repli interne de MapLibre ne se termine jamais et le bandeau reste
+   ouvert en permanence. On gère nous-mêmes l'ouverture, uniquement au
+   survol/focus. */
+.maplibregl-ctrl-attrib.maplibregl-compact:hover,
+.maplibregl-ctrl-attrib.maplibregl-compact:focus-within {
+  width: auto !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+.maplibregl-ctrl-attrib.maplibregl-compact:hover .maplibregl-ctrl-attrib-inner,
+.maplibregl-ctrl-attrib.maplibregl-compact:focus-within .maplibregl-ctrl-attrib-inner {
+  display: block !important;
+}
+
+/* ---------------------------------------------------------- */
 /* Panneau de contrôle (avions / trains / vigilance / bateaux) */
 /* ---------------------------------------------------------- */
 
@@ -206,30 +254,59 @@
 }
 
 .map-style-menu-item {
-  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 14px;
+  
   background: transparent;
   border: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  color: rgba(232, 224, 223, 0.75);
-  font-family: 'Inter', sans-serif;
-  font-size: 0.78rem;
+  border-bottom: 1px solid var(--item-border);
+  
+  color: var(--text-muted);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.8125rem;
   font-weight: 500;
+  letter-spacing: -0.01em;
   text-align: left;
+  
   cursor: pointer;
+  user-select: none;
   touch-action: manipulation;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  
+  /* Transitions fluides */
+  transition: 
+    background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    padding-left 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .map-style-menu-item:last-child {
   border-bottom: none;
 }
 
+/* Interaction au survol : léger décalage vers la droite + contraste */
 .map-style-menu-item:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: #e8e6df;
+  background-color: var(--item-bg-hover);
+  color: var(--text-main);
+  padding-left: 16px;
 }
 
+/* État Focus (Accessibilité Clavier) */
+.map-style-menu-item:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: -2px;
+}
+
+/* État Actif/Sélectionné : Pilule lumineuse à gauche + effet Glow */
 .map-style-menu-item[data-active='true'] {
-  color: #5db8ff;
+  color: var(--accent-color);
   font-weight: 600;
+  background-color: var(--item-bg-active);
+  box-shadow: inset 3px 0 0 0 var(--accent-color);
+}
+
+.map-style-menu-item[data-active='true']:hover {
+  padding-left: 14px; /* Fixe l'alignement quand déjà actif */
 }

@@ -414,31 +414,68 @@ body {
 }
 
 .close-expanded-btn {
+  /* Positionnement fixe propre et réactif (safe-area supporté) */
   position: fixed;
-  top: 24%;
-  right: max(16px, env(safe-area-inset-right));
+  top: clamp(12px, 2vh, 3px);
+  right: clamp(60px, 2vw, 24px);
   z-index: 1000;
+
+  /* Dimensions & Flexbox */
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
-  background: rgba(11, 20, 38, 0.85);
-  color: var(--text-primary);
-  border: 1px solid var(--accent-amber);
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
+
+  /* Design Glassmorphism moderne */
+  background: rgba(11, 20, 38, 0.65);
+  color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+
+  /* Ombre subtile sans surcharger */
+  box-shadow: 
+    0 4px 20px -2px rgba(0, 0, 0, 0.5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.15);
+
+  /* Interactions & Utilitaires */
   cursor: pointer;
-  backdrop-filter: blur(10px);
-  transition: all 0.2s ease;
-  box-shadow: 0 0 10px var(--accent-amber-glow);
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  user-select: none;
+
+  /* Animation fluide avec courbe d'accélération naturelle */
+  transition: 
+    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Survol : Halo lumineux ambré et léger grossissement */
 .close-expanded-btn:hover {
-  background: var(--accent-amber);
-  color: #030712;
-  transform: scale(1.08);
+  background: rgba(11, 20, 38, 0.85);
+  color: #ffffff;
+  border-color: var(--accent-amber);
+  transform: scale(1.06);
+  box-shadow: 
+    0 0 16px -2px var(--accent-amber-glow, rgba(245, 158, 11, 0.35)),
+    0 4px 20px -2px rgba(0, 0, 0, 0.6),
+    inset 0 1px 1px rgba(255, 255, 255, 0.25);
+}
+
+/* Clic / Pression : Effet d'enfoncement (Feedback tactile) */
+.close-expanded-btn:active {
+  transform: scale(0.94);
+  transition-duration: 0.1s;
+}
+
+/* Accessibilité Clavier */
+.close-expanded-btn:focus-visible {
+  outline: 2px solid var(--accent-amber);
+  outline-offset: 3px;
 }
 
 /* --- Ajustement de la Bordure Verte Maximale (Viseur Radar) --- */
@@ -635,7 +672,7 @@ body {
       to bottom,
       #ffffff19 0px,
       #ffffff19 1px,
-      transparent 2px,
+      transparent 4px,
       transparent 3px
     );
   animation: halo-breathe 14s ease-in-out infinite;
