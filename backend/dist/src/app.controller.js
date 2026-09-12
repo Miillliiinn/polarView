@@ -53,6 +53,9 @@ let AppController = class AppController {
     async getShipsPicture(imo) {
         return await this.appService.getWikimediaCommonsAPI(imo);
     }
+    async getSatellite() {
+        return await this.appService.getCelesttrackCache();
+    }
 };
 exports.AppController = AppController;
 __decorate([
@@ -117,6 +120,12 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], AppController.prototype, "getShipsPicture", null);
+__decorate([
+    (0, common_1.Get)('satellite'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], AppController.prototype, "getSatellite", null);
 exports.AppController = AppController = __decorate([
     (0, common_1.Controller)(),
     __metadata("design:paramtypes", [ApiService_1.ApiService])

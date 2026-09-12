@@ -13,7 +13,7 @@ export function PlanesData()
     useEffect(() => 
     {
         const interval = setInterval(() => {
-        planesAPI().then((data) => { globalCache.setOpCache(data); })}, 1000);
+        planesAPI().then((data) => { globalCache.setOpCache(data); })}, 2000);
         return () => clearInterval(interval);
     }, []);
     return;

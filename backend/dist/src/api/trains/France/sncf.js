@@ -38,7 +38,7 @@ async function fetchDeparturesForGare(gare, authHeader, datetimeSncf) {
         if (!res.ok) {
             const body = await res.text().catch(() => '');
             if (res.status === 429 || body.toLowerCase().includes('quota')) {
-                console.error(`Quota SNCF probablement dépassé : ${res.status} — ${body}`);
+                console.error(`Quota SNCF probablement dépassé : ${res.status} - ${body}`);
             }
             return [];
         }

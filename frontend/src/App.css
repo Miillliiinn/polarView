@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Design Tokens — Poste de Contrôle Nocturne / Tactical HQ
+   Design Tokens - Poste de Contrôle Nocturne / Tactical HQ
    ========================================================================== */
 :root {
   --bg-deep: #030712;
@@ -50,7 +50,7 @@ body {
 }
 
 /* ==========================================================================
-   Fond de l'application — épuré, sans motif répétitif
+   Fond de l'application - épuré, sans motif répétitif
    ========================================================================== */
 .app-shell {
   min-height: 100vh;
@@ -61,7 +61,7 @@ body {
 }
 
 /* ==========================================================================
-   Navigation — Bandeau de Contrôle
+   Navigation - Bandeau de Contrôle
    ========================================================================== */
 .site-nav {
   position: sticky;
@@ -163,7 +163,7 @@ body {
 }
 
 /* ==========================================================================
-   Control Deck — Bandeau d'instruments
+   Control Deck - Bandeau d'instruments
    ========================================================================== */
 .control-deck {
   background: rgba(11, 20, 38, 0.6);
@@ -534,7 +534,7 @@ body {
 }
 
 /* ==========================================================================
-   System Readout — panneau de diagnostic sous la carte
+   System Readout - panneau de diagnostic sous la carte
    ========================================================================== */
 .system-readout {
   background: var(--bg-panel-solid);
@@ -650,7 +650,7 @@ body {
 }
 
 /* ==========================================================================
-   Effets d'ambiance — halo, lignes de connexion, scanlines, balayage radar
+   Effets d'ambiance - halo, lignes de connexion, scanlines, balayage radar
    Actifs uniquement hors mode carte plein écran (.ambient-active)
    Fusionnés sur les DEUX seuls pseudo-éléments disponibles (::before / ::after)
    ========================================================================== */
@@ -659,7 +659,7 @@ body {
   isolation: isolate;
 }
 
-/* ::before — Halo qui respire lentement + grain de scanlines CRT */
+/* ::before - Halo qui respire lentement + grain de scanlines CRT */
 .app-shell.ambient-active::before {
   content: '';
   position: fixed;
@@ -683,7 +683,7 @@ body {
   50% { opacity: 1; }
 }
 
-/* ::after — Lignes de connexion qui dérivent lentement */
+/* ::after - Lignes de connexion qui dérivent lentement */
 .app-shell.ambient-active::after {
   content: '';
   position: fixed;
@@ -724,7 +724,7 @@ body {
 }
 
 /* ==========================================================================
-   Réticule radar — suit le curseur, effet ciblage tactique
+   Réticule radar - suit le curseur, effet ciblage tactique
    ========================================================================== */
 .cursor-spotlight {
   position: fixed;

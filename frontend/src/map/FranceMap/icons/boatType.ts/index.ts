@@ -53,6 +53,7 @@ export
 
 function boatIcons(map : maplibregl.Map, type : string)
 {
+     if (map.hasImage(type)) return;
     if (type === 'Inconnu')
         map.addImage(type, createInconnuIcon('#17361fb5'));
     else if ( type === 'Pêche')

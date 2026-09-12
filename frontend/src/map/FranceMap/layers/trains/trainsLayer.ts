@@ -48,7 +48,7 @@ export function setupTrainsLayer(map: maplibregl.Map)
     new maplibregl.Popup()
       .setLngLat((feature.geometry as any).coordinates)
       .setHTML(`
-        <strong>${trainNumber}</strong> — ${type}<br/>
+        <strong>${trainNumber}</strong> - ${type}<br/>
         ${direction}
         ${departureTime}
       `)

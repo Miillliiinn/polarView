@@ -22,6 +22,7 @@ const gareScript_1 = require("./script/trains/gareScript");
 const railScript_1 = require("./script/trains/railScript");
 const adsbScript_1 = require("./script/planes/adsbScript");
 const aircraft_service_1 = require("./data/aircraft_service");
+const celestrackScript_1 = require("./script/satellite/celestrackScript");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -44,6 +45,7 @@ exports.AppModule = AppModule = __decorate([
             prisma_service_1.PrismaService,
             aisstreamScript_1.AisStreamAPI,
             aircraft_service_1.AircraftService,
+            celestrackScript_1.CallCelestrackAPI,
         ],
     })
 ], AppModule);

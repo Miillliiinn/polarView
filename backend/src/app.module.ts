@@ -13,6 +13,7 @@ import { CallGareAPI } from './script/trains/gareScript';
 import { CallRailAPI } from './script/trains/railScript';
 import { CallAdsbAPI } from './script/planes/adsbScript';
 import { AircraftService } from './data/aircraft_service';
+import { CallCelestrackAPI } from './script/satellite/celestrackScript';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { AircraftService } from './data/aircraft_service';
     PrismaService,
     AisStreamAPI,
     AircraftService,
+    CallCelestrackAPI,
   ],
 })
 export class AppModule {}

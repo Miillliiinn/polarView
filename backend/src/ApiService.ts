@@ -6,12 +6,13 @@ import { fetchYoutubeWebcams } from './api/webcam/youtubeWebcam';
 import { OpenskyTokenManager, fetchOpenskyStates } from './api/planes/opensky'; 
 import { fetchAdsbStates, DEFAULT_FRANCE_ZONES } from './api/planes/adsb'; 
 import { mergeAdsbAndOpensky } from './api/planes/mergeAdsbOpensky'; 
-import { fetchSncfDepartures, fetchSncfGares, fetchSncfRailLines }  from './api/trains/sncf';
+import { fetchSncfDepartures, fetchSncfGares, fetchSncfRailLines }  from './api/trains/France/sncf';
 import { fetchMeteofranceVigilance } from './api/weather/meteofranceVigilance'; 
 import { fetchPlaneSpotterPhoto } from './api/planes/planeSpotter'; 
 import { AircraftService } from './data/aircraft_service';
 import { fetchWikimediaCommonsAPI } from './api/boats/wikimediaCommonsAPI';
 import { findOrFetchAndCache } from './data/boats/findOrFetchAndCache';
+import { fetchCestrack } from './api/satellite/celestrack';
 
 @Injectable()
 export class ApiService {
@@ -20,9 +21,10 @@ export class ApiService {
   private OpenskyCache: any = [];
   private AdsbCache: any = [];
   private SncfCache: any = [];
-  private gareCache: any;
-  private railCache: any;
+  private gareCache: any = [];
+  private railCache: any = [];
   private MeteofranceCache: any = [];
+  private CelestrackCache: any = [];
 
   constructor(private configService: ConfigService, private prisma: PrismaService, private readonly aircraftservice: AircraftService) 
   {
@@ -142,5 +144,13 @@ export class ApiService {
       }),
       (record) => !!record.url
     );
+  }
+
+  // --- Celestrack ---
+
+  setCelestrackCache(newdata: any = []){ this.CelestrackCache = newdata; };
+  getCelesttrackCache(){ return this.CelestrackCache; };
+  async getCelestrackAPI() {
+    return fetchCestrack();
   }
 }

@@ -21,13 +21,6 @@
   z-index: 1;
 }
 
-/* ---------------------------------------------------------- */
-/* Attribution OpenFreeMap/OSM : forcer le mode replié dès le  */
-/* premier rendu (MapLibre affiche sinon le bandeau complet    */
-/* pendant quelques secondes au tout premier passage en mode   */
-/* compact, avant de se replier tout seul).                    */
-/* ---------------------------------------------------------- */
-
 .maplibregl-ctrl-attrib.maplibregl-compact {
   width: 0 !important;
   height: 0 !important;
@@ -51,12 +44,6 @@
   display: none !important;
 }
 
-/* On ignore volontairement la classe .maplibregl-compact-show que MapLibre
-   réaccroche en continu à chaque événement "sourcedata" (déclenché sans
-   arrêt ici par les flux temps réel avions/bateaux) : sans ça, le minuteur
-   de repli interne de MapLibre ne se termine jamais et le bandeau reste
-   ouvert en permanence. On gère nous-mêmes l'ouverture, uniquement au
-   survol/focus. */
 .maplibregl-ctrl-attrib.maplibregl-compact:hover,
 .maplibregl-ctrl-attrib.maplibregl-compact:focus-within {
   width: auto !important;

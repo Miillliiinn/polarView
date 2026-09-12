@@ -12,6 +12,8 @@ import { GareData } from './api/sncf/gare/front_gareAPI';
 import { RailData } from './api/sncf/rail/rail';
 import { AisStreamData } from './api/aisstream/front_aisStreamAPI';
 import ShowAllShipsData from './api/aisstream/showData';
+import ShowAllCelestData from './api/celestrack/showData';
+import { SatelliteData } from './api/celestrack/front_celestrack';
 
 /* --- Icônes de navigation (style filaire tactique) --- */
 
@@ -24,8 +26,7 @@ const IconFrance = () => (
 
 const IconPlane = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M2.5 15.5 21 8.2c1-.4 1.9.6 1.5 1.6L14.9 21l-2-6.3-6.4-1.9z" />
-    <path d="M8.5 12.8 2.5 15.5l2.7 1.1 1.2 2.7 2.6-6" />
+    <path d="M17.8 19.2 16 11l3.5-3.5c0.8-0.8 0.8-2 0-2.8s-2-0.8-2.8 0L13.2 8.2 5 6.4c-0.7-0.2-1.4 0.3-1.6 1s0.3 1.4 1 1.6l6.8 3.5-3.2 3.2-3.1-0.8c-0.5-0.1-1 0.1-1.3 0.5l-0.6 0.8c-0.3 0.4-0.2 1 0.2 1.3l3.5 3.5c0.3 0.4 0.9 0.5 1.3 0.2l0.8-0.6c0.4-0.3 0.6-0.8 0.5-1.3l-0.8-3.1 3.2-3.2 3.5 6.8c0.2 0.7 0.9 1.2 1.6 1s1.2-0.9 1-1.6z" />
   </svg>
 );
 
@@ -73,11 +74,12 @@ const IconSignal = () => (
 );
 
 const IconSatellite = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M13 7 9 3 3 9l4 4" />
-    <path d="M17 11l4 4-6 6-4-4" />
-    <path d="M8 12l4 4" />
-    <path d="M16 4l1.5 1.5M20 8l1.5 1.5" />
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="9" y="9" width="6" height="6" rx="1" transform="rotate(-45 12 12)" />
+    <path d="M9.17 9.17 4.22 4.22m3.54-1.41-4.95 4.95" />
+    <path d="m14.83 14.83 4.95 4.95m-3.54 1.41 4.95-4.95" />
+    <path d="M6.5 17.5a4 4 0 0 0 5.66 0" />
+    <path d="m7.5 16.5-2 2" />
   </svg>
 );
 
@@ -109,6 +111,7 @@ const NAV_LINKS = [
   { to: '/avions', label: 'Avions', end: false, icon: IconPlane },
   { to: '/trains', label: 'Trains', end: false, icon: IconTrain },
   { to: '/bateaux', label: 'Bateaux', end: false, icon: IconBoat },
+  { to: '/satellite', label: 'Satellite', end: false, icon: IconSatellite },
   { to: '/meteo', label: 'Météo', end: false, icon: IconCloud },
 ];
 
@@ -204,11 +207,11 @@ function ControlDeck() {
   const now = useClock();
   const uptime = useUptime();
   const ping = usePing();
-  const location = useLocation();
+  //const location = useLocation();
 
-  const active = NAV_LINKS.find(({ to, end }) =>
-    end ? location.pathname === to : location.pathname.startsWith(to)
-  );
+  // const active = NAV_LINKS.find(({ to, end }) =>
+  //   end ? location.pathname === to : location.pathname.startsWith(to)
+  // );
 
   return (
     <div className="control-deck">
@@ -456,6 +459,7 @@ function AppContent() {
           <Route path="/trains" element={<ShowAllTrainsData />} />
           <Route path="/meteo" element={<ShowAllMeteoFranceData />} />
           <Route path="/bateaux" element={<ShowAllShipsData />} />
+          <Route path="/satellite" element={<ShowAllCelestData />} />
         </Routes>
       </div>
     </div>
@@ -469,6 +473,7 @@ function App() {
   GareData();
   RailData();
   AisStreamData();
+  SatelliteData();
 
   return (
     <BrowserRouter>

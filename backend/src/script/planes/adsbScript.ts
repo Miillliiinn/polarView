@@ -12,7 +12,7 @@ export class CallAdsbAPI implements OnModuleInit, OnModuleDestroy
 
     async onModuleInit()
     {
-        if (process.env.RUN_PLANES_API !== 'true')
+        if (process.env.RUN_ADSB_FI_API !== 'true')
             return;
         await this.refreshCache();
         this.scheduleNextRefresh();

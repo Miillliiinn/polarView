@@ -5,7 +5,7 @@ function drawTrainBody(ctx: CanvasRenderingContext2D, s: number, noseStyle: Trai
 
   switch (noseStyle) {
     case 'highspeed':
-      // Nez très effilé (TGV INOUI / OUIGO — même matériel roulant)
+      // Nez très effilé (TGV INOUI / OUIGO - même matériel roulant)
       ctx.moveTo(0, -48 * s);
       ctx.lineTo(3 * s, -38 * s);
       ctx.lineTo(3 * s, -18 * s);
@@ -20,7 +20,7 @@ function drawTrainBody(ctx: CanvasRenderingContext2D, s: number, noseStyle: Trai
       break;
 
     case 'suburban':
-      // Nez arrondi, corps large (RER / Transilien — rames à deux niveaux)
+      // Nez arrondi, corps large (RER / Transilien - rames à deux niveaux)
       ctx.moveTo(0, -42 * s);
       ctx.quadraticCurveTo(14 * s, -36 * s, 15 * s, -16 * s);
       ctx.lineTo(15 * s, 34 * s);

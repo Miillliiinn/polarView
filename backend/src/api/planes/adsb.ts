@@ -22,7 +22,7 @@ function adsblolUrl(zone: AdsbZone) {
   return `https://api.adsb.lol/v2/point/${zone.lat}/${zone.lon}/${zone.dist}`;
 }
 
-const USER_AGENT = 'PolarView-Backend/1.0 (+https://github.com/thomas/polarView)';
+const USER_AGENT = 'PolarView-Backend/1.0 (+https://github.com/miillliiinn/polarView)';
 
 async function fetchZoneFrom(url: string): Promise<any[]> {
   const res = await fetch(url, {
@@ -69,7 +69,7 @@ export async function fetchAdsbStates(zones: AdsbZone[] = DEFAULT_FRANCE_ZONES) 
       await sleep(2000);
     }
 
-    console.log(`✈️  ADSB (adsb.fi / adsb.lol) request — ${byHex.size} appareils ✈️`);
+    console.log(`✈️  ADSB (adsb.fi / adsb.lol) request - ${byHex.size} appareils ✈️`);
     
     return Array.from(byHex.values()).map((ac) => {
       const classification = classifyAircraft(ac);

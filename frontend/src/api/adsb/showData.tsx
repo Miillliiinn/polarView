@@ -63,7 +63,7 @@ export default function ShowAllPlanesData()
 
                     <div style={{ fontSize: 12, color: "#6b7280" }}>
                         id: {plane.icao24}
-                        {" | "}pays: {plane.originCountry ?? "—"}
+                        {" | "}pays: {plane.originCountry ?? "-"}
                         {" | "}lon: {plane.longitude?.toFixed?.(3) ?? "?"}
                         {" | "}lat: {plane.latitude?.toFixed?.(3) ?? "?"}
                         {" | "}alt: {plane.onGround ? "au sol" : `${plane.altitude ?? "?"} ft`}

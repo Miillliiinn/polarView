@@ -9,18 +9,18 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CallGareAPI = void 0;
+exports.CallCelestrackAPI = void 0;
 const common_1 = require("@nestjs/common");
 const ApiService_1 = require("../../ApiService");
-let CallGareAPI = class CallGareAPI {
-    ApiService;
-    POLL_INTERVAL_MS = 600_000_000;
+let CallCelestrackAPI = class CallCelestrackAPI {
+    apiservice;
+    POLL_INTERVAL_MS = 8_000_000;
     timeoutHandle = null;
-    constructor(ApiService) {
-        this.ApiService = ApiService;
+    constructor(apiservice) {
+        this.apiservice = apiservice;
     }
     async onModuleInit() {
-        if (process.env.RUN_SNCFGARE_API !== 'true')
+        if (process.env.RUN_CELESTRACK_API !== 'true')
             return;
         await this.refreshCache();
         this.scheduleNextRefresh();
@@ -33,12 +33,11 @@ let CallGareAPI = class CallGareAPI {
     }
     async refreshCache() {
         try {
-            const data = await this.ApiService.getGareAPI();
-            this.ApiService.setGareCache(data);
-            console.log('🚉 SNCF (gare) Api request 🚉');
+            const data = await this.apiservice.getCelestrackAPI();
+            this.apiservice.setCelestrackCache(data);
         }
         catch (e) {
-            console.error("Error lors du chargement du cache SNCF (gare), : ", e);
+            console.error("Error lors du chargement du cache Opensky, : ", e);
         }
     }
     onModuleDestroy() {
@@ -46,9 +45,9 @@ let CallGareAPI = class CallGareAPI {
             clearTimeout(this.timeoutHandle);
     }
 };
-exports.CallGareAPI = CallGareAPI;
-exports.CallGareAPI = CallGareAPI = __decorate([
+exports.CallCelestrackAPI = CallCelestrackAPI;
+exports.CallCelestrackAPI = CallCelestrackAPI = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [ApiService_1.ApiService])
-], CallGareAPI);
-//# sourceMappingURL=gareScript.js.map
+], CallCelestrackAPI);
+//# sourceMappingURL=celestrackScript.js.map

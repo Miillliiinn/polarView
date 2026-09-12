@@ -116,7 +116,7 @@ export default function FranceMap() {
 
     mapInstance.addControl(new maplibregl.NavigationControl(), 'top-right');
     // Crédits OpenFreeMap/OSM repliés par défaut (juste l'icône "i"),
-    // cliquables pour dérouler le détail — requis par la licence des tuiles,
+    // cliquables pour dérouler le détail - requis par la licence des tuiles,
     // mais on évite qu'il reste ouvert en permanence à l'écran.
     mapInstance.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
 

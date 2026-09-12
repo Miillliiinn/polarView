@@ -19,11 +19,6 @@ export {
   createDefaultTrainIcon
 };
 
-/**
- * Associe l'id d'image MapLibre au type renvoyé par l'API SNCF (`display.commercial_mode`).
- * À utiliser pour enregistrer les images (map.addImage) et piloter l'expression
- * 'icon-image' du layer en fonction de la propriété `type` de chaque feature.
- */
 export const TRAIN_ICON_BY_TYPE: Record<string, string> = {
   RER: 'train-rer',
   TRANSILIEN: 'train-transilien',
@@ -36,18 +31,20 @@ export const TRAIN_ICON_BY_TYPE: Record<string, string> = {
 
 export const DEFAULT_TRAIN_ICON_ID = 'train-default';
 
-/**
- * Enregistre toutes les icônes de train dans le style MapLibre.
- * À appeler une seule fois, avant d'ajouter le layer symbol des trains.
- */
+function safeAddImage(map: maplibregl.Map, id: string, image: any) {
+  if (!map.hasImage(id)) {
+    map.addImage(id, image);
+  }
+}
+
 export function registerTrainIcons(map: maplibregl.Map, size = 64)
 {
-  map.addImage('train-rer', createRerIcon(size));
-  map.addImage('train-transilien', createTransilienIcon(size));
-  map.addImage('train-tgv-inoui', createTgvInouiIcon(size));
-  map.addImage('train-ouigo', createOuigoIcon(size));
-  map.addImage('train-breizhgo', createBreizhGoIcon(size));
-  map.addImage('train-zou', createZouIcon(size));
-  map.addImage('train-fluo', createFluoIcon(size));
-  map.addImage(DEFAULT_TRAIN_ICON_ID, createDefaultTrainIcon(size));
+  safeAddImage(map, 'train-rer', createRerIcon(size));
+  safeAddImage(map, 'train-transilien', createTransilienIcon(size));
+  safeAddImage(map, 'train-tgv-inoui', createTgvInouiIcon(size));
+  safeAddImage(map, 'train-ouigo', createOuigoIcon(size));
+  safeAddImage(map, 'train-breizhgo', createBreizhGoIcon(size));
+  safeAddImage(map, 'train-zou', createZouIcon(size));
+  safeAddImage(map, 'train-fluo', createFluoIcon(size));
+  safeAddImage(map, DEFAULT_TRAIN_ICON_ID, createDefaultTrainIcon(size));
 }

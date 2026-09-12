@@ -12,7 +12,7 @@ export function AdsbData()
     useEffect(() => 
     {
         const interval = setInterval(() => {
-        planesAPI().then((data) => { globalCache.setAdsbCache(data); })}, 1000);
+        planesAPI().then((data) => { globalCache.setAdsbCache(data); })}, 2000);
         return () => clearInterval(interval);
     }, []);
     return;

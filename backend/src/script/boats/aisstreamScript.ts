@@ -69,7 +69,7 @@ export class AisStreamAPI implements OnModuleInit, OnModuleDestroy
 
   onModuleInit()
   {
-    if (process.env.RUN_BOATS_API !== 'true') return;
+    if (process.env.RUN_AISSTREAM_API !== 'true') return;
     this.connect();
     this.cleanupInterval = setInterval(() => this.pruneStaleShips(), STALE_CLEANUP_INTERVAL_MS);
     this.watchdogInterval = setInterval(() => this.checkWatchdog(), WATCHDOG_CHECK_INTERVAL_MS);

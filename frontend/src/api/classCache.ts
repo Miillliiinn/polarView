@@ -10,13 +10,15 @@ export class Cache
     private gareCache: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] };
     private railCache: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] };
     private meteofranceCache: any[] = [];
+    private celestCache: any[] = [];
 
     setOpCache(newCache: any[]) { this.openskyCache = newCache; }
-    setAdsbCache(newCache: any[]) { this.openskyCache = newCache; }
+    setAdsbCache(newCache: any[]) { this.adsbCache = newCache; }
     setSncfCache(newCache: any[]) { this.scnfCache = newCache; }
     setGareCache(newCache: GeoJSON.FeatureCollection) { this.gareCache = newCache; }
     setRailCache(newCache: GeoJSON.FeatureCollection) { this.railCache = newCache; }
     setMfCache(newCache: any[]) { this.meteofranceCache = newCache; }
+    setCelestCache(newCache: any[]){ this.celestCache = newCache; }
 
     getOpCache() { return this.openskyCache; }
     getAdsbCache() { return this.adsbCache; }
@@ -24,6 +26,7 @@ export class Cache
     getGareCache() { return this.gareCache; }
     getRailCache() { return this.railCache; }
     getMfCache() { return this.meteofranceCache; }
+    getCelestrackCache() { return this.celestCache; }
 
     private static readonly AIS_FLUSH_INTERVAL_MS = 500; 
 

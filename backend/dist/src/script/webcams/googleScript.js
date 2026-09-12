@@ -44,7 +44,7 @@ let CallGoogleAPI = class CallGoogleAPI {
                 }
                 const city = this.cities[this.testCityIndex];
                 this.testCityIndex = (this.testCityIndex + 1) % this.cities.length;
-                console.log(`⏱️ ${new Date().toLocaleTimeString()} — [${executionCount + 1}/${maxExecutions}] ville : ${city}`);
+                console.log(`⏱️ ${new Date().toLocaleTimeString()} - [${executionCount + 1}/${maxExecutions}] ville : ${city}`);
                 executionCount++;
                 await this.updateDatabaseCache([city]);
             }, 10000);

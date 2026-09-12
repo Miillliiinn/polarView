@@ -17,12 +17,13 @@ const youtubeWebcam_1 = require("./api/webcam/youtubeWebcam");
 const opensky_1 = require("./api/planes/opensky");
 const adsb_1 = require("./api/planes/adsb");
 const mergeAdsbOpensky_1 = require("./api/planes/mergeAdsbOpensky");
-const sncf_1 = require("./api/trains/sncf");
+const sncf_1 = require("./api/trains/France/sncf");
 const meteofranceVigilance_1 = require("./api/weather/meteofranceVigilance");
 const planeSpotter_1 = require("./api/planes/planeSpotter");
 const aircraft_service_1 = require("./data/aircraft_service");
 const wikimediaCommonsAPI_1 = require("./api/boats/wikimediaCommonsAPI");
 const findOrFetchAndCache_1 = require("./data/boats/findOrFetchAndCache");
+const celestrack_1 = require("./api/satellite/celestrack");
 let ApiService = class ApiService {
     configService;
     prisma;
@@ -31,9 +32,10 @@ let ApiService = class ApiService {
     OpenskyCache = [];
     AdsbCache = [];
     SncfCache = [];
-    gareCache;
-    railCache;
+    gareCache = [];
+    railCache = [];
     MeteofranceCache = [];
+    CelestrackCache = [];
     constructor(configService, prisma, aircraftservice) {
         this.configService = configService;
         this.prisma = prisma;
@@ -108,6 +110,13 @@ let ApiService = class ApiService {
             width: photo.width ?? null,
             height: photo.height ?? null,
         }), (record) => !!record.url);
+    }
+    setCelestrackCache(newdata = []) { this.CelestrackCache = newdata; }
+    ;
+    getCelesttrackCache() { return this.CelestrackCache; }
+    ;
+    async getCelestrackAPI() {
+        return (0, celestrack_1.fetchCestrack)();
     }
 };
 exports.ApiService = ApiService;

@@ -22,6 +22,7 @@ export declare class AppController {
     getRail(): Promise<any>;
     getWeather(): Promise<any>;
     getShipsPicture(imo: string): Promise<any>;
+    getSatellite(): Promise<any>;
 }
 export declare class AisStreamController {
     private readonly aisService;

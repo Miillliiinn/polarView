@@ -12,6 +12,7 @@ export declare class ApiService {
     private gareCache;
     private railCache;
     private MeteofranceCache;
+    private CelestrackCache;
     constructor(configService: ConfigService, prisma: PrismaService, aircraftservice: AircraftService);
     getGoogleAPIFromDatabase(): Promise<{
         title: string;
@@ -68,4 +69,7 @@ export declare class ApiService {
     getMeteofranceAPI(): Promise<any>;
     getPlaneSpotterApi(icao24: string): Promise<any>;
     getWikimediaCommonsAPI(imo: string): Promise<any>;
+    setCelestrackCache(newdata?: any): void;
+    getCelesttrackCache(): any;
+    getCelestrackAPI(): Promise<any>;
 }

@@ -60,6 +60,14 @@ export class AppController
   {
     return await this.appService.getWikimediaCommonsAPI(imo);
   }
+// ---------------------------------------------------------------------
+
+  @Get('satellite')
+  async getSatellite()
+  {
+    return await this.appService.getCelesttrackCache();
+  }
+
 }
 
 @Controller()

@@ -87,7 +87,7 @@ let AisStreamAPI = AisStreamAPI_1 = class AisStreamAPI {
         this.configService = configService;
     }
     onModuleInit() {
-        if (process.env.RUN_BOATS_API !== 'true')
+        if (process.env.RUN_AISSTREAM_API !== 'true')
             return;
         this.connect();
         this.cleanupInterval = setInterval(() => this.pruneStaleShips(), STALE_CLEANUP_INTERVAL_MS);
