@@ -275,6 +275,17 @@ export default function FranceMap() {
       <div ref={mapContainer} className="map-container" />
 
       <div className="map-controls">
+
+        <button
+          type="button"
+          className="map-toggle-btn map-toggle-btn--satellite"
+          data-active={visibleSatellites}
+          onClick={handleSatellitesData}
+        >
+          <span className="map-toggle-btn__dot" aria-hidden="true" />
+          Satellites
+        </button>
+
         <button
           type="button"
           className="map-toggle-btn map-toggle-btn--plane"
@@ -315,15 +326,6 @@ export default function FranceMap() {
           Bateaux
         </button>
 
-        <button
-          type="button"
-          className="map-toggle-btn map-toggle-btn--satellite"
-          data-active={visibleSatellites}
-          onClick={handleSatellitesData}
-        >
-          <span className="map-toggle-btn__dot" aria-hidden="true" />
-          Satellites
-        </button>
       </div>
 
       {/* Sélecteur de calque de carte */}
