@@ -14,6 +14,9 @@ import { AisStreamData } from './api/aisstream/front_aisStreamAPI';
 import ShowAllShipsData from './api/aisstream/showData';
 import ShowAllCelestData from './api/celestrack/showData';
 import { SatelliteData } from './api/celestrack/front_celestrack';
+import { countSatellite } from './tools/stat/satellite/count';
+import { countPlanes } from './tools/stat/planes/count';
+import { countBoats } from './tools/stat/boats/count';
 
 /* --- Icônes de navigation (style filaire tactique) --- */
 
@@ -269,12 +272,12 @@ function ControlDeck() {
 /* --- Panneau de diagnostic système (sous la carte) --- */
 
 function SystemReadout() {
-  const signal = useRandomWalk(82, 99, 4);
+  const planes = countPlanes();
   const coverage = useRandomWalk(88, 97, 3);
   const packets = usePacketCounter();
-  const windSpeed = useRandomWalk(8, 34, 5, 4000);
+  const boats = countBoats();
   const pressure = useRandomWalk(1008, 1024, 2, 5000);
-  const satellites = useRandomWalk(11, 18, 2, 6000);
+  const satellites = countSatellite();
 
   return (
     <div className="system-readout">
@@ -293,13 +296,21 @@ function SystemReadout() {
         </div>
 
         <div className="readout-tile">
-          <span className="readout-icon"><IconGauge /></span>
+          <span className="readout-icon"><IconPlane /></span>
           <div className="readout-text">
-            <span className="readout-label">Intégrité Signal</span>
-            <span className="readout-value">{signal}%</span>
+            <span className="readout-label">Aéronef Liés</span>
+            <span className="readout-value">{planes}</span>
           </div>
-          <div className="readout-bar">
-            <div className="readout-bar-fill" style={{ width: `${signal}%` }} />
+          {/* <div className="readout-bar">
+            <div className="readout-bar-fill" style={{ width: `${planes}%` }} />
+          </div> */}
+        </div>
+
+        <div className="readout-tile">
+          <span className="readout-icon"><IconBoat /></span>
+          <div className="readout-text">
+            <span className="readout-label">Bateaux Liés</span>
+            <span className="readout-value">{boats}</span>
           </div>
         </div>
 
@@ -318,14 +329,6 @@ function SystemReadout() {
           <div className="readout-text">
             <span className="readout-label">Paquets Analysés</span>
             <span className="readout-value mono">{formatPackets(packets)}</span>
-          </div>
-        </div>
-
-        <div className="readout-tile">
-          <span className="readout-icon"><IconWind /></span>
-          <div className="readout-text">
-            <span className="readout-label">Vent Secteur</span>
-            <span className="readout-value">{windSpeed} km/h</span>
           </div>
         </div>
 
