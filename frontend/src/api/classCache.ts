@@ -11,6 +11,7 @@ export class Cache
     private railCache: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] };
     private meteofranceCache: any[] = [];
     private celestCache: any[] = [];
+    private celestListeners = new Set<() => void>();
 
     setOpCache(newCache: any[]) { this.openskyCache = newCache; }
     setAdsbCache(newCache: any[]) { this.adsbCache = newCache; }
@@ -18,7 +19,17 @@ export class Cache
     setGareCache(newCache: GeoJSON.FeatureCollection) { this.gareCache = newCache; }
     setRailCache(newCache: GeoJSON.FeatureCollection) { this.railCache = newCache; }
     setMfCache(newCache: any[]) { this.meteofranceCache = newCache; }
-    setCelestCache(newCache: any[]){ this.celestCache = newCache; }
+    setCelestCache(newCache: any[])
+    {
+        this.celestCache = newCache;
+        this.celestListeners.forEach((l) => l());
+    }
+
+    subscribeCelest(listener: () => void)
+    {
+        this.celestListeners.add(listener);
+        return () => this.celestListeners.delete(listener);
+    }
 
     getOpCache() { return this.openskyCache; }
     getAdsbCache() { return this.adsbCache; }

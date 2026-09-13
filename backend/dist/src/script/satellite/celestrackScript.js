@@ -14,7 +14,7 @@ const common_1 = require("@nestjs/common");
 const ApiService_1 = require("../../ApiService");
 let CallCelestrackAPI = class CallCelestrackAPI {
     apiservice;
-    POLL_INTERVAL_MS = 8_000_000;
+    POLL_INTERVAL_MS = 21_600_000;
     timeoutHandle = null;
     constructor(apiservice) {
         this.apiservice = apiservice;

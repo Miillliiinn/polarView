@@ -52,28 +52,33 @@ async function fetchCestrack() {
             return [];
         }
         const raw = await response.json();
-        const mapped = raw.map((f) => ({
-            name: f.OBJECT_NAME,
-            id: f.NORAD_CAT_ID,
-            objectId: f.OBJECT_ID,
-            owner: f.OWNER,
-            launchDate: f.LAUNCH_DATE,
-            epoch: f.EPOCH,
-            meanMotion: f.MEAN_MOTION,
-            eccentricity: f.ECCENTRICITY,
-            inclination: f.INCLINATION,
-            raOfAscNode: f.RA_OF_ASC_NODE,
-            argOfPericenter: f.ARG_OF_PERICENTER,
-            meanAnomaly: f.MEAN_ANOMALY,
-            ephemerisType: f.EPHEMERIS_TYPE,
-            classificationType: f.CLASSIFICATION_TYPE,
-            elementSetNo: f.ELEMENT_SET_NO,
-            revAtEpoch: f.REV_AT_EPOCH,
-            bstar: f.BSTAR,
-            meanMotionDot: f.MEAN_MOTION_DOT,
-            meanMotionDdot: f.MEAN_MOTION_DDOT,
-            raw: f,
-        }));
+        const mapped = raw.reduce((acc, f) => {
+            if (parseFloat(f.INCLINATION) >= 35.0) {
+                acc.push({
+                    name: f.OBJECT_NAME,
+                    id: f.NORAD_CAT_ID,
+                    objectId: f.OBJECT_ID,
+                    owner: f.OWNER,
+                    launchDate: f.LAUNCH_DATE,
+                    epoch: f.EPOCH,
+                    meanMotion: f.MEAN_MOTION,
+                    eccentricity: f.ECCENTRICITY,
+                    inclination: f.INCLINATION,
+                    raOfAscNode: f.RA_OF_ASC_NODE,
+                    argOfPericenter: f.ARG_OF_PERICENTER,
+                    meanAnomaly: f.MEAN_ANOMALY,
+                    ephemerisType: f.EPHEMERIS_TYPE,
+                    classificationType: f.CLASSIFICATION_TYPE,
+                    elementSetNo: f.ELEMENT_SET_NO,
+                    revAtEpoch: f.REV_AT_EPOCH,
+                    bstar: f.BSTAR,
+                    meanMotionDot: f.MEAN_MOTION_DOT,
+                    meanMotionDdot: f.MEAN_MOTION_DDOT,
+                    raw: f,
+                });
+            }
+            return acc;
+        }, []);
         await writeCelestrackCache(mapped);
         console.log("🛰️  Celestrak API request 🛰️");
         return mapped;

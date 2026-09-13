@@ -4,7 +4,7 @@ import { ApiService } from "src/ApiService";
 @Injectable()
 export class CallCelestrackAPI implements OnModuleInit, OnModuleDestroy
 {
-    private readonly POLL_INTERVAL_MS = 8_000_000; // 1h 11min
+    private readonly POLL_INTERVAL_MS = 21_600_000; // 6h
 
     private timeoutHandle: NodeJS.Timeout | null = null;
 

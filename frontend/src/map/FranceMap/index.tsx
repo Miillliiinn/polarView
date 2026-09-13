@@ -10,6 +10,7 @@ import { setupTrainsLayer } from './layers/trains/trainsLayer';
 import { setupRailLayer, toggleRailLayer } from './layers/trains/trainsLayer';
 import { toggleGareLayer, setupGareLayer } from './layers/trains/gareLayer';
 import { setupBoatsLayer, toggleBoatsLayer } from './layers/boats/boatsLayer';
+import { setupSatellitesLayer, toggleSatellitesLayer } from './layers/satellite/satelliteLayer'; 
 import { usePlanesRealtimeSync } from './hooks/usePlanesRealtimeSync';
 import { setupPhotoLightbox } from './utils/popUpImage';
 
@@ -49,16 +50,17 @@ export default function FranceMap() {
   const [visibleTrains, setVisibleTrains] = useState(false);
   const [visiblePlanes, setVisiblePlanes] = useState(false);
   const [visibleBoats, setVisibleBoats] = useState(false);
+  const [visibleSatellites, setVisibleSatellites] = useState(false);
 
   const [currentStyleId, setCurrentStyleId] = useState('dark');
   const [styleMenuOpen, setStyleMenuOpen] = useState(false);
   const styleMenuRef = useRef<HTMLDivElement>(null);
 
   // Refs miroir des états, pour éviter les closures obsolètes dans les listeners MapLibre
-  const stateRef = useRef({ vigilanceVisible, visibleTrains, visiblePlanes, visibleBoats });
+  const stateRef = useRef({ vigilanceVisible, visibleTrains, visiblePlanes, visibleBoats, visibleSatellites });
   useEffect(() => {
-    stateRef.current = { vigilanceVisible, visibleTrains, visiblePlanes, visibleBoats };
-  }, [vigilanceVisible, visibleTrains, visiblePlanes, visibleBoats]);
+    stateRef.current = { vigilanceVisible, visibleTrains, visiblePlanes, visibleBoats, visibleSatellites };
+  }, [vigilanceVisible, visibleTrains, visiblePlanes, visibleBoats, visibleSatellites]);
 
   // currentStyleId dans une ref pour pouvoir le lire depuis createMap()
   // (utilisée aussi lors d'une recréation suite à perte de contexte)
@@ -68,9 +70,10 @@ export default function FranceMap() {
   }, [currentStyleId]);
 
   // Fonctions de nettoyage des couches à effet de bord (polling / websocket)
-  const cleanupRefs = useRef<{ vigilance: (() => void) | null; boats: (() => void) | null }>({
+  const cleanupRefs = useRef<{ vigilance: (() => void) | null; boats: (() => void) | null; satellites: (() => void) | null }>({
     vigilance: null,
     boats: null,
+    satellites: null,
   });
 
   // (Ré)installe toutes les couches personnalisées et restaure leur visibilité actuelle.
@@ -83,6 +86,7 @@ export default function FranceMap() {
     setupGareLayer(mapInstance);
     cleanupRefs.current.boats = setupBoatsLayer(mapInstance);
     setupPlanesLayer(mapInstance);
+    cleanupRefs.current.satellites = setupSatellitesLayer(mapInstance);
 
     const s = stateRef.current;
     toggleVigilanceLayer(mapInstance, s.vigilanceVisible);
@@ -90,6 +94,7 @@ export default function FranceMap() {
     toggleGareLayer(mapInstance, s.visibleTrains);
     toggleBoatsLayer(mapInstance, s.visibleBoats);
     togglePlaneLayer(mapInstance, s.visiblePlanes);
+    toggleSatellitesLayer(mapInstance, s.visibleSatellites);
   };
 
   // Crée (ou recrée) l'instance MapLibre et branche tous ses listeners.
@@ -157,6 +162,7 @@ export default function FranceMap() {
         resizeObserver.disconnect();
         cleanupRefs.current.vigilance?.();
         cleanupRefs.current.boats?.();
+        cleanupRefs.current.satellites?.();
         mapInstance.remove();
         map.current = null;
         createMap();
@@ -185,6 +191,7 @@ export default function FranceMap() {
       (map.current as any)?._franceMapResizeObserver?.disconnect();
       cleanupRefs.current.vigilance?.();
       cleanupRefs.current.boats?.();
+      cleanupRefs.current.satellites?.();
       map.current?.remove();
       map.current = null;
     };
@@ -213,6 +220,7 @@ export default function FranceMap() {
     // Coupe le polling/websocket des couches actuelles avant de changer de style
     cleanupRefs.current.vigilance?.();
     cleanupRefs.current.boats?.();
+    cleanupRefs.current.satellites?.();
 
     const mapInstance = map.current;
 
@@ -253,6 +261,13 @@ export default function FranceMap() {
     const newVisibility = !visiblePlanes;
     togglePlaneLayer(map.current, newVisibility);
     setVisiblePlanes(newVisibility);
+  };
+
+  const handleSatellitesData = () => {
+    if (!map.current) return;
+    const newVisibility = !visibleSatellites;
+    toggleSatellitesLayer(map.current, newVisibility);
+    setVisibleSatellites(newVisibility);
   };
 
   return (
@@ -298,6 +313,16 @@ export default function FranceMap() {
         >
           <span className="map-toggle-btn__dot" aria-hidden="true" />
           Bateaux
+        </button>
+
+        <button
+          type="button"
+          className="map-toggle-btn map-toggle-btn--satellite"
+          data-active={visibleSatellites}
+          onClick={handleSatellitesData}
+        >
+          <span className="map-toggle-btn__dot" aria-hidden="true" />
+          Satellites
         </button>
       </div>
 
