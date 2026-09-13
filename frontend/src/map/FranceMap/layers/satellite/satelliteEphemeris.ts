@@ -22,7 +22,7 @@ export interface CelestrakOmm {
   elementSetNo: number;
   revAtEpoch: number;
   bstar: number;
-  meanMotionDot: number;    // déjà en unités TLE (ndot/2), pas besoin de diviser à nouveau
+  meanMotionDot: number;    // dja en unités TLE (ndot/2), pas besoin de diviser à nouveau
   meanMotionDdot: number;
 }
 

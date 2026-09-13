@@ -1,14 +1,9 @@
 import maplibregl from 'maplibre-gl';
 import { globalCache } from '../../../../api/classCache';
 import { toGeoJsonFeatureCollection } from '../../../../api/geoJsonConvertion';
-import {
-  buildSatrecCache,
-  computeGroundTrack,
-  propagateOne,
-  type CelestrakOmm,
-  type SatellitePosition,
-  type SatRecEntry,
-} from './satelliteEphemeris';
+import type { CelestrakOmm, SatellitePosition } from './satelliteEphemeris';
+import { type ViewportBounds } from './geoUtils';
+import { createSatelliteIcon } from '../../icons/satellite/satelliteIcon';
 
 const SOURCE_POINTS = 'satellites';
 const SOURCE_TRACK = 'satellites-track';
@@ -16,52 +11,46 @@ const LAYER_POINTS = 'satellites-layer';
 const LAYER_LABELS = 'satellites-labels-layer';
 const LAYER_TRACK = 'satellites-track-layer';
 
-// Cadence de rendu de la position : contrairement aux avions (qui
-// extrapolent entre deux fixes ADS-B), un satellite a un modèle physique
-// complet (SGP4) donc sa position exacte est calculable à tout instant.
-// Une cadence rapide = un mouvement fluide, sans jump visible, sans
-// avoir besoin d'interpoler quoi que ce soit.
-const POSITION_RENDER_INTERVAL_MS = 100;
-
-// La trajectoire (ground track) du satellite sélectionné ne change presque
-// pas d'une frame à l'autre : on la recalcule à part, moins souvent.
-const TRACK_REFRESH_INTERVAL_MS = 4000;
-const TRACK_PAST_MIN = 15;
-const TRACK_FUTURE_MIN = 45;
-const TRACK_STEP_SEC = 30;
-
 // Marge ajoutée autour du viewport visible pour que les satellites
 // n'apparaissent/disparaissent pas brutalement pile sur le bord de l'écran.
 const VIEWPORT_MARGIN_DEG = 5;
 
-function normalizeLon(lon: number): number {
-  return ((lon + 180) % 360 + 360) % 360 - 180;
+// Icônes satellite (canvas -> ImageData -> map.addImage). Deux tailles/
+// couleurs : normal et sélectionné. Une icône pleine grandeur agrandit
+// mécaniquement la zone cliquable par rapport à l'ancien point de 3-5px.
+const ICON_ID = 'satellite-icon';
+const ICON_ID_SELECTED = 'satellite-icon-selected';
+const ICON_SIZE = 28;
+const ICON_SIZE_SELECTED = 36;
+const ICON_COLOR = '#66d9ff';
+const ICON_COLOR_SELECTED = '#ffcc00';
+
+function ensureSatelliteImages(map: maplibregl.Map) {
+  if (!map.hasImage(ICON_ID)) {
+    map.addImage(ICON_ID, createSatelliteIcon(ICON_COLOR, ICON_SIZE));
+  }
+  if (!map.hasImage(ICON_ID_SELECTED)) {
+    map.addImage(ICON_ID_SELECTED, createSatelliteIcon(ICON_COLOR_SELECTED, ICON_SIZE_SELECTED));
+  }
 }
 
-/**
- * Teste si (lon, lat) tombe dans les limites visibles de la carte (+ marge),
- * en gérant le cas où le viewport traverse l'antiméridien (west > east
- * après normalisation).
- */
-function isInViewport(lon: number, lat: number, bounds: maplibregl.LngLatBounds): boolean {
-  const south = bounds.getSouth() - VIEWPORT_MARGIN_DEG;
-  const north = bounds.getNorth() + VIEWPORT_MARGIN_DEG;
-  if (lat < south || lat > north) return false;
+// ---------------------------------------------------------------------------
+// Le calcul lourd (SGP4, ground track) a été déplacé dans satelliteWorker.ts.
+// Ce fichier ne fait plus que :
+//  - piloter les sources/layers maplibre (thread principal, obligatoire)
+//  - transmettre au worker les infos dont il a besoin (données OMM, viewport,
+//    satellite sélectionné)
+//  - injecter dans les sources les GeoJSON reçus du worker
+// ---------------------------------------------------------------------------
 
-  const west = normalizeLon(bounds.getWest() - VIEWPORT_MARGIN_DEG);
-  const east = normalizeLon(bounds.getEast() + VIEWPORT_MARGIN_DEG);
-  const lonN = normalizeLon(lon);
-
-  if (west <= east) return lonN >= west && lonN <= east;
-  // Le viewport traverse l'antiméridien (±180°)
-  return lonN >= west || lonN <= east;
-}
+type WorkerOutboundMessage =
+  | { type: 'positions'; positions: SatellitePosition[]; selectedId: number | null }
+  | { type: 'track'; segments: number[][][]; selectedId: number };
 
 const listenersAttached = new WeakSet<maplibregl.Map>();
 const celestUnsubscribeByMap = new WeakMap<maplibregl.Map, () => void>();
-const positionTimerByMap = new WeakMap<maplibregl.Map, ReturnType<typeof setInterval>>();
-const trackTimerByMap = new WeakMap<maplibregl.Map, ReturnType<typeof setInterval>>();
-const satrecCacheByMap = new WeakMap<maplibregl.Map, Map<number, SatRecEntry>>();
+const workerByMap = new WeakMap<maplibregl.Map, Worker>();
+const moveHandlerByMap = new WeakMap<maplibregl.Map, () => void>();
 
 function emptyFC(): GeoJSON.FeatureCollection {
   return { type: 'FeatureCollection', features: [] };
@@ -86,7 +75,32 @@ function satellitesToFeatureCollection(
   );
 }
 
+function trackToFeatureCollection(
+  segments: number[][][],
+  selectedId: number
+): GeoJSON.FeatureCollection {
+  return {
+    type: 'FeatureCollection',
+    features: segments.map((coords) => ({
+      type: 'Feature',
+      geometry: { type: 'LineString', coordinates: coords },
+      properties: { id: selectedId },
+    })),
+  } as GeoJSON.FeatureCollection;
+}
+
+function boundsToViewport(bounds: maplibregl.LngLatBounds): ViewportBounds {
+  return {
+    south: bounds.getSouth() - VIEWPORT_MARGIN_DEG,
+    north: bounds.getNorth() + VIEWPORT_MARGIN_DEG,
+    west: bounds.getWest() - VIEWPORT_MARGIN_DEG,
+    east: bounds.getEast() + VIEWPORT_MARGIN_DEG,
+  };
+}
+
 function addSatellitesSourceAndLayers(map: maplibregl.Map) {
+  ensureSatelliteImages(map);
+
   if (!map.getSource(SOURCE_POINTS)) {
     map.addSource(SOURCE_POINTS, { type: 'geojson', data: emptyFC() });
   }
@@ -112,14 +126,14 @@ function addSatellitesSourceAndLayers(map: maplibregl.Map) {
   if (!map.getLayer(LAYER_POINTS)) {
     map.addLayer({
       id: LAYER_POINTS,
-      type: 'circle',
+      type: 'symbol',
       source: SOURCE_POINTS,
-      layout: { visibility: 'none' },
-      paint: {
-        'circle-radius': ['case', ['get', 'selected'], 5, 3],
-        'circle-color': ['case', ['get', 'selected'], '#ffcc00', '#66d9ff'],
-        'circle-stroke-width': 1,
-        'circle-stroke-color': '#0a2a3a',
+      layout: {
+        visibility: 'none',
+        'icon-image': ['case', ['get', 'selected'], ICON_ID_SELECTED, ICON_ID],
+        'icon-size': 1,
+        'icon-allow-overlap': true,
+        'icon-ignore-placement': true,
       },
     });
   }
@@ -134,7 +148,7 @@ function addSatellitesSourceAndLayers(map: maplibregl.Map) {
         'text-field': ['get', 'name'],
         'text-font': ['Noto Sans Regular'],
         'text-size': 10,
-        'text-offset': [0, 1.1],
+        'text-offset': [0, 1.6],
         'text-anchor': 'top',
         'text-optional': true,
       },
@@ -154,10 +168,10 @@ function clearTrack(map: maplibregl.Map) {
 
 function setSelectedSatellite(map: maplibregl.Map, id: number | null) {
   (map as any)._satellitesSelectedId = id;
+  const worker = workerByMap.get(map);
+  worker?.postMessage({ type: 'selected', id });
   if (id === null) {
     clearTrack(map);
-  } else {
-    refreshTrack(map);
   }
 }
 
@@ -225,84 +239,60 @@ function setupSatellitesClickPopup(map: maplibregl.Map) {
   listenersAttached.add(map);
 }
 
-function refreshSatrecs(map: maplibregl.Map) {
-  const omms = globalCache.getCelestrackCache() as CelestrakOmm[];
-  const previous = satrecCacheByMap.get(map) ?? new Map<number, SatRecEntry>();
-  satrecCacheByMap.set(map, buildSatrecCache(omms, previous));
-}
-
-function updatePositions(map: maplibregl.Map) {
-  const satrecCache = satrecCacheByMap.get(map);
-  if (!satrecCache) return;
-
-  const now = new Date();
-  const selectedId = getSelectedSatellite(map);
-  const bounds = map.getBounds();
-  const positions: SatellitePosition[] = [];
-
-  satrecCache.forEach((entry) => {
-    const pos = propagateOne(entry, now);
-    if (!pos) return;
-    // Le satellite sélectionné reste affiché même s'il sort du cadre, pour
-    // ne pas perdre le point qu'on est en train de suivre.
-    if (pos.id === selectedId || isInViewport(pos.longitude, pos.latitude, bounds)) {
-      positions.push(pos);
-    }
-  });
-
-  const source = map.getSource(SOURCE_POINTS) as maplibregl.GeoJSONSource | undefined;
-  source?.setData(satellitesToFeatureCollection(positions, selectedId));
-}
-
-function refreshTrack(map: maplibregl.Map) {
-  const selectedId = getSelectedSatellite(map);
-  if (selectedId === null) return;
-
-  const satrecCache = satrecCacheByMap.get(map);
-  const entry = satrecCache?.get(selectedId);
-  const trackSource = map.getSource(SOURCE_TRACK) as maplibregl.GeoJSONSource | undefined;
-  if (!entry || !trackSource) return;
-
-  const segments = computeGroundTrack(entry, new Date(), TRACK_PAST_MIN, TRACK_FUTURE_MIN, TRACK_STEP_SEC);
-  trackSource.setData({
-    type: 'FeatureCollection',
-    features: segments.map((coords) => ({
-      type: 'Feature',
-      geometry: { type: 'LineString', coordinates: coords },
-      properties: { id: selectedId },
-    })),
-  });
+function handleWorkerMessage(map: maplibregl.Map, e: MessageEvent<WorkerOutboundMessage>) {
+  const msg = e.data;
+  if (msg.type === 'positions') {
+    const source = map.getSource(SOURCE_POINTS) as maplibregl.GeoJSONSource | undefined;
+    source?.setData(satellitesToFeatureCollection(msg.positions, msg.selectedId));
+    return;
+  }
+  if (msg.type === 'track') {
+    // On ignore un track qui arriverait pour un satellite qui n'est plus
+    // sélectionné (message en vol au moment d'un changement de sélection).
+    if (msg.selectedId !== getSelectedSatellite(map)) return;
+    const trackSource = map.getSource(SOURCE_TRACK) as maplibregl.GeoJSONSource | undefined;
+    trackSource?.setData(trackToFeatureCollection(msg.segments, msg.selectedId));
+  }
 }
 
 export function setupSatellitesLayer(map: maplibregl.Map): () => void {
   addSatellitesSourceAndLayers(map);
   setupSatellitesClickPopup(map);
 
-  refreshSatrecs(map);
-  updatePositions(map);
+  // Le calcul lourd (SGP4 + ground track) tourne dans ce worker, hors du
+  // thread principal, pour laisser le rendu (avions, bateaux, carte) fluide.
+  const worker = new Worker(new URL('./satelliteWorker.ts', import.meta.url), { type: 'module' });
+  worker.onmessage = (e: MessageEvent<WorkerOutboundMessage>) => handleWorkerMessage(map, e);
+  workerByMap.set(map, worker);
+
+  worker.postMessage({ type: 'omms', omms: globalCache.getCelestrackCache() as CelestrakOmm[] });
+  worker.postMessage({ type: 'viewport', bounds: boundsToViewport(map.getBounds()) });
+  worker.postMessage({ type: 'selected', id: getSelectedSatellite(map) });
+  worker.postMessage({ type: 'start' });
 
   if (!celestUnsubscribeByMap.has(map)) {
     const unsubscribe = globalCache.subscribeCelest(() => {
-      refreshSatrecs(map);
-      updatePositions(map);
+      worker.postMessage({ type: 'omms', omms: globalCache.getCelestrackCache() as CelestrakOmm[] });
     });
     celestUnsubscribeByMap.set(map, unsubscribe);
   }
 
-  if (positionTimerByMap.has(map)) clearInterval(positionTimerByMap.get(map)!);
-  positionTimerByMap.set(map, setInterval(() => updatePositions(map), POSITION_RENDER_INTERVAL_MS));
-
-  if (trackTimerByMap.has(map)) clearInterval(trackTimerByMap.get(map)!);
-  trackTimerByMap.set(map, setInterval(() => refreshTrack(map), TRACK_REFRESH_INTERVAL_MS));
+  // Le viewport ne change pas à chaque frame : on ne l'envoie au worker
+  // qu'après un pan/zoom, pas toutes les 50ms.
+  const onMoveEnd = () => {
+    worker.postMessage({ type: 'viewport', bounds: boundsToViewport(map.getBounds()) });
+  };
+  map.on('moveend', onMoveEnd);
+  moveHandlerByMap.set(map, onMoveEnd);
 
   return () => {
-    const posTimer = positionTimerByMap.get(map);
-    if (posTimer) clearInterval(posTimer);
-    positionTimerByMap.delete(map);
+    worker.postMessage({ type: 'stop' });
+    worker.terminate();
+    workerByMap.delete(map);
 
-    const trackTimer = trackTimerByMap.get(map);
-    if (trackTimer) clearInterval(trackTimer);
-    trackTimerByMap.delete(map);
+    const onMoveEndHandler = moveHandlerByMap.get(map);
+    if (onMoveEndHandler) map.off('moveend', onMoveEndHandler);
+    moveHandlerByMap.delete(map);
 
     const unsubscribe = celestUnsubscribeByMap.get(map);
     if (unsubscribe) {
@@ -311,8 +301,6 @@ export function setupSatellitesLayer(map: maplibregl.Map): () => void {
     }
 
     deselectSatellite(map);
-
-    satrecCacheByMap.delete(map);
 
     if (map.getLayer(LAYER_LABELS)) map.removeLayer(LAYER_LABELS);
     if (map.getLayer(LAYER_POINTS)) map.removeLayer(LAYER_POINTS);

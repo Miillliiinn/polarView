@@ -58,7 +58,6 @@ async function fetchCestrack() {
                     name: f.OBJECT_NAME,
                     id: f.NORAD_CAT_ID,
                     objectId: f.OBJECT_ID,
-                    owner: f.OWNER,
                     launchDate: f.LAUNCH_DATE,
                     epoch: f.EPOCH,
                     meanMotion: f.MEAN_MOTION,
@@ -74,7 +73,6 @@ async function fetchCestrack() {
                     bstar: f.BSTAR,
                     meanMotionDot: f.MEAN_MOTION_DOT,
                     meanMotionDdot: f.MEAN_MOTION_DDOT,
-                    raw: f,
                 });
             }
             return acc;

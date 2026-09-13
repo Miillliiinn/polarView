@@ -4,7 +4,7 @@ import api from '../../../../api/apiBridge';
 import { globalCache } from '../../../../api/classCache';
 import { type ShipPosition } from '../../../../api/aisstream/front_aisStreamAPI';
 import { toGeoJsonFeatureCollection } from '../../../../api/geoJsonConvertion.ts';
-import { registerBoatIcons } from '../../icons/boatType.ts';
+import { registerBoatIcons } from '../../icons/boatType/index.ts';
 
 const SOURCE_ID = 'boats';
 const LAYER_ID = 'boats-layer';
