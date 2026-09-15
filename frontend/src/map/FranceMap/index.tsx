@@ -52,7 +52,7 @@ export default function FranceMap() {
   const [visibleBoats, setVisibleBoats] = useState(false);
   const [visibleSatellites, setVisibleSatellites] = useState(false);
 
-  const [currentStyleId, setCurrentStyleId] = useState('dark');
+  const [currentStyleId, setCurrentStyleId] = useState('liberty');
   const [styleMenuOpen, setStyleMenuOpen] = useState(false);
   const styleMenuRef = useRef<HTMLDivElement>(null);
 

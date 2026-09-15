@@ -51,6 +51,7 @@ const listenersAttached = new WeakSet<maplibregl.Map>();
 const celestUnsubscribeByMap = new WeakMap<maplibregl.Map, () => void>();
 const workerByMap = new WeakMap<maplibregl.Map, Worker>();
 const moveHandlerByMap = new WeakMap<maplibregl.Map, () => void>();
+const cleanupByMap = new WeakMap<maplibregl.Map, () => void>();
 
 function emptyFC(): GeoJSON.FeatureCollection {
   return { type: 'FeatureCollection', features: [] };
@@ -115,7 +116,7 @@ function addSatellitesSourceAndLayers(map: maplibregl.Map) {
       source: SOURCE_TRACK,
       layout: { visibility: 'none', 'line-join': 'round', 'line-cap': 'round' },
       paint: {
-        'line-color': '#ffcc00',
+        'line-color': '#b59100',
         'line-width': 1.5,
         'line-dasharray': [2, 2],
         'line-opacity': 0.85,
@@ -138,19 +139,21 @@ function addSatellitesSourceAndLayers(map: maplibregl.Map) {
     });
   }
 
-  if (!map.getLayer(LAYER_LABELS)) {
+if (!map.getLayer(LAYER_LABELS)) {
     map.addLayer({
       id: LAYER_LABELS,
       type: 'symbol',
       source: SOURCE_POINTS,
       layout: {
-        visibility: 'none',
+        visibility: 'visible', 
         'text-field': ['get', 'name'],
         'text-font': ['Noto Sans Regular'],
-        'text-size': 10,
+        'text-size': 12,
         'text-offset': [0, 1.6],
         'text-anchor': 'top',
-        'text-optional': true,
+        'text-allow-overlap': true,    
+        'text-ignore-placement': true,
+        'text-optional': false,       
       },
       paint: {
         'text-color': '#e8f6ff',
@@ -159,7 +162,7 @@ function addSatellitesSourceAndLayers(map: maplibregl.Map) {
       },
     });
   }
-}
+}//001018
 
 function clearTrack(map: maplibregl.Map) {
   const trackSource = map.getSource(SOURCE_TRACK) as maplibregl.GeoJSONSource | undefined;
@@ -186,6 +189,11 @@ function deselectSatellite(map: maplibregl.Map) {
   (map as any)._satellitesActivePopup = undefined;
 }
 
+function getOmmById(id: number): CelestrakOmm | undefined {
+  const omms = globalCache.getCelestrackCache() as CelestrakOmm[];
+  return omms.find((o) => o.id === id);
+}
+
 function setupSatellitesClickPopup(map: maplibregl.Map) {
   if (listenersAttached.has(map)) return;
 
@@ -202,13 +210,80 @@ function setupSatellitesClickPopup(map: maplibregl.Map) {
     const existing = (map as any)._satellitesActivePopup as maplibregl.Popup | undefined;
     if (existing) existing.remove();
 
+    const omm = getOmmById(id);
+
+    const objectId = omm?.objectId;
+    const meanMotion = omm?.meanMotion;
+    const eccentricity = omm?.eccentricity;
+    const inclination = omm?.inclination;
+    const raOfAscNode = omm?.raOfAscNode;
+    const argOfPericenter = omm?.argOfPericenter;
+    const meanAnomaly = omm?.meanAnomaly;
+    const ephemerisType = omm?.ephemerisType;
+    const classificationType = omm?.classificationType;
+    const elementSetNo = omm?.elementSetNo;
+    const revAtEpoch = omm?.revAtEpoch;
+    const bstar = omm?.bstar;
+    const meanMotionDot = omm?.meanMotionDot;
+    const meanMotionDdot = omm?.meanMotionDdot;
+
+    // omm.epoch est une string ISO : on la parse une seule fois en Date,
+    // et c'est CE Date (epochDate) qu'on réutilise partout ensuite —
+    // jamais la string brute, qui n'a pas de .getTime().
+    const epochDate = omm?.epoch ? new Date(omm.epoch) : null;
+    const formattedDate = epochDate
+      ? epochDate.toLocaleString('fr-FR', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      : 'N/A';
+
+    // Date de lancement estimée à partir du nombre de révolutions et de la
+    // période orbitale (approximation ; omm.launchDate donne la vraie date
+    // si tu préfères l'utiliser directement).
+    const rev = Number(revAtEpoch);
+    const mm = Number(meanMotion);
+    let launchDateFormatted = 'N/A';
+
+    if (epochDate && rev > 0 && mm > 0) {
+      const daysInOrbit = rev / mm;
+      const launchTimestamp = epochDate.getTime() - daysInOrbit * 24 * 60 * 60 * 1000;
+      const launchDate = new Date(launchTimestamp);
+      launchDateFormatted = launchDate.toLocaleString('fr-FR', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    }
+
     const popup = new maplibregl.Popup({ closeButton: true, closeOnClick: false })
       .setLngLat(coordinates)
       .setHTML(`
         Nom: <strong>${props.name ?? 'Satellite'}</strong><br/>
+        Start: <strong style="font-size: 0.90em; font-weight: 1200;">${launchDateFormatted}</strong><br/>
         NORAD ID: <strong>${id}</strong><br/>
         Altitude: <strong>${props.altitudeKm} km</strong><br/>
-        Vitesse: <strong>${props.velocityKmS} km/s</strong><br/>
+        Vitesse: <strong>${props.velocityKmS * 3600} km/h</strong><br/>
+        Last signal: <strong style="font-size: 0.90em; font-weight: 1200;">${formattedDate}</strong><br/>
+        objectId: <strong>${objectId}</strong></br>
+        Tour d'orbite / jour: <strong>${meanMotion?.toFixed(2)}</strong></br>
+        Eccentricity: <strong>${eccentricity}</strong></br>
+        Inclinaison: <strong>${inclination}</strong></br>
+        RaOfAscNode: <strong>${raOfAscNode}</strong></br>
+        ArgOfPericenter: <strong>${argOfPericenter}</strong></br>
+        Mean Anomaly: <strong>${meanAnomaly}</strong></br>
+        Ephemeris Type: <strong>${ephemerisType}</strong></br>
+        Classification Type: <strong>${classificationType}</strong></br>
+        ElementSetNo: <strong>${elementSetNo}</strong></br>
+        Tour d'orbite total: <strong>${revAtEpoch}</strong></br>
+        Bstar: <strong>${bstar}</strong></br>
+        Mean Motion Dot: <strong>${meanMotionDot}</strong></br>
+        Mean Motion Ddot: <strong>${meanMotionDdot}</strong></br>
       `)
       .addTo(map);
 
@@ -219,10 +294,6 @@ function setupSatellitesClickPopup(map: maplibregl.Map) {
     (map as any)._satellitesActivePopup = popup;
   });
 
-  // Clic ailleurs sur la carte (pas sur un satellite) -> on retire le popup
-  // et la trajectoire. queryRenderedFeatures re-vérifie le même point : si
-  // le clic vient d'atteindre un satellite, le handler ci-dessus l'a déjà
-  // sélectionné et on le retrouve ici, donc pas de désélection accidentelle.
   map.on('click', (e) => {
     if (!map.getLayer(LAYER_POINTS)) return;
     const hits = map.queryRenderedFeatures(e.point, { layers: [LAYER_POINTS] });
@@ -256,6 +327,17 @@ function handleWorkerMessage(map: maplibregl.Map, e: MessageEvent<WorkerOutbound
 }
 
 export function setupSatellitesLayer(map: maplibregl.Map): () => void {
+  // Idempotence : si setupSatellitesLayer est rappelée sur le même map sans
+  // que le cleanup précédent ait été exécuté (remount de composant, double
+  // appel, hot reload...), on nettoie d'abord l'ancienne instance. Sans ça,
+  // le vieux Worker n'est jamais terminé et continue de tourner en tâche de
+  // fond (propagation SGP4 + postMessage à 50ms, indéfiniment) : c'est le
+  // scénario typique d'un ralentissement qui s'aggrave avec le temps.
+  const previousCleanup = cleanupByMap.get(map);
+  if (previousCleanup) {
+    previousCleanup();
+  }
+
   addSatellitesSourceAndLayers(map);
   setupSatellitesClickPopup(map);
 
@@ -268,7 +350,11 @@ export function setupSatellitesLayer(map: maplibregl.Map): () => void {
   worker.postMessage({ type: 'omms', omms: globalCache.getCelestrackCache() as CelestrakOmm[] });
   worker.postMessage({ type: 'viewport', bounds: boundsToViewport(map.getBounds()) });
   worker.postMessage({ type: 'selected', id: getSelectedSatellite(map) });
-  worker.postMessage({ type: 'start' });
+  // Le worker reste volontairement à l'arrêt tant que la couche n'est pas
+  // affichée. C'est toggleSatellitesLayer() qui envoie 'start'/'stop' selon
+  // la visibilité réelle — sinon le calcul SGP4 à 20Hz tourne en tâche de
+  // fond dès le chargement de la page, même si l'utilisateur n'a jamais
+  // cliqué sur "Satellites" (visibleSatellites vaut false par défaut).
 
   if (!celestUnsubscribeByMap.has(map)) {
     const unsubscribe = globalCache.subscribeCelest(() => {
@@ -285,7 +371,7 @@ export function setupSatellitesLayer(map: maplibregl.Map): () => void {
   map.on('moveend', onMoveEnd);
   moveHandlerByMap.set(map, onMoveEnd);
 
-  return () => {
+  const cleanup = () => {
     worker.postMessage({ type: 'stop' });
     worker.terminate();
     workerByMap.delete(map);
@@ -307,7 +393,12 @@ export function setupSatellitesLayer(map: maplibregl.Map): () => void {
     if (map.getLayer(LAYER_TRACK)) map.removeLayer(LAYER_TRACK);
     if (map.getSource(SOURCE_POINTS)) map.removeSource(SOURCE_POINTS);
     if (map.getSource(SOURCE_TRACK)) map.removeSource(SOURCE_TRACK);
+
+    cleanupByMap.delete(map);
   };
+
+  cleanupByMap.set(map, cleanup);
+  return cleanup;
 }
 
 export function toggleSatellitesLayer(map: maplibregl.Map, visible: boolean) {
@@ -315,6 +406,10 @@ export function toggleSatellitesLayer(map: maplibregl.Map, visible: boolean) {
   if (map.getLayer(LAYER_POINTS)) map.setLayoutProperty(LAYER_POINTS, 'visibility', vis);
   if (map.getLayer(LAYER_LABELS)) map.setLayoutProperty(LAYER_LABELS, 'visibility', vis);
   if (map.getLayer(LAYER_TRACK)) map.setLayoutProperty(LAYER_TRACK, 'visibility', vis);
+
+  const worker = workerByMap.get(map);
+  worker?.postMessage({ type: visible ? 'start' : 'stop' });
+
   if (!visible) {
     deselectSatellite(map);
   }

@@ -401,9 +401,9 @@ function AppContent() {
 
         {showMapChrome && (
           <header className="project-intro">
-            <div className="tactical-badge">SECTEUR METROPOLITAIN · OPÉRATIONNEL</div>
-            <h2>Poste de Surveillance Multi-Flux Temps Réel</h2>
-            <p className="intro-lead">Supervision centralisée des lignes ferroviaires, du trafic aérien et de la navigation maritime.</p>
+            <div className="tactical-badge">SECTEUR Europe ouest · OPÉRATIONNEL</div>
+            <h2>Surveillance de Multi-Flux en Temps Réel</h2>
+            <p className="intro-lead">*En cours de développement*</p>
           </header>
         )}
 
@@ -443,7 +443,7 @@ function AppContent() {
           <span className="map-frame-corner br" aria-hidden="true" />
 
           {/* Bandeaux d'information radar */}
-          <span className="map-readout" aria-hidden="true">Europe Ouest &middot; LIVE</span>
+          <span className="map-readout" aria-hidden="true">EUW &middot; LIVE</span>
 
           <div className={`map-container-inner ${!isExpanded ? 'disabled-events' : ''}`}>
             <FranceMap />

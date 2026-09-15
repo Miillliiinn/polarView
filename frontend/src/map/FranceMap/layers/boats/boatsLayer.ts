@@ -13,6 +13,11 @@ const HEADING_NOT_AVAILABLE = 511;
 
 const listenersAttached = new WeakSet<maplibregl.Map>();
 const aisUnsubscribeByMap = new WeakMap<maplibregl.Map, () => void>();
+// La couche "Bateaux" est masquée par défaut au chargement de la page. Sans
+// ce flag, updateSource() continuerait à reconvertir tout le cache AIS en
+// GeoJSON et à appeler setData() à chaque message AIS reçu, même invisible —
+// même défaut que celui corrigé sur la couche satellites.
+const boatsVisibleByMap = new WeakMap<maplibregl.Map, boolean>();
 
 function shipsToFeatureCollection(ships: ShipPosition[]): GeoJSON.FeatureCollection
 {
@@ -151,6 +156,7 @@ export function setupBoatsLayer(map: maplibregl.Map): () => void
 
   if (!aisUnsubscribeByMap.has(map)) {
     const updateSource = () => {
+      if (!boatsVisibleByMap.get(map)) return;
       const source = map.getSource(SOURCE_ID) as maplibregl.GeoJSONSource | undefined;
       if (!source) return;
       source.setData(shipsToFeatureCollection(globalCache.getAisCache()));
@@ -173,6 +179,17 @@ export function setupBoatsLayer(map: maplibregl.Map): () => void
 
 export function toggleBoatsLayer(map: maplibregl.Map, visible: boolean)
 {
+  boatsVisibleByMap.set(map, visible);
+
   if (!map.getLayer(LAYER_ID)) return;
   map.setLayoutProperty(LAYER_ID, 'visibility', visible ? 'visible' : 'none');
+
+  // En réaffichant la couche, le cache AIS a pu bouger pendant qu'elle était
+  // masquée (aucune mise à jour n'était appliquée) : on resynchronise une
+  // fois immédiatement plutôt que d'attendre le prochain message AIS.
+  if (visible)
+  {
+    const source = map.getSource(SOURCE_ID) as maplibregl.GeoJSONSource | undefined;
+    source?.setData(shipsToFeatureCollection(globalCache.getAisCache()));
+  }
 }

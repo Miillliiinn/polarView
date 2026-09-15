@@ -172,11 +172,7 @@ export function createSatelliteIcon(color: string = '#00e5ff', size: number = 12
   ctx.beginPath();
   ctx.arc(0, 0, 5.5 * s, 0, Math.PI * 2);
   ctx.fill();
-
-  // Reset de la shadow pour éviter les effets de bord
   ctx.shadowBlur = 0;
-
   ctx.restore();
-
   return ctx.getImageData(0, 0, size, size);
 }

@@ -81,7 +81,7 @@
   background: rgba(15, 29, 56, 0.82);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid #ffffff1f;
   border-radius: 1px;
   color: rgba(232, 224, 223, 0.75);
   font-family: 'Inter', sans-serif;
@@ -256,8 +256,8 @@
 
 .map-style-switcher {
   position: absolute;
-  top: 20%;
-  right: 1%;
+  top: 110px;
+  right: 9px;
   z-index: 10;
 }
 
@@ -271,7 +271,7 @@
   background: rgba(15, 29, 56, 0.82);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 5px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid #ffffff1f;
   border-radius: 4px;
   color: rgba(232, 224, 223, 0.75);
   cursor: pointer;

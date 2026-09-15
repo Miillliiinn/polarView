@@ -50,7 +50,7 @@ body {
 }
 
 /* ==========================================================================
-   Fond de l'application - épuré, sans motif répétitif
+   Fond de l'application
    ========================================================================== */
 .app-shell {
   min-height: 100vh;
@@ -67,9 +67,9 @@ body {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(3, 7, 18, 0.9);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(3, 7, 18, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--line);
 }
 
@@ -118,6 +118,7 @@ body {
   background: var(--accent-radar-bright);
   box-shadow: 0 0 10px var(--accent-radar-bright);
   animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  will-change: transform, opacity;
 }
 
 @keyframes pulse-dot {
@@ -146,7 +147,7 @@ body {
   color: var(--text-muted);
   text-decoration: none;
   border: 1px solid transparent;
-  transition: all 0.2s ease;
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .nav-link:hover {
@@ -219,10 +220,6 @@ body {
   letter-spacing: 0.04em;
 }
 
-/* /* .deck-value.highlight {
-  color: var(--accent-radar-bright);
-} */
-
 .text-amber {
   color: var(--accent-amber);
 } 
@@ -240,9 +237,9 @@ body {
   background: var(--accent-radar-bright);
   box-shadow: 0 0 8px var(--accent-radar-bright);
   animation: pulse-dot 2s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 
-/* Curseur de terminal clignotant à côté du statut opérationnel */
 .badge-status::after {
   content: '▫▫▫';
   display: inline-block;
@@ -291,7 +288,6 @@ body {
   display: none;
 }
 
-/* Présentation Tactique */
 .project-intro {
   text-align: center;
   max-width: 800px;
@@ -329,12 +325,12 @@ body {
 }
 
 /* ==========================================================================
-   Wrapper de la Carte & Contour Vert Intégral
+   Wrapper de la Carte
    ========================================================================== */
 .map-wrapper {
   position: relative;
   width: 100%;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: height 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-radius 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .map-wrapper.hidden {
@@ -392,16 +388,15 @@ body {
   gap: 10px;
   padding: 10px 22px;
   border-radius: 999px;
-  background: rgba(11, 20, 38, 0.9);
+  background: rgba(11, 20, 38, 0.95);
   color: #ffffff;
   font-size: 0.85rem;
   font-weight: 500;
   border: 1px solid var(--accent-radar-bright);
-  backdrop-filter: blur(12px);
   opacity: 0;
   transform: translateY(10px);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 8px 24px #00000080, 0 0 15px var(--accent-radar-glow);
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 15px var(--accent-radar-glow);
 }
 
 .map-wrapper.preview:hover .map-overlay {
@@ -414,83 +409,57 @@ body {
 }
 
 .close-expanded-btn {
-  /* Positionnement fixe propre et réactif (safe-area supporté) */
   position: fixed;
-  top: clamp(12px, 2vh, 3px);
-  right: clamp(60px, 2vw, 24px);
+  top: clamp(9px, 2vh, 1px);
+  right: clamp(60px, 2vw, 40px);
   z-index: 1000;
-
-  /* Dimensions & Flexbox */
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 40px;
   height: 40px;
   border-radius: 50%;
-
-  /* Design Glassmorphism moderne */
-  background: rgba(11, 20, 38, 0.65);
+  background: rgba(11, 20, 38, 0.85);
   color: var(--text-primary);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(12px) saturate(180%);
-  -webkit-backdrop-filter: blur(12px) saturate(180%);
-
-  /* Ombre subtile sans surcharger */
-  box-shadow: 
-    0 4px 20px -2px rgba(0, 0, 0, 0.5),
-    inset 0 1px 1px rgba(255, 255, 255, 0.15);
-
-  /* Interactions & Utilitaires */
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
   cursor: pointer;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
-
-  /* Animation fluide avec courbe d'accélération naturelle */
-  transition: 
-    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-    background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Survol : Halo lumineux ambré et léger grossissement */
 .close-expanded-btn:hover {
-  background: rgba(11, 20, 38, 0.85);
+  background: rgba(11, 20, 38, 0.95);
   color: #ffffff;
   border-color: var(--accent-amber);
   transform: scale(1.06);
-  box-shadow: 
-    0 0 16px -2px var(--accent-amber-glow, rgba(245, 158, 11, 0.35)),
-    0 4px 20px -2px rgba(0, 0, 0, 0.6),
-    inset 0 1px 1px rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 16px -2px var(--accent-amber-glow), 0 4px 20px -2px rgba(0, 0, 0, 0.6);
 }
 
-/* Clic / Pression : Effet d'enfoncement (Feedback tactile) */
 .close-expanded-btn:active {
   transform: scale(0.94);
   transition-duration: 0.1s;
 }
 
-/* Accessibilité Clavier */
 .close-expanded-btn:focus-visible {
   outline: 2px solid var(--accent-amber);
   outline-offset: 3px;
 }
 
-/* --- Ajustement de la Bordure Verte Maximale (Viseur Radar) --- */
+/* Viseur Radar */
 .map-frame-corner {
   position: absolute;
-  width: 5000px;
-  height: 5000px;
+  width: 36px;
+  height: 36px;
   border: 2px solid var(--accent-radar-bright);
   opacity: 0.65;
   z-index: 6;
   pointer-events: none;
-  transition: all 0.3s ease;
+  transition: opacity 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Ancrage exact aux bords sans déformer la carte */
 .map-frame-corner.tl { top: 0; left: 0; border-right: none; border-bottom: none; }
 .map-frame-corner.tr { top: 0; right: 0; border-left: none; border-bottom: none; }
 .map-frame-corner.bl { bottom: 0; left: 0; border-right: none; border-top: none; }
@@ -498,8 +467,6 @@ body {
 
 .map-wrapper.preview:hover .map-frame-corner {
   opacity: 1;
-  width: 36px;
-  height: 36px;
   box-shadow: 0 0 10px var(--accent-radar-glow);
 }
 
@@ -513,11 +480,10 @@ body {
   font-size: 0.65rem;
   letter-spacing: 0.14em;
   color: var(--accent-radar-bright);
-  background: rgba(3, 7, 18, 0.85);
+  background: rgba(3, 7, 18, 0.9);
   padding: 4px 14px;
   border-radius: 999px;
   border: 1px solid rgba(134, 239, 172, 0.3);
-  backdrop-filter: blur(8px);
   pointer-events: none;
 }
 
@@ -534,7 +500,7 @@ body {
 }
 
 /* ==========================================================================
-   System Readout - panneau de diagnostic sous la carte
+   System Readout
    ========================================================================== */
 .system-readout {
   background: var(--bg-panel-solid);
@@ -640,26 +606,20 @@ body {
   background: var(--accent-amber);
 }
 
-/* ==========================================================================
-   Contenu des sous-pages
-   ========================================================================== */
 .app-content {
   max-width: 55%;
   margin: 0 auto;
-  padding: 0px 0px 0px;
+  padding: 0;
 }
 
 /* ==========================================================================
-   Effets d'ambiance - halo, lignes de connexion, scanlines, balayage radar
-   Actifs uniquement hors mode carte plein écran (.ambient-active)
-   Fusionnés sur les DEUX seuls pseudo-éléments disponibles (::before / ::after)
+   Effets d'ambiance
    ========================================================================== */
 .app-shell.ambient-active {
   position: relative;
   isolation: isolate;
 }
 
-/* ::before - Halo qui respire lentement + grain de scanlines CRT */
 .app-shell.ambient-active::before {
   content: '';
   position: fixed;
@@ -667,23 +627,35 @@ body {
   z-index: 0;
   pointer-events: none;
   background-image:
-    radial-gradient(ellipse 900px 500px at 50% -10%, #86efac0f, transparent 65%),
+    radial-gradient(ellipse 900px 500px at 50% -10%, rgba(134, 239, 172, 0.06), transparent 65%),
     repeating-linear-gradient(
       to bottom,
-      #ffffff19 0px,
-      #ffffff19 1px,
+      rgba(255, 255, 255, 0.055) 0px,
+      rgba(255, 255, 255, 0.055) 1px,
       transparent 4px,
       transparent 3px
     );
-  animation: halo-breathe 14s ease-in-out infinite;
+  /* animation: halo-breathe 100000s ; */
+  will-change: opacity;
+  transform: translateZ(0);
 }
 
-@keyframes halo-breathe {
+/* @keyframes halo-breathe {
   0%, 100% { opacity: 0.7; }
   50% { opacity: 1; }
-}
+} */
 
-/* ::after - Lignes de connexion qui dérivent lentement */
+/* @keyframes lines-drift {
+  0%, 100% {
+    background-position: 0% 0%, 100% 100%;
+    opacity: 0.5;
+  }
+  50% {
+    background-position: 100% 100%, 0% 0%;
+    opacity: 1;
+  }
+} */
+
 .app-shell.ambient-active::after {
   content: '';
   position: fixed;
@@ -694,20 +666,8 @@ body {
     linear-gradient(115deg, transparent 20%, #86efad39 70%, transparent 80%),
     linear-gradient(65deg, transparent 30%, #f59e0b39 70%, transparent 75%);
   background-size: 100% 100%;
-  animation: lines-drift 22s ease-in-out infinite;
+  /* animation: lines-drift 22s ease-in-out infinite; */
 }
-
-@keyframes lines-drift {
-  0%, 100% {
-    background-position: 0% 0%, 100% 100%;
-    opacity: 0.5;
-  }
-  50% {
-    background-position: 100% 100%, 0% 0%;
-    opacity: 1;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .app-shell.ambient-active::before,
   .app-shell.ambient-active::after {
@@ -715,7 +675,6 @@ body {
   }
 }
 
-/* Repasse le contenu au-dessus des effets d'ambiance */
 .site-nav,
 .home-page,
 .app-content {
@@ -724,7 +683,7 @@ body {
 }
 
 /* ==========================================================================
-   Réticule radar - suit le curseur, effet ciblage tactique
+   Réticule radar / Curseur
    ========================================================================== */
 .cursor-spotlight {
   position: fixed;
@@ -733,17 +692,16 @@ body {
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  transform: translate(
+  transform: translate3d(
     calc(var(--mouse-x, 50vw) - 50%),
-    calc(var(--mouse-y, 50vh) - 50%)
+    calc(var(--mouse-y, 50vh) - 50%),
+    0
   );
   pointer-events: none;
   z-index: 2;
-  transition: transform 0.12s ease-out;
   will-change: transform;
 }
 
-/* Halo doux, très contenu */
 .cursor-spotlight::before {
   content: '';
   position: absolute;
@@ -756,7 +714,6 @@ body {
   );
 }
 
-/* Anneau fin façon réticule de ciblage */
 .cursor-spotlight::after {
   content: '';
   position: absolute;
@@ -769,7 +726,6 @@ body {
   border-radius: 50%;
 }
 
-/* Croix centrale */
 .crosshair {
   position: absolute;
   background: rgba(134, 239, 172, 0.45);
@@ -836,3 +792,16 @@ body {
     display: none;
   }
 }
+
+/* .app-shell.ambient-active::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(115deg, transparent 20%, #86efad39 70%, transparent 80%),
+    linear-gradient(65deg, transparent 30%, #f59e0b39 70%, transparent 75%);
+  background-size: 100% 100%;
+  animation: lines-drift 22s ease-in-out infinite;
+} */
