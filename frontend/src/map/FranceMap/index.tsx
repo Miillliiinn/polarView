@@ -25,11 +25,11 @@ const IconBurger = () => (
 
 /* --- Styles OpenFreeMap disponibles --- */
 const MAP_STYLES = [
+  { id: 'bright', label: 'Simple', url: 'https://tiles.openfreemap.org/styles/bright' },
+  { id: 'dark', label: 'Sombre', url: 'https://tiles.openfreemap.org/styles/dark' },
   { id: 'liberty', label: '3D', url: 'https://tiles.openfreemap.org/styles/liberty' },
-  { id: 'dark', label: 'Dark', url: 'https://tiles.openfreemap.org/styles/dark' },
-  { id: 'bright', label: 'Marin', url: 'https://tiles.openfreemap.org/styles/bright' },
-  { id: 'fiord', label: 'Blue', url: 'https://tiles.openfreemap.org/styles/fiord' },
-  { id: 'positron', label: 'White', url: 'https://tiles.openfreemap.org/styles/positron' },
+  { id: 'fiord', label: 'Bleu', url: 'https://tiles.openfreemap.org/styles/fiord' },
+  { id: 'positron', label: 'Blanche', url: 'https://tiles.openfreemap.org/styles/positron' },
 ];
 
 // Délai après une perte de contexte WebGL avant de considérer que le
@@ -52,7 +52,7 @@ export default function FranceMap() {
   const [visibleBoats, setVisibleBoats] = useState(false);
   const [visibleSatellites, setVisibleSatellites] = useState(false);
 
-  const [currentStyleId, setCurrentStyleId] = useState('liberty');
+  const [currentStyleId, setCurrentStyleId] = useState('bright');
   const [styleMenuOpen, setStyleMenuOpen] = useState(false);
   const styleMenuRef = useRef<HTMLDivElement>(null);
 
