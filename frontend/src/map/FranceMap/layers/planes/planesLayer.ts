@@ -2,8 +2,104 @@ import maplibregl from 'maplibre-gl';
 import api from '../../../../api/apiBridge';
 import { globalCache } from '../../../../api/classCache';
 import { registerAllPlaneIcons } from '../../icons/planeType/utils/iconRegistry';
+import { type PlaneIconType } from '../../icons/planeType/utils/planeIconResolver';
+import { ALTITUDE_STOPS, type AltitudeStop } from '../../icons/planeType/utils/altitudeColors';
+
+const LAYER_ID = 'planes-layer';
+
+export const PLANE_TYPE_LABELS: Partial<Record<PlaneIconType, string>> = {
+  // 1. Avions commerciaux & jets les plus courants
+  L2J: 'Bimoteur commercial / Bijet',
+  L4J: 'Quadrijet (gros porteur)',
+  L3J: 'Trijet',
+
+  // 2. Aviation générale & turbopropulseurs légers
+  L1P: 'Monomoteur léger',
+  L2P: 'Bimoteur léger',
+  L2T: 'Biturbopropulseur',
+  L1T: 'Monoturbopropulseur',
+
+  // 3. Hélicoptères
+  H1P: 'Hélicoptère léger',
+  H2T: 'Hélicoptère biturbine',
+  H3T: 'Hélicoptère lourd',
+
+  // 4. Appareils militaires
+  JETM: 'Avion de chasse',
+  L2JM: 'Bijet militaire',
+  L4JM: 'Quadrijet militaire',
+  L2TM: 'Biturbopropulseur militaire',
+  L1TM: 'Turbopropulseur militaire',
+  L1PM: 'Monomoteur léger militaire',
+  L2PM: 'Bimoteur léger militaire',
+  L3JM: 'Trijet militaire',
+
+  // 5. Divers & au sol (en dernier)
+  uav: 'Drone (UAV)',
+  glider: 'Planeur',
+  balloon: 'Ballon',
+  groundVehicle: 'Véhicule au sol',
+};
+
+export const PLANE_TYPES = Object.keys(PLANE_TYPE_LABELS) as PlaneIconType[];
+
+export const ALTITUDE_LABELS: Record<AltitudeStop, string> = {
+  ground: 'Au sol',
+  taxiing: 'Roulage',
+  initial_climb: 'Décollage',
+  low_approach: 'Approche basse',
+  approach: 'Approche',
+  climb: 'Montée',
+  low: 'Basse altitude',
+  mid: 'Altitude moyenne',
+  high: 'Haute altitude',
+  cruise: 'Croisière',
+  stratosphere: 'Stratosphère',
+};
+
+export { ALTITUDE_STOPS };
 
 const listenersAttached = new WeakSet<maplibregl.Map>();
+
+// Filtres actuels par carte. Absence d'entrée == tout est affiché.
+const planeTypeFilterByMap = new WeakMap<maplibregl.Map, Set<string>>();
+const altitudeFilterByMap = new WeakMap<maplibregl.Map, Set<string>>();
+
+function applyPlaneFilters(map: maplibregl.Map)
+{
+  if (!map.getLayer(LAYER_ID)) return;
+
+  const types = planeTypeFilterByMap.get(map);
+  const altitudes = altitudeFilterByMap.get(map);
+
+  const subFilters: maplibregl.ExpressionSpecification[] = [];
+
+  if (types && types.size < PLANE_TYPES.length) {
+    subFilters.push(['in', ['get', 'planeType'], ['literal', Array.from(types)]] as maplibregl.ExpressionSpecification);
+  }
+  if (altitudes && altitudes.size < ALTITUDE_STOPS.length) {
+    subFilters.push(['in', ['get', 'altitudeStop'], ['literal', Array.from(altitudes)]] as maplibregl.ExpressionSpecification);
+  }
+
+  const filter: maplibregl.FilterSpecification | null =
+    subFilters.length > 0 ? (['all', ...subFilters] as maplibregl.FilterSpecification) : null;
+
+  map.setFilter(LAYER_ID, filter);
+}
+
+/** Types d'avions à afficher (voir PLANE_TYPES pour la liste complète). */
+export function setPlaneTypeFilter(map: maplibregl.Map, types: string[])
+{
+  planeTypeFilterByMap.set(map, new Set(types));
+  applyPlaneFilters(map);
+}
+
+/** Tranches d'altitude à afficher (voir ALTITUDE_STOPS). */
+export function setAltitudeFilter(map: maplibregl.Map, stops: string[])
+{
+  altitudeFilterByMap.set(map, new Set(stops));
+  applyPlaneFilters(map);
+}
 
 function onPlaneClick(map: maplibregl.Map) {
   return async (e: maplibregl.MapMouseEvent & { features?: maplibregl.MapGeoJSONFeature[] }) => {
@@ -81,12 +177,12 @@ function onPlaneClick(map: maplibregl.Map) {
 function attachPlaneListeners(map: maplibregl.Map) {
   if (listenersAttached.has(map)) return; // déjà attachés, on ne fait rien
 
-  map.on('click', 'planes-layer', onPlaneClick(map));
+  map.on('click', LAYER_ID, onPlaneClick(map));
 
-  map.on('mouseenter', 'planes-layer', () => {
+  map.on('mouseenter', LAYER_ID, () => {
     map.getCanvas().style.cursor = 'pointer';
   });
-  map.on('mouseleave', 'planes-layer', () => {
+  map.on('mouseleave', LAYER_ID, () => {
     map.getCanvas().style.cursor = '';
   });
 
@@ -105,9 +201,9 @@ export function setupPlanesLayer(map: maplibregl.Map)
     });
   }
 
-  if (!map.getLayer('planes-layer')) {
+  if (!map.getLayer(LAYER_ID)) {
     map.addLayer({
-      id: 'planes-layer',
+      id: LAYER_ID,
       type: 'symbol',
       source: 'planes',
       layout: {
@@ -122,11 +218,15 @@ export function setupPlanesLayer(map: maplibregl.Map)
   }
 
   attachPlaneListeners(map);
+
+  // Le layer est recréé (nouveau style, reprise après perte de contexte
+  // WebGL) sans filtre : on réapplique la sélection type/altitude connue.
+  applyPlaneFilters(map);
 }
 
 export function togglePlaneLayer(map: maplibregl.Map, visible: boolean) {
-  if (!map.getLayer('planes-layer')) return;
-  map.setLayoutProperty('planes-layer', 'visibility', visible ? 'visible' : 'none');
+  if (!map.getLayer(LAYER_ID)) return;
+  map.setLayoutProperty(LAYER_ID, 'visibility', visible ? 'visible' : 'none');
 }
 
 /*

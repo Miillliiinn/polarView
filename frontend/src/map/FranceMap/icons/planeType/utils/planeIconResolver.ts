@@ -34,8 +34,8 @@ export function resolvePlaneIconType(p: PlaneClassificationProps): PlaneIconType
   if (kind === 'balloon') return 'balloon';
   if (kind === 'glider') return 'glider';
   if (kind === 'groundvehicle') return 'groundVehicle'; 
-  if (kind === 'commercial') return 'commercial';
-  if (kind === 'privatejet') return 'privateJet';      
+  if (kind === 'commercial') return 'L2J';
+  if (kind === 'privatejet') return 'L3J';      
 
   if (p.isMilitary || kind === 'military')
   {

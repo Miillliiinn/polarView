@@ -116,7 +116,7 @@ const TYPE_TABLE: Record<string, TypeInfo> = {
   CGR2: { engines: 2, kindHint: 'militaryHelicopter', label: 'Airbus H225M Caracal' },
   CH47: { engines: 2, kindHint: 'militaryHelicopter', label: 'Boeing CH-47 Chinook' },
 
-  // --- Avions militaires connus ---
+  // --- s militaires connus ---
   RFAL: { engines: 2, kindHint: 'military', label: 'Dassault Rafale' },
   MIR2: { engines: 1, kindHint: 'military', label: 'Dassault Mirage 2000' },
   A400: { engines: 4, kindHint: 'military', label: 'Airbus A400M Atlas' },

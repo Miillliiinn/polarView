@@ -1,14 +1,15 @@
+
 import { useEffect, useRef, type RefObject } from 'react';
 import maplibregl from 'maplibre-gl';
 import { globalCache } from '../../../api/classCache';
 import { toGeoJsonFeature } from '../../../api/geoJsonConvertion';
-import { resolvePlaneIconType } from '../icons/planeType/utils/planeIconResolver';
-import { getAltitudeStop } from '../icons/planeType/utils/altitudeColors';
+import { resolvePlaneIconType, type PlaneIconType } from '../icons/planeType/utils/planeIconResolver';
+import { getAltitudeStop, type AltitudeStop } from '../icons/planeType/utils/altitudeColors';
 import { buildIconKey } from '../icons/planeType/utils/iconRegistry';
-
+ 
 const ALTITUDE_MIN = 400;
 const KM_PER_DEGREE_LAT = 111.32;
-
+ 
 interface PlaneAnchor
 {
   model: string
@@ -22,28 +23,32 @@ interface PlaneAnchor
   source: string; 
   capturedAt: number;
   iconKey: string;
+  // Exposées séparément (en plus de iconKey) pour permettre un filtrage
+  // MapLibre direct via map.setFilter, sans avoir à re-parser iconKey.
+  planeType: PlaneIconType;
+  altitudeStop: AltitudeStop;
 }
-
+ 
 export function usePlanesRealtimeSync(mapRef: RefObject<maplibregl.Map | null>, renderIntervalMs = 200)
 {
   const anchorsRef = useRef(new Map<string, PlaneAnchor>());
   const renderIntervalRef = useRef(renderIntervalMs);
   renderIntervalRef.current = renderIntervalMs;
-
+ 
   useEffect(() => {
     const updateAnchors = () => {
       const planes = globalCache.getOpCache();
       if (!planes) return;
-
+ 
       const anchors = anchorsRef.current;
       const seenIds = new Set<string>();
-
+ 
       for (const p of planes) {
         if (!p?.icao24 || p.latitude == null || p.longitude == null) continue;
         seenIds.add(p.icao24);
-
+ 
         const existing = anchors.get(p.icao24);
-
+ 
         const iconType = resolvePlaneIconType({
           model: p.model,
           icaoAircraftClass: p.icaoAircraftClass,
@@ -54,14 +59,14 @@ export function usePlanesRealtimeSync(mapRef: RefObject<maplibregl.Map | null>, 
         });
         const altitudeStop = getAltitudeStop(p.altitude ?? 0);
         const iconKey = buildIconKey(iconType, altitudeStop);
-
+ 
         const positionOrStateChanged =
           !existing || 
           existing.lat !== p.latitude || 
           existing.long !== p.longitude ||
           existing.altitude !== p.altitude ||
           existing.iconKey !== iconKey;
-
+ 
         if (positionOrStateChanged)
         {
           anchors.set(p.icao24, {
@@ -75,64 +80,68 @@ export function usePlanesRealtimeSync(mapRef: RefObject<maplibregl.Map | null>, 
             altitude: p.altitude ?? 0,
             source: p.source,
             capturedAt: Date.now(),
-            iconKey
+            iconKey,
+            planeType: iconType,
+            altitudeStop
           });
         }
       }
-
+ 
       for (const id of anchors.keys()) {
         if (!seenIds.has(id)) anchors.delete(id);
       }
     };
-
+ 
     updateAnchors(); 
     const interval = setInterval(updateAnchors, 1000);
-
+ 
     return () => clearInterval(interval);
   }, []);
-
+ 
   useEffect(() => {
     const interval = setInterval(() => {
       const map = mapRef.current;
       if (!map || !map.isStyleLoaded()) return;
-
+ 
       const source = map.getSource('planes') as maplibregl.GeoJSONSource | undefined;
       if (!source) return;
-
+ 
       const now = Date.now();
-
+ 
       const features = Array.from(anchorsRef.current.values()).map((p) => {
         let lat = p.lat;
         let long = p.long;
-
+ 
         if (p.velocity > 0) {
           if (p.altitude > ALTITUDE_MIN || p.source !== 'opensky') {
             const elapsedSeconds = (now - p.capturedAt) / 1000;
             const distanceKm = (p.velocity * elapsedSeconds) / 1000;
             const bearingRad = (p.heading * Math.PI) / 180;
-
+ 
             const dLat = (distanceKm * Math.cos(bearingRad)) / KM_PER_DEGREE_LAT;
             const dLong =
               (distanceKm * Math.sin(bearingRad)) /
               (KM_PER_DEGREE_LAT * Math.cos((p.lat * Math.PI) / 180));
-
+ 
             lat = p.lat + dLat;
             long = p.long + dLong;
           }
         }
-
+ 
         return toGeoJsonFeature(long, lat, {
           icao24: p.icao24,
           callsign: p.callsign,
           heading: p.heading,
           altitude: p.altitude,
-          iconKey: p.iconKey
+          iconKey: p.iconKey,
+          planeType: p.planeType,
+          altitudeStop: p.altitudeStop
         });
       });
-
+ 
       source.setData({ type: 'FeatureCollection', features });
     }, renderIntervalRef.current);
-
+ 
     return () => clearInterval(interval);
   }, [mapRef]);
 }
