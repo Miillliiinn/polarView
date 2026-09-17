@@ -13,7 +13,7 @@
   --accent-radar-bright: #86efac;
   --accent-radar-glow: rgba(134, 239, 172, 0.25);
 
-  --accent-amber: #f59e0b;
+  --accent-amber: #00a2ff; /* 00a2ff */
   --accent-amber-glow: rgba(245, 158, 11, 0.25);
 
   --text-primary: #f3f4f6;
@@ -373,7 +373,7 @@ body {
 .map-overlay {
   position: absolute;
   inset: 0;
-  background: #03071228;
+  background: rgba(3, 7, 18, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -685,12 +685,12 @@ body {
 /* ==========================================================================
    Réticule radar / Curseur
    ========================================================================== */
-.cursor-spotlight {
+/* .cursor-spotlight {
   position: fixed;
   top: 0;
   left: 0;
-  width: 120px;
-  height: 120px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   transform: translate3d(
     calc(var(--mouse-x, 50vw) - 50%),
@@ -717,24 +717,24 @@ body {
 .cursor-spotlight::after {
   content: '';
   position: absolute;
-  top: 50%;
+  top: 51%;
   left: 50%;
-  width: 30px;
-  height: 30px;
+  width: 15px;
+  height: 15px;
   transform: translate(-50%, -50%);
-  border: 1px solid rgba(134, 239, 172, 0.35);
+  border: 1px solid #86efac59;
   border-radius: 50%;
 }
 
 .crosshair {
   position: absolute;
-  background: rgba(134, 239, 172, 0.45);
+  background: #86efac73;
 }
 
 .crosshair-h {
   top: 50%;
   left: 50%;
-  width: 14px;
+  width: 10px;
   height: 1px;
   transform: translate(-50%, -50%);
 }
@@ -743,9 +743,9 @@ body {
   top: 50%;
   left: 50%;
   width: 1px;
-  height: 14px;
+  height: 10px;
   transform: translate(-50%, -50%);
-}
+} */
 
 /* ==========================================================================
    Responsive

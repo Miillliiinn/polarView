@@ -17,8 +17,8 @@ import { SatelliteData } from './api/celestrack/front_celestrack';
 import { countSatellite } from './tools/stat/satellite/count';
 import { countPlanes } from './tools/stat/planes/count';
 import { countBoats } from './tools/stat/boats/count';
+import { mapGestion } from './tools/gestion/classUsefull';
 
-/* --- Icônes de navigation (style filaire tactique) --- */
 
 const IconFrance = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -93,21 +93,21 @@ const IconWave = () => (
   </svg>
 );
 
-const IconGauge = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18z" />
-    <path d="M12 12 16 8" />
-    <path d="M12 8v1M6 12h1M17 12h1" />
-  </svg>
-);
+// const IconGauge = () => (
+//   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+//     <path d="M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18z" />
+//     <path d="M12 12 16 8" />
+//     <path d="M12 8v1M6 12h1M17 12h1" />
+//   </svg>
+// );
 
-const IconWind = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3 8h11a2.5 2.5 0 1 0-2.2-3.6" />
-    <path d="M3 12h15a2.5 2.5 0 1 1-2.2 3.6" />
-    <path d="M3 16h8a2 2 0 1 1-1.6 3.2" />
-  </svg>
-);
+// const IconWind = () => (
+//   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+//     <path d="M3 8h11a2.5 2.5 0 1 0-2.2-3.6" />
+//     <path d="M3 12h15a2.5 2.5 0 1 1-2.2 3.6" />
+//     <path d="M3 16h8a2 2 0 1 1-1.6 3.2" />
+//   </svg>
+// );
 
 const NAV_LINKS = [
   { to: '/', label: 'France', end: true, icon: IconFrance },
@@ -177,7 +177,8 @@ function usePacketCounter() {
   return count;
 }
 
-function useMouseSpotlight(active: boolean) {
+function useMouseSpotlight(active: boolean)
+{
   useEffect(() => {
     if (!active) return;
 
@@ -364,6 +365,8 @@ function AppContent() {
   }, [isHome]);
 
   const showMapChrome = isHome && !isExpanded;
+  mapGestion.setMapIsExpanded(isExpanded);
+  console.log(mapGestion.getMapIsExpanded());
   useMouseSpotlight(!isExpanded);
   return (
     <div className={`app-shell ${!isExpanded ? 'ambient-active' : ''}`}>
@@ -401,9 +404,9 @@ function AppContent() {
 
         {showMapChrome && (
           <header className="project-intro">
-            <div className="tactical-badge">SECTEUR Europe ouest · OPÉRATIONNEL</div>
+            <div className="tactical-badge">*En cours de développement*</div>
             <h2>Surveillance de Multi-Flux en Temps Réel</h2>
-            <p className="intro-lead">*En cours de développement*</p>
+            <p className="intro-lead"></p>
           </header>
         )}
 

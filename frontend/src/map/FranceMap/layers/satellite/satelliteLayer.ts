@@ -11,13 +11,8 @@ const LAYER_POINTS = 'satellites-layer';
 const LAYER_LABELS = 'satellites-labels-layer';
 const LAYER_TRACK = 'satellites-track-layer';
 
-// Marge ajoutée autour du viewport visible pour que les satellites
-// n'apparaissent/disparaissent pas brutalement pile sur le bord de l'écran.
 const VIEWPORT_MARGIN_DEG = 5;
 
-// Icônes satellite (canvas -> ImageData -> map.addImage). Deux tailles/
-// couleurs : normal et sélectionné. Une icône pleine grandeur agrandit
-// mécaniquement la zone cliquable par rapport à l'ancien point de 3-5px.
 const ICON_ID = 'satellite-icon';
 const ICON_ID_SELECTED = 'satellite-icon-selected';
 const ICON_SIZE = 28;
@@ -33,15 +28,6 @@ function ensureSatelliteImages(map: maplibregl.Map) {
     map.addImage(ICON_ID_SELECTED, createSatelliteIcon(ICON_COLOR_SELECTED, ICON_SIZE_SELECTED));
   }
 }
-
-// ---------------------------------------------------------------------------
-// Le calcul lourd (SGP4, ground track) a été déplacé dans satelliteWorker.ts.
-// Ce fichier ne fait plus que :
-//  - piloter les sources/layers maplibre (thread principal, obligatoire)
-//  - transmettre au worker les infos dont il a besoin (données OMM, viewport,
-//    satellite sélectionné)
-//  - injecter dans les sources les GeoJSON reçus du worker
-// ---------------------------------------------------------------------------
 
 type WorkerOutboundMessage =
   | { type: 'positions'; positions: SatellitePosition[]; selectedId: number | null }
@@ -117,7 +103,7 @@ function addSatellitesSourceAndLayers(map: maplibregl.Map) {
       layout: { visibility: 'none', 'line-join': 'round', 'line-cap': 'round' },
       paint: {
         'line-color': '#b59100',
-        'line-width': 1.5,
+        'line-width': 1.7,
         'line-dasharray': [2, 2],
         'line-opacity': 0.85,
       },
@@ -214,22 +200,19 @@ function setupSatellitesClickPopup(map: maplibregl.Map) {
 
     const objectId = omm?.objectId;
     const meanMotion = omm?.meanMotion;
-    const eccentricity = omm?.eccentricity;
+    // const eccentricity = omm?.eccentricity;
     const inclination = omm?.inclination;
-    const raOfAscNode = omm?.raOfAscNode;
-    const argOfPericenter = omm?.argOfPericenter;
-    const meanAnomaly = omm?.meanAnomaly;
-    const ephemerisType = omm?.ephemerisType;
-    const classificationType = omm?.classificationType;
-    const elementSetNo = omm?.elementSetNo;
+    // const raOfAscNode = omm?.raOfAscNode;
+    // const argOfPericenter = omm?.argOfPericenter;
+    // const meanAnomaly = omm?.meanAnomaly;
+    // const ephemerisType = omm?.ephemerisType;
+    // const classificationType = omm?.classificationType;
+    // const elementSetNo = omm?.elementSetNo;
     const revAtEpoch = omm?.revAtEpoch;
-    const bstar = omm?.bstar;
-    const meanMotionDot = omm?.meanMotionDot;
-    const meanMotionDdot = omm?.meanMotionDdot;
+    // const bstar = omm?.bstar;
+    // const meanMotionDot = omm?.meanMotionDot;
+    // const meanMotionDdot = omm?.meanMotionDdot;
 
-    // omm.epoch est une string ISO : on la parse une seule fois en Date,
-    // et c'est CE Date (epochDate) qu'on réutilise partout ensuite —
-    // jamais la string brute, qui n'a pas de .getTime().
     const epochDate = omm?.epoch ? new Date(omm.epoch) : null;
     const formattedDate = epochDate
       ? epochDate.toLocaleString('fr-FR', {
@@ -241,9 +224,6 @@ function setupSatellitesClickPopup(map: maplibregl.Map) {
         })
       : 'N/A';
 
-    // Date de lancement estimée à partir du nombre de révolutions et de la
-    // période orbitale (approximation ; omm.launchDate donne la vraie date
-    // si tu préfères l'utiliser directement).
     const rev = Number(revAtEpoch);
     const mm = Number(meanMotion);
     let launchDateFormatted = 'N/A';
@@ -265,25 +245,15 @@ function setupSatellitesClickPopup(map: maplibregl.Map) {
       .setLngLat(coordinates)
       .setHTML(`
         Nom: <strong>${props.name ?? 'Satellite'}</strong><br/>
-        Start: <strong style="font-size: 0.90em; font-weight: 1200;">${launchDateFormatted}</strong><br/>
-        NORAD ID: <strong>${id}</strong><br/>
+        Norad Id: <strong>${id}</strong><br/>
+        Objet Id: <strong>${objectId}</strong></br>
         Altitude: <strong>${props.altitudeKm} km</strong><br/>
+        Inclinaison: <strong>${inclination?.toFixed(2)}°</strong></br>
         Vitesse: <strong>${props.velocityKmS * 3600} km/h</strong><br/>
-        Last signal: <strong style="font-size: 0.90em; font-weight: 1200;">${formattedDate}</strong><br/>
-        objectId: <strong>${objectId}</strong></br>
+        Satelliser: <strong style="font-size: 0.90em; font-weight: 1200;">${launchDateFormatted}</strong><br/>
         Tour d'orbite / jour: <strong>${meanMotion?.toFixed(2)}</strong></br>
-        Eccentricity: <strong>${eccentricity}</strong></br>
-        Inclinaison: <strong>${inclination}</strong></br>
-        RaOfAscNode: <strong>${raOfAscNode}</strong></br>
-        ArgOfPericenter: <strong>${argOfPericenter}</strong></br>
-        Mean Anomaly: <strong>${meanAnomaly}</strong></br>
-        Ephemeris Type: <strong>${ephemerisType}</strong></br>
-        Classification Type: <strong>${classificationType}</strong></br>
-        ElementSetNo: <strong>${elementSetNo}</strong></br>
         Tour d'orbite total: <strong>${revAtEpoch}</strong></br>
-        Bstar: <strong>${bstar}</strong></br>
-        Mean Motion Dot: <strong>${meanMotionDot}</strong></br>
-        Mean Motion Ddot: <strong>${meanMotionDdot}</strong></br>
+        Last signal: <strong style="font-size: 0.90em; font-weight: 1200;">${formattedDate}</strong><br/>
       `)
       .addTo(map);
 
@@ -318,8 +288,6 @@ function handleWorkerMessage(map: maplibregl.Map, e: MessageEvent<WorkerOutbound
     return;
   }
   if (msg.type === 'track') {
-    // On ignore un track qui arriverait pour un satellite qui n'est plus
-    // sélectionné (message en vol au moment d'un changement de sélection).
     if (msg.selectedId !== getSelectedSatellite(map)) return;
     const trackSource = map.getSource(SOURCE_TRACK) as maplibregl.GeoJSONSource | undefined;
     trackSource?.setData(trackToFeatureCollection(msg.segments, msg.selectedId));
@@ -327,12 +295,6 @@ function handleWorkerMessage(map: maplibregl.Map, e: MessageEvent<WorkerOutbound
 }
 
 export function setupSatellitesLayer(map: maplibregl.Map): () => void {
-  // Idempotence : si setupSatellitesLayer est rappelée sur le même map sans
-  // que le cleanup précédent ait été exécuté (remount de composant, double
-  // appel, hot reload...), on nettoie d'abord l'ancienne instance. Sans ça,
-  // le vieux Worker n'est jamais terminé et continue de tourner en tâche de
-  // fond (propagation SGP4 + postMessage à 50ms, indéfiniment) : c'est le
-  // scénario typique d'un ralentissement qui s'aggrave avec le temps.
   const previousCleanup = cleanupByMap.get(map);
   if (previousCleanup) {
     previousCleanup();
@@ -340,9 +302,6 @@ export function setupSatellitesLayer(map: maplibregl.Map): () => void {
 
   addSatellitesSourceAndLayers(map);
   setupSatellitesClickPopup(map);
-
-  // Le calcul lourd (SGP4 + ground track) tourne dans ce worker, hors du
-  // thread principal, pour laisser le rendu (avions, bateaux, carte) fluide.
   const worker = new Worker(new URL('./satelliteWorker.ts', import.meta.url), { type: 'module' });
   worker.onmessage = (e: MessageEvent<WorkerOutboundMessage>) => handleWorkerMessage(map, e);
   workerByMap.set(map, worker);
@@ -350,11 +309,6 @@ export function setupSatellitesLayer(map: maplibregl.Map): () => void {
   worker.postMessage({ type: 'omms', omms: globalCache.getCelestrackCache() as CelestrakOmm[] });
   worker.postMessage({ type: 'viewport', bounds: boundsToViewport(map.getBounds()) });
   worker.postMessage({ type: 'selected', id: getSelectedSatellite(map) });
-  // Le worker reste volontairement à l'arrêt tant que la couche n'est pas
-  // affichée. C'est toggleSatellitesLayer() qui envoie 'start'/'stop' selon
-  // la visibilité réelle — sinon le calcul SGP4 à 20Hz tourne en tâche de
-  // fond dès le chargement de la page, même si l'utilisateur n'a jamais
-  // cliqué sur "Satellites" (visibleSatellites vaut false par défaut).
 
   if (!celestUnsubscribeByMap.has(map)) {
     const unsubscribe = globalCache.subscribeCelest(() => {
@@ -363,8 +317,6 @@ export function setupSatellitesLayer(map: maplibregl.Map): () => void {
     celestUnsubscribeByMap.set(map, unsubscribe);
   }
 
-  // Le viewport ne change pas à chaque frame : on ne l'envoie au worker
-  // qu'après un pan/zoom, pas toutes les 50ms.
   const onMoveEnd = () => {
     worker.postMessage({ type: 'viewport', bounds: boundsToViewport(map.getBounds()) });
   };
@@ -414,3 +366,26 @@ export function toggleSatellitesLayer(map: maplibregl.Map, visible: boolean) {
     deselectSatellite(map);
   }
 }
+
+/*
+        Nom: <strong>${props.name ?? 'Satellite'}</strong><br/>
+        Start: <strong style="font-size: 0.90em; font-weight: 1200;">${launchDateFormatted}</strong><br/>
+        NORAD ID: <strong>${id}</strong><br/>
+        Altitude: <strong>${props.altitudeKm} km</strong><br/>
+        Vitesse: <strong>${props.velocityKmS * 3600} km/h</strong><br/>
+        Last signal: <strong style="font-size: 0.90em; font-weight: 1200;">${formattedDate}</strong><br/>
+        objectId: <strong>${objectId}</strong></br>
+        Tour d'orbite / jour: <strong>${meanMotion?.toFixed(2)}</strong></br>
+        Eccentricity: <strong>${eccentricity}</strong></br>
+        Inclinaison: <strong>${inclination}</strong></br>
+        RaOfAscNode: <strong>${raOfAscNode}</strong></br>
+        ArgOfPericenter: <strong>${argOfPericenter}</strong></br>
+        Mean Anomaly: <strong>${meanAnomaly}</strong></br>
+        Ephemeris Type: <strong>${ephemerisType}</strong></br>
+        Classification Type: <strong>${classificationType}</strong></br>
+        ElementSetNo: <strong>${elementSetNo}</strong></br>
+        Tour d'orbite total: <strong>${revAtEpoch}</strong></br>
+        Bstar: <strong>${bstar}</strong></br>
+        Mean Motion Dot: <strong>${meanMotionDot}</strong></br>
+        Mean Motion Ddot: <strong>${meanMotionDdot}</strong></br>
+*/

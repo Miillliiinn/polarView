@@ -1,7 +1,7 @@
 import { isFighterJet } from "./FighterJet";
 
 export type PlaneIconType =
-  | 'L1P' | 'L2P'| 'L1T' | 'L1TM' | 'L2J' | 'L2JM' | 'L2T' | 'L3J' | 'L3JM' | 'L4J' | 'L4JM'
+  | 'L1P' | 'L1PM' | 'L2P' | 'L2PM' | 'L1T' | 'L1TM' | 'L2J' | 'L2JM' | 'L2T' | 'L2TM' | 'L3J' | 'L3JM' | 'L4J' | 'L4JM'
   | 'H1P' | 'H2T' | 'H3T' | 'JETM' |'militaryHelicopter'
   | 'militaryTransport' | 'uav' | 'balloon' | 'glider'
   | 'groundVehicle' | 'generic' | 'commercial' | 'privateJet';
@@ -41,12 +41,18 @@ export function resolvePlaneIconType(p: PlaneClassificationProps): PlaneIconType
   {
     if (icaoClass === 'H1P' || icaoClass === 'H1T' || icaoClass === 'H2T' || icaoClass === 'H3T')
       return 'militaryHelicopter';
+    if (icaoClass === 'L1P')
+      return 'L1PM';
+    if (icaoClass === 'L2P')
+        return 'L2PM';
     if (icaoClass === 'L3J')
       return 'L3JM';
     if (icaoClass === 'L4J')
       return 'L4JM';
     if (icaoClass === 'L1T')
       return 'L1TM';
+    if (icaoClass === 'L2T')
+      return 'L2TM';
     if (icaoClass === 'L4T')
       return 'militaryTransport';
     if (isFighterJet(model) === true)

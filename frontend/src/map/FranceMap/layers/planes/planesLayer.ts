@@ -3,11 +3,6 @@ import api from '../../../../api/apiBridge';
 import { globalCache } from '../../../../api/classCache';
 import { registerAllPlaneIcons } from '../../icons/planeType/utils/iconRegistry';
 
-// Garde en mémoire, par instance de map, si les listeners "planes-layer"
-// ont déjà été attachés. Comme map.on('click', 'planes-layer', ...) est
-// une délégation basée sur l'id du layer (et non sur l'objet layer),
-// les listeners survivent à un setStyle() / recréation du layer.
-// Il ne faut donc les attacher qu'UNE SEULE FOIS par instance de map.
 const listenersAttached = new WeakSet<maplibregl.Map>();
 
 function onPlaneClick(map: maplibregl.Map) {
@@ -25,7 +20,7 @@ function onPlaneClick(map: maplibregl.Map) {
     const altitude = feature.properties?.altitude ?? planeData?.altitude ?? '?';
     const coordinates = (feature.geometry as any).coordinates;
 
-    const kind = planeData?.kind ?? 'N/A';
+    //const kind = planeData?.kind ?? 'N/A';
     const source = planeData?.source ?? 'N/A';
     const icaoAircraftClass = planeData?.icaoAircraftClass ?? 'N/A';
     const typeLabel = planeData?.typeLabel ?? 'N/A';
@@ -36,7 +31,6 @@ function onPlaneClick(map: maplibregl.Map) {
 
     const buildContent = (photoHtml: string) => `
       Model: <strong>${mod}</strong><br/>
-      Catégorie: <strong>${kind}</strong><br/>
       Icao: <strong>${icao24}</strong><br />
       Icao Class : <strong>${icaoAircraftClass}</strong><br />
       Callsign: <strong>${callsign}</strong><br/>
@@ -46,8 +40,6 @@ function onPlaneClick(map: maplibregl.Map) {
       <div id="photo-container">${photoHtml}</div>
     `;
 
-    // Ferme un éventuel popup encore ouvert avant d'en ouvrir un nouveau
-    // (sécurité supplémentaire si jamais un doublon de listener subsiste).
     const existing = (map as any)._planesActivePopup as maplibregl.Popup | undefined;
     if (existing) existing.remove();
 
@@ -101,17 +93,12 @@ function attachPlaneListeners(map: maplibregl.Map) {
   listenersAttached.add(map);
 }
 
-/**
- * Recrée la source + le layer 'planes'.
- * À appeler à chaque changement de style (map.setStyle), car le style
- * détruit toutes les sources/layers custom.
- * Les listeners d'événements, eux, ne sont attachés qu'une fois (voir
- * attachPlaneListeners), pour éviter l'accumulation de handlers/popups.
- */
-export function setupPlanesLayer(map: maplibregl.Map) {
+export function setupPlanesLayer(map: maplibregl.Map)
+{
   registerAllPlaneIcons(map);
 
-  if (!map.getSource('planes')) {
+  if (!map.getSource('planes'))
+  {
     map.addSource('planes', {
       type: 'geojson',
       data: { type: 'FeatureCollection', features: [] }

@@ -13,6 +13,7 @@ import { setupBoatsLayer, toggleBoatsLayer } from './layers/boats/boatsLayer';
 import { setupSatellitesLayer, toggleSatellitesLayer } from './layers/satellite/satelliteLayer'; 
 import { usePlanesRealtimeSync } from './hooks/usePlanesRealtimeSync';
 import { setupPhotoLightbox } from './utils/popUpImage';
+import { mapGestion } from '../../tools/gestion/classUsefull';
 
 /* --- Icône burger --- */
 const IconBurger = () => (
@@ -27,18 +28,11 @@ const IconBurger = () => (
 const MAP_STYLES = [
   { id: 'bright', label: 'Simple', url: 'https://tiles.openfreemap.org/styles/bright' },
   { id: 'dark', label: 'Sombre', url: 'https://tiles.openfreemap.org/styles/dark' },
-  { id: 'liberty', label: '3D', url: 'https://tiles.openfreemap.org/styles/liberty' },
   { id: 'fiord', label: 'Bleu', url: 'https://tiles.openfreemap.org/styles/fiord' },
   { id: 'positron', label: 'Blanche', url: 'https://tiles.openfreemap.org/styles/positron' },
+    { id: 'liberty', label: '3D', url: 'https://tiles.openfreemap.org/styles/liberty' },
 ];
 
-// Délai après une perte de contexte WebGL avant de considérer que le
-// navigateur ne la restaurera pas tout seul (cas fréquent en ouvrant les
-// DevTools / le mode responsive sur certains GPU/drivers, notamment en
-// environnement virtualisé où le rendu WebGL est logiciel). Passé ce délai,
-// on recrée la carte de zéro plutôt que de laisser un fond bleu figé.
-// Volontairement court : en plein travail de mise au point responsive,
-// on veut retrouver la carte quasi instantanément.
 const CONTEXT_RESTORE_TIMEOUT_MS = 800;
 
 export default function FranceMap() {
@@ -56,29 +50,22 @@ export default function FranceMap() {
   const [styleMenuOpen, setStyleMenuOpen] = useState(false);
   const styleMenuRef = useRef<HTMLDivElement>(null);
 
-  // Refs miroir des états, pour éviter les closures obsolètes dans les listeners MapLibre
   const stateRef = useRef({ vigilanceVisible, visibleTrains, visiblePlanes, visibleBoats, visibleSatellites });
   useEffect(() => {
     stateRef.current = { vigilanceVisible, visibleTrains, visiblePlanes, visibleBoats, visibleSatellites };
   }, [vigilanceVisible, visibleTrains, visiblePlanes, visibleBoats, visibleSatellites]);
 
-  // currentStyleId dans une ref pour pouvoir le lire depuis createMap()
-  // (utilisée aussi lors d'une recréation suite à perte de contexte)
   const currentStyleIdRef = useRef(currentStyleId);
   useEffect(() => {
     currentStyleIdRef.current = currentStyleId;
   }, [currentStyleId]);
 
-  // Fonctions de nettoyage des couches à effet de bord (polling / websocket)
   const cleanupRefs = useRef<{ vigilance: (() => void) | null; boats: (() => void) | null; satellites: (() => void) | null }>({
     vigilance: null,
     boats: null,
     satellites: null,
   });
 
-  // (Ré)installe toutes les couches personnalisées et restaure leur visibilité actuelle.
-  // Appelé au premier chargement, après chaque changement de style (setStyle les efface),
-  // ET après une restauration de contexte WebGL (qui efface tout aussi).
   const initLayers = (mapInstance: maplibregl.Map) => {
     cleanupRefs.current.vigilance = setupVigilanceLayer(mapInstance);
     setupRailLayer(mapInstance);
@@ -134,18 +121,11 @@ export default function FranceMap() {
       initLayers(mapInstance);
     });
 
-    // --- Filet de sécurité resize : en plus du trackResize interne de
-    // MapLibre, on observe nous-mêmes le container. Utile en mode
-    // responsive (device toolbar) où la taille peut changer très
-    // rapidement/plusieurs fois de suite pendant qu'on redimensionne. ---
     const resizeObserver = new ResizeObserver(() => {
       mapInstance.resize();
     });
     resizeObserver.observe(mapContainer.current);
     (mapInstance as any)._franceMapResizeObserver = resizeObserver;
-
-    // --- Gestion de la perte de contexte WebGL (ouverture DevTools / mode
-    // responsive sur certains GPU-drivers, environnements virtualisés, etc.) ---
     mapInstance.on('webglcontextlost', () => {
       console.warn(
         '[FranceMap] Contexte WebGL perdu (souvent déclenché par DevTools / mode responsive). ' +
@@ -274,90 +254,92 @@ export default function FranceMap() {
     <div className="france-map-wrapper">
       <div ref={mapContainer} className="map-container" />
 
-      <div className="map-controls">
+      {mapGestion.getMapIsExpanded() !== false && (
+        <>
+          {/* Filtres de données (Satellites, Avions, etc.) */}
+          <div className="map-controls">
+            <button
+              type="button"
+              className="map-toggle-btn map-toggle-btn--satellite"
+              data-active={visibleSatellites}
+              onClick={handleSatellitesData}
+            >
+              <span className="map-toggle-btn__dot" aria-hidden="true" />
+              Satellites
+            </button>
 
-        <button
-          type="button"
-          className="map-toggle-btn map-toggle-btn--satellite"
-          data-active={visibleSatellites}
-          onClick={handleSatellitesData}
-        >
-          <span className="map-toggle-btn__dot" aria-hidden="true" />
-          Satellites
-        </button>
+            <button
+              type="button"
+              className="map-toggle-btn map-toggle-btn--plane"
+              data-active={visiblePlanes}
+              onClick={handlePlanesData}
+            >
+              <span className="map-toggle-btn__dot" aria-hidden="true" />
+              Avions
+            </button>
 
-        <button
-          type="button"
-          className="map-toggle-btn map-toggle-btn--plane"
-          data-active={visiblePlanes}
-          onClick={handlePlanesData}
-        >
-          <span className="map-toggle-btn__dot" aria-hidden="true" />
-          Avions
-        </button>
+            <button
+              type="button"
+              className="map-toggle-btn map-toggle-btn--rail"
+              data-active={visibleTrains}
+              onClick={handleTrainsData}
+            >
+              <span className="map-toggle-btn__dot" aria-hidden="true" />
+              Trains
+            </button>
 
-        <button
-          type="button"
-          className="map-toggle-btn map-toggle-btn--rail"
-          data-active={visibleTrains}
-          onClick={handleTrainsData}
-        >
-          <span className="map-toggle-btn__dot" aria-hidden="true" />
-          Trains
-        </button>
+            <button
+              type="button"
+              className="map-toggle-btn map-toggle-btn--vigilance"
+              data-active={vigilanceVisible}
+              onClick={handleToggleVigilance}
+            >
+              <span className="map-toggle-btn__dot" aria-hidden="true" />
+              Vigilance
+            </button>
 
-        <button
-          type="button"
-          className="map-toggle-btn map-toggle-btn--vigilance"
-          data-active={vigilanceVisible}
-          onClick={handleToggleVigilance}
-        >
-          <span className="map-toggle-btn__dot" aria-hidden="true" />
-          Vigilance
-        </button>
-
-        <button
-          type="button"
-          className="map-toggle-btn map-toggle-btn--boat"
-          data-active={visibleBoats}
-          onClick={handleBoatsData}
-        >
-          <span className="map-toggle-btn__dot" aria-hidden="true" />
-          Bateaux
-        </button>
-
-      </div>
-
-      {/* Sélecteur de calque de carte */}
-      <div className="map-style-switcher" ref={styleMenuRef}>
-        <button
-          type="button"
-          className="map-style-btn"
-          onClick={() => setStyleMenuOpen((v) => !v)}
-          aria-haspopup="menu"
-          aria-expanded={styleMenuOpen}
-          title="Changer le fond de carte"
-        >
-          <IconBurger />
-        </button>
-
-        {styleMenuOpen && (
-          <div className="map-style-menu" role="menu">
-            {MAP_STYLES.map((s) => (
-              <button
-                key={s.id}
-                type="button"
-                role="menuitem"
-                className="map-style-menu-item"
-                data-active={s.id === currentStyleId}
-                onClick={() => handleStyleChange(s.id)}
-              >
-                {s.label}
-              </button>
-            ))}
+            <button
+              type="button"
+              className="map-toggle-btn map-toggle-btn--boat"
+              data-active={visibleBoats}
+              onClick={handleBoatsData}
+            >
+              <span className="map-toggle-btn__dot" aria-hidden="true" />
+              Bateaux
+            </button>
           </div>
-        )}
-      </div>
+
+          {/* Sélecteur de calque de carte */}
+          <div className="map-style-switcher" ref={styleMenuRef}>
+            <button
+              type="button"
+              className="map-style-btn"
+              onClick={() => setStyleMenuOpen((v) => !v)}
+              aria-haspopup="menu"
+              aria-expanded={styleMenuOpen}
+              title="Changer le fond de carte"
+            >
+              <IconBurger />
+            </button>
+
+            {styleMenuOpen && (
+              <div className="map-style-menu" role="menu">
+                {MAP_STYLES.map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    role="menuitem"
+                    className="map-style-menu-item"
+                    data-active={s.id === currentStyleId}
+                    onClick={() => handleStyleChange(s.id)}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </div>
-  );
-}
+  );}

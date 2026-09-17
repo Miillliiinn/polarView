@@ -1,10 +1,5 @@
 import * as satellite from 'satellite.js';
 
-/**
- * Champs OMM (Orbit Mean-Elements Message) tels que renvoyés par le backend,
- * repris du payload Celestrak (voir la conversation d'origine pour le mapping
- * f.OBJECT_NAME -> name, f.NORAD_CAT_ID -> id, etc.)
- */
 export interface CelestrakOmm {
   name: string;
   id: number;               // NORAD_CAT_ID
@@ -35,34 +30,23 @@ export interface SatellitePosition {
   velocityKmS: number;
 }
 
-/* ------------------------------------------------------------------ */
-/* Formatage bas niveau au format TLE (fixed-width, tel que défini par */
-/* NORAD / Space-Track). Chaque helper produit exactement le nombre de */
-/* caractères attendu par la colonne correspondante.                   */
-/* ------------------------------------------------------------------ */
-
-// Nombre décimal positif, largeur fixe "III.FFFF" (pas de signe : angles 0-360, mean motion, etc.)
 function fixedDecimal(value: number, intDigits: number, decDigits: number): string {
   const width = intDigits + 1 + decDigits;
   return value.toFixed(decDigits).padStart(width, ' ');
 }
 
-// Eccentricité: pas de point décimal, 7 chiffres, ex 0.0007833 -> "0007833"
 function eccentricityField(value: number): string {
   const digits = Math.round(value * 1e7);
   return String(digits).padStart(7, '0');
 }
 
-// Première dérivée du mean motion: signe + '.' + 8 décimales, ex 0.00001234 -> " .00001234"
 function firstDerivativeField(value: number): string {
   const sign = value < 0 ? '-' : ' ';
   const abs = Math.abs(value);
-  const digits = abs.toFixed(8).split('.')[1]; // 8 décimales, sans le "0."
+  const digits = abs.toFixed(8).split('.')[1];
   return `${sign}.${digits}`;
 }
 
-// Notation exponentielle TLE: signe + 5 chiffres de mantisse + signe exposant + 1 chiffre
-// V = sign * 0.MMMMM * 10^E   (utilisé pour bstar et mean-motion-ddot)
 function exponentialField(value: number): string {
   if (value === 0) return ' 00000-0';
   const sign = value < 0 ? '-' : ' ';
@@ -71,7 +55,6 @@ function exponentialField(value: number): string {
   let mantissa = abs / Math.pow(10, exponent);
   let mantissaDigits = Math.round(mantissa * 1e5);
   if (mantissaDigits >= 100000) {
-    // arrondi qui déborde (0.999995 -> 1.00000) : on décale l'exposant
     mantissaDigits = Math.round(mantissaDigits / 10);
     exponent += 1;
   }
@@ -91,7 +74,6 @@ function epochToTleEpoch(epochIso: string): string {
   return `${year2}${intPart.padStart(3, '0')}.${fracPart}`;
 }
 
-// Somme des chiffres mod 10 ('-' compte pour 1, tout le reste pour 0)
 function checksum(lineWithoutChecksum: string): string {
   let sum = 0;
   for (const c of lineWithoutChecksum) {
@@ -101,15 +83,6 @@ function checksum(lineWithoutChecksum: string): string {
   return String(sum % 10);
 }
 
-/**
- * Reconstruit une paire de lignes TLE valides (avec checksum) à partir des
- * champs OMM. Les champs OMM de Celestrak sont numériquement équivalents aux
- * champs TLE (conversion sans perte), donc on ne fait que du formatage.
- *
- * Limite connue: le schéma "Alpha-5" pour NORAD_CAT_ID >= 100000 n'est pas
- * géré ici (rare en pratique pour l'instant) — on retombe sur un padding
- * numérique classique dans ce cas, ce qui produira un satnum tronqué.
- */
 export function ommToTleLines(sat: CelestrakOmm): [string, string] {
   const satNum = String(sat.id).padStart(5, '0').slice(-5);
 
@@ -169,14 +142,9 @@ export interface SatRecEntry {
   satrec: satellite.SatRec;
   name: string;
   id: number;
-  epoch: string; // pour détecter un changement d'éléments orbitaux
+  epoch: string;
 }
 
-/**
- * Construit (ou réutilise) un satrec par satellite. Ne recalcule les lignes
- * TLE que si l'epoch a changé depuis le dernier passage, pour éviter de
- * reparser inutilement à chaque tick d'animation.
- */
 export function buildSatrecCache(
   omms: CelestrakOmm[],
   previous: Map<number, SatRecEntry>
@@ -207,7 +175,6 @@ export function buildSatrecCache(
   return next;
 }
 
-/** Propage un satrec à une date donnée et renvoie sa position géodésique. */
 export function propagateOne(entry: SatRecEntry, date: Date): SatellitePosition | null {
   let pv;
   try {
@@ -217,8 +184,6 @@ export function propagateOne(entry: SatRecEntry, date: Date): SatellitePosition 
     return null;
   }
 
-  // satellite.js peut renvoyer null/undefined directement (satrec invalide),
-  // ou un objet { position: false, velocity: false } (satellite décayé / erreur SGP4).
   if (!pv) return null;
   const positionEci = pv.position;
   const velocityEci = pv.velocity;
@@ -242,11 +207,6 @@ export function propagateOne(entry: SatRecEntry, date: Date): SatellitePosition 
   };
 }
 
-/**
- * Calcule la trace au sol (ground track) d'un satellite sur une fenêtre
- * temporelle, découpée en plusieurs segments à chaque franchissement de
- * l'antiméridien (±180°) pour éviter une ligne qui traverse toute la carte.
- */
 export function computeGroundTrack(
   entry: SatRecEntry,
   centerDate: Date,
